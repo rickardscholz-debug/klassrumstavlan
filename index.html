@@ -1,84 +1,130 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Klassrumstavlan 2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klassrumstavlan</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,Segoe UI,Arial,sans-serif;color:#14202a}
-#bg{position:fixed;inset:0;background:linear-gradient(120deg,#123b54,#e3a85d);background-size:cover;background-position:center;z-index:-5}
-#bg.animated{background:linear-gradient(120deg,#123b54,#e3a85d,#347c8d,#d9bd7b);background-size:400% 400%;animation:sky 18s ease infinite}@keyframes sky{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
-#top{position:fixed;top:14px;left:18px;right:18px;display:flex;align-items:center;gap:10px;z-index:100}.brand{font-weight:900;color:white;text-shadow:0 2px 8px #0008;font-size:22px}.spacer{flex:1}
-#dock{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:5px;align-items:center;background:#fff;padding:8px 12px;border-radius:22px;box-shadow:0 8px 30px #0005;z-index:100;max-width:96vw;overflow:auto}
-.tool{border:0;background:white;border-radius:12px;padding:8px 10px;cursor:pointer;white-space:nowrap}.tool:hover{background:#edf2f6}.tool b{display:block;font-size:21px}.tool small{font-size:11px}
-button{font:inherit;cursor:pointer}.pill{border:0;border-radius:13px;padding:10px 14px;background:#fff;box-shadow:0 3px 14px #0003}
-.widget{position:absolute;min-width:260px;min-height:130px;width:360px;background:#fffffff0;border-radius:18px;box-shadow:0 12px 35px #0005;overflow:hidden;resize:both;z-index:10}.head{height:43px;display:flex;align-items:center;padding:0 12px;background:#f4f6f8;cursor:move;font-weight:800;user-select:none}.head .x{margin-left:auto;border:0;background:transparent;font-size:18px}.body{padding:14px;max-height:calc(100% - 43px);overflow:auto}
-input,textarea,select{font:inherit;border:1px solid #ccd4da;border-radius:9px;padding:8px}textarea{width:100%;min-height:120px}.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.grow{flex:1}.big{font-size:48px;font-weight:900;text-align:center}.date{font-size:27px;font-weight:900}.muted{opacity:.65;font-size:12px}.lesson{display:grid;grid-template-columns:76px 1fr 42px;gap:6px;margin:6px 0}.lesson input{width:100%}.subjectIcon{font-size:30px}.linkgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.link{padding:12px;text-decoration:none;text-align:center;background:#edf4f7;border-radius:11px;color:#152632;font-weight:750}
-dialog{border:0;border-radius:18px;width:min(650px,92vw);padding:20px}dialog::backdrop{background:#0008}.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.thumb{height:90px;border-radius:10px;border:0;background-size:cover!important;background-position:center!important}
-@media(max-width:700px){#dock{left:8px;right:8px;transform:none}.widget{width:310px}}
-</style></head>
+:root{--glass:rgba(20,28,36,.72);--line:rgba(255,255,255,.22)}
+*{box-sizing:border-box} html,body{height:100%;margin:0;font-family:Arial,sans-serif;color:white;overflow:hidden}
+body{background:#274b5d center/cover no-repeat;transition:background-image .4s}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.3));pointer-events:none}
+#board{position:fixed;inset:0 0 74px 0}
+.widget{position:absolute;min-width:220px;min-height:120px;background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.28);overflow:hidden;resize:both}
+.widget .head{padding:10px 12px;background:rgba(0,0,0,.2);cursor:move;display:flex;align-items:center;justify-content:space-between;font-weight:700}
+.widget .body{padding:14px;height:calc(100% - 42px);overflow:auto}
+.close{border:0;background:transparent;color:white;font-size:18px;cursor:pointer}
+.toolbar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:7px;align-items:center;max-width:96vw;padding:8px 10px;background:rgba(16,20,25,.8);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;z-index:1000;overflow-x:auto}
+.toolbar button,.toolbar label{border:0;border-radius:12px;background:rgba(255,255,255,.13);color:white;padding:10px 12px;cursor:pointer;white-space:nowrap;font-size:14px}
+.toolbar button:hover,.toolbar label:hover{background:rgba(255,255,255,.23)}
+input,textarea,select{width:100%;padding:9px;border-radius:9px;border:1px solid #aaa;margin:5px 0 9px}
+textarea{min-height:90px}
+.bigtime{font-size:52px;font-weight:700;text-align:center}
+.date{font-size:28px;text-align:center;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.timer{font-size:48px;text-align:center;font-weight:700}
+.light{width:72px;height:72px;border-radius:50%;margin:8px auto;opacity:.28}.light.active{opacity:1;box-shadow:0 0 25px currentColor}
+.red{background:#ef4444}.yellow{background:#facc15}.green{background:#22c55e}
+.linkcard{display:block;color:white;text-decoration:none;background:rgba(255,255,255,.12);padding:10px;border-radius:10px;margin:7px 0}
+.schedule td,.schedule th{padding:6px;border-bottom:1px solid rgba(255,255,255,.18);text-align:left}
+.schedule{width:100%;border-collapse:collapse}
+.hint{font-size:12px;opacity:.75}
+@media(max-width:700px){.toolbar{left:8px;right:8px;transform:none}.widget{max-width:94vw}}
+</style>
+</head>
 <body>
-<div id="bg"></div>
-<div id="top"><div class="brand">✎ Klassrumstavlan</div><div class="spacer"></div><button class="pill" onclick="document.documentElement.requestFullscreen?.()">⛶ Helskärm</button><button class="pill" onclick="settings.showModal()">⚙ Inställningar</button></div>
 <div id="board"></div>
-<div id="dock">
-<button class="tool" onclick="openSettings('bg')"><b>🏞️</b><small>Bakgrund</small></button>
-<button class="tool" onclick="addWidget('day')"><b>📅</b><small>Dagen</small></button>
-<button class="tool" onclick="addWidget('schedule')"><b>🗓️</b><small>Schema</small></button>
-<button class="tool" onclick="addWidget('timer')"><b>⏳</b><small>Timer</small></button>
-<button class="tool" onclick="addWidget('clock')"><b>🕐</b><small>Klocka</small></button>
-<button class="tool" onclick="addWidget('text')"><b>Aa</b><small>Text</small></button>
-<button class="tool" onclick="addWidget('links')"><b>🔗</b><small>Länkar</small></button>
-<button class="tool" onclick="addWidget('random')"><b>🎲</b><small>Slumpa</small></button>
-<button class="tool" onclick="addWidget('traffic')"><b>🚦</b><small>Trafikljus</small></button>
-<button class="tool" onclick="addWidget('image')"><b>🖼️</b><small>Bild</small></button>
+<div class="toolbar">
+<button data-add="day">📅 Dagen</button>
+<button data-add="clock">🕒 Klocka</button>
+<button data-add="timer">⏱ Timer</button>
+<button data-add="text">📝 Text</button>
+<button data-add="traffic">🚦 Ljus</button>
+<button data-add="random">🎲 Slumpa</button>
+<button data-add="links">🔗 Länkar</button>
+<button data-add="schedule">📚 Schema</button>
+<button id="bgBtn">🏞 Bakgrund</button>
+<label>📷 Egen bild<input id="bgFile" type="file" accept="image/*" hidden></label>
+<button id="clearBtn">↺ Återställ</button>
 </div>
-<dialog id="settings"><h2>⚙ Inställningar</h2>
-<h3>Bakgrund</h3><p class="muted">Välj en lugn animerad naturkänsla eller ladda upp en egen HD-bild.</p>
-<div class="thumbs">
-<button class="thumb" style="background:linear-gradient(135deg,#123b54,#e49a50)" onclick="setPreset(0)"></button>
-<button class="thumb" style="background:linear-gradient(135deg,#193b2b,#7ea178,#d7c28d)" onclick="setPreset(1)"></button>
-<button class="thumb" style="background:linear-gradient(135deg,#102b49,#6ca5bd,#d8c58d)" onclick="setPreset(2)"></button>
-</div>
-<p><label><input type="checkbox" id="animateBg" onchange="toggleAnim()"> Animerad bakgrund</label></p>
-<div class="row"><input id="bgUrl" class="grow" placeholder="Bildadress (https://...)"><button onclick="setBgUrl()">Använd</button></div>
-<p><input id="bgFile" type="file" accept="image/*"><button onclick="setBgFile()">Ladda egen HD-bild</button></p>
-<hr><h3>Veckoschema</h3><p class="muted">Spara ett återkommande schema. Dagens schema hämtas automatiskt efter veckodag.</p>
-<select id="weekDay"><option value="1">Måndag</option><option value="2">Tisdag</option><option value="3">Onsdag</option><option value="4">Torsdag</option><option value="5">Fredag</option></select>
-<div id="weekEditor"></div><button onclick="addWeekLesson()">+ Rad</button> <button onclick="saveWeek()">Spara dagen</button>
-<hr><button onclick="settings.close()">Stäng</button>
-</dialog>
+
 <script>
-const S='klassrumstavlan-v4';let d={};try{d=JSON.parse(localStorage.getItem(S)||'{}')}catch{};d.widgets??=[];d.links??=[];d.week??={};d.bg??='';d.anim??=false;
-const save=()=>localStorage.setItem(S,JSON.stringify(d)); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const days=['söndag','måndag','tisdag','onsdag','torsdag','fredag','lördag'], months=['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'];
-function dateText(){let n=new Date();return days[n.getDay()].replace(/^./,x=>x.toUpperCase())+' '+n.getDate()+' '+months[n.getMonth()]+' '+n.getFullYear()}
-function iconFor(t){t=t.toLowerCase();if(t.includes('rast'))return'🤸';if(t.includes('lunch'))return'🍽️';if(t.includes('musik'))return'🎵';if(t.includes('bild'))return'🎨';if(t.includes('sv'))return'📖';if(t.includes('eng'))return'🇬🇧';if(t.includes('geo')||t.includes('so'))return'🌍';if(t.includes('no'))return'🔬';if(t.includes('idrott'))return'⚽';return'📚'}
-function addWidget(type){let w={id:Date.now()+Math.random(),type,x:80+d.widgets.length*25,y:90+d.widgets.length*20,w:360,h:220};d.widgets.push(w);save();render()}
-function title(t){return({day:'Dagen',schedule:'Dagens schema',timer:'Timer',clock:'Klocka',text:'Text',links:'Länkar',random:'Slumpa',traffic:'Trafikljus',image:'Bild'})[t]}
-function body(w){if(w.type==='day')return '<div class="date">'+dateText()+'</div><p>👋 God morgon!</p><p class="muted">Datum och veckodag uppdateras automatiskt.</p>';
-if(w.type==='clock')return '<div class="big liveclock"></div>';
-if(w.type==='text')return '<textarea oninput="setVal('+w.id+',this.value)" placeholder="Skriv på tavlan…">'+esc(w.val||'')+'</textarea>';
-if(w.type==='schedule'){let arr=d.week[new Date().getDay()]||[];return arr.length?arr.map(x=>'<div class="lesson"><span>'+esc(x.time)+'</span><span><span class="subjectIcon">'+iconFor(x.text)+'</span> '+esc(x.text)+'</span><span></span></div>').join(''):'<p>Inget schema sparat för idag.</p><button onclick="settings.showModal();loadWeek()">Redigera veckoschema</button>'}
-if(w.type==='links')return '<div class="linkgrid"><a class="link" target="_blank" href="https://urplay.se">📺 UR Play</a><a class="link" target="_blank" href="https://www.sli.se">🎬 SLI</a><a class="link" target="_blank" href="https://skolon.com">🎓 Skolon</a>'+d.links.map((x,i)=>'<a class="link" target="_blank" href="'+esc(x.url)+'">'+esc(x.name)+'</a>').join('')+'</div><div class="row" style="margin-top:10px"><input id="ln'+w.id+'" placeholder="Namn"><input id="lu'+w.id+'" class="grow" placeholder="https://..."><button onclick="addLink('+w.id+')">+</button></div>';
-if(w.type==='random')return '<div class="big" id="rr'+w.id+'">?</div><div class="row"><input id="rn'+w.id+'" type="number" value="25" min="1" style="width:70px"><button onclick="randomize('+w.id+')">Slumpa elev</button></div>';
-if(w.type==='traffic')return '<div style="text-align:center;font-size:50px"><button onclick="this.parentElement.dataset.c=1;this.parentElement.style.background=`#79c47c`">🟢</button> <button onclick="this.parentElement.style.background=`#f0d56d`">🟡</button> <button onclick="this.parentElement.style.background=`#e57373`">🔴</button></div>';
-if(w.type==='image')return '<input type="file" accept="image/*" onchange="widgetImage('+w.id+',this)"><div id="im'+w.id+'">'+(w.val?'<img src="'+w.val+'" style="max-width:100%;border-radius:10px">':'')+'</div>';
-if(w.type==='timer')return '<div class="big" id="tm'+w.id+'">05:00</div><div class="row"><input id="mi'+w.id+'" type="number" value="5" min="1" style="width:65px"><button onclick="timerStart('+w.id+')">Start</button><button onclick="timerReset('+w.id+')">Nollställ</button></div>';
-return''}
-function render(){let b=document.getElementById('board');b.innerHTML='';d.widgets.forEach(w=>{let e=document.createElement('section');e.className='widget';e.dataset.id=w.id;e.style.cssText='left:'+w.x+'px;top:'+w.y+'px;width:'+w.w+'px;height:'+w.h+'px';e.innerHTML='<div class="head">'+title(w.type)+'<button class="x" onclick="removeW('+w.id+')">✕</button></div><div class="body">'+body(w)+'</div>';b.appendChild(e);drag(e,w);new ResizeObserver(()=>{w.w=e.offsetWidth;w.h=e.offsetHeight;save()}).observe(e)});tickClocks()}
-function drag(e,w){let h=e.querySelector('.head'),sx,sy,ox,oy;h.onpointerdown=a=>{if(a.target.tagName==='BUTTON')return;sx=a.clientX;sy=a.clientY;ox=e.offsetLeft;oy=e.offsetTop;h.setPointerCapture(a.pointerId);h.onpointermove=m=>{w.x=Math.max(0,ox+m.clientX-sx);w.y=Math.max(0,oy+m.clientY-sy);e.style.left=w.x+'px';e.style.top=w.y+'px'};h.onpointerup=()=>{h.onpointermove=null;save()}}}
-function removeW(id){d.widgets=d.widgets.filter(x=>x.id!==id);save();render()} function setVal(id,v){let w=d.widgets.find(x=>x.id===id);w.val=v;save()}
-function tickClocks(){document.querySelectorAll('.liveclock').forEach(x=>x.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'}))}setInterval(tickClocks,1000);
-function addLink(id){let n=document.getElementById('ln'+id).value.trim(),u=document.getElementById('lu'+id).value.trim();if(!n||!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;d.links.push({name:n,url:u});save();render()}
-function randomize(id){let n=Math.max(1,+document.getElementById('rn'+id).value);document.getElementById('rr'+id).textContent=1+Math.floor(Math.random()*n)}
-let timers={};function timerStart(id){if(timers[id])return;let el=document.getElementById('tm'+id),left=Math.max(1,+document.getElementById('mi'+id).value)*60;timers[id]=setInterval(()=>{left--;el.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');if(left<=0){clearInterval(timers[id]);delete timers[id]}},1000)}function timerReset(id){clearInterval(timers[id]);delete timers[id];document.getElementById('tm'+id).textContent='05:00'}
-function widgetImage(id,inp){let f=inp.files[0];if(!f)return,r=new FileReader();r.onload=()=>{let w=d.widgets.find(x=>x.id===id);w.val=r.result;save();render()};r.readAsDataURL(f)}
-const presets=['linear-gradient(135deg,#123b54,#e49a50)','linear-gradient(135deg,#193b2b,#7ea178,#d7c28d)','linear-gradient(135deg,#102b49,#6ca5bd,#d8c58d)'];
-function applyBg(){let e=document.getElementById('bg');e.style.background=d.bg||presets[0];e.style.backgroundSize=d.bg?.startsWith('data:')||d.bg?.startsWith('url')?'cover':'400% 400%';e.classList.toggle('animated',d.anim&&!d.bg)}
-function setPreset(i){d.bg=presets[i];save();applyBg()}function toggleAnim(){d.anim=document.getElementById('animateBg').checked;save();applyBg()}function setBgUrl(){let u=document.getElementById('bgUrl').value.trim();if(u){d.bg='url("'+u+'") center/cover';save();applyBg()}}function setBgFile(){let f=document.getElementById('bgFile').files[0];if(!f)return,r=new FileReader();r.onload=()=>{d.bg='url("'+r.result+'") center/cover';save();applyBg()};r.readAsDataURL(f)}
-function openSettings(){settings.showModal()} document.getElementById('animateBg').checked=d.anim;
-function loadWeek(){let day=+document.getElementById('weekDay').value,arr=d.week[day]||[];let e=document.getElementById('weekEditor');e.innerHTML='';arr.forEach(x=>weekRow(x.time,x.text));if(!arr.length)weekRow('08:20','')}
-function weekRow(t='',v=''){let e=document.getElementById('weekEditor'),r=document.createElement('div');r.className='lesson';r.innerHTML='<input type="time" value="'+esc(t)+'"><input value="'+esc(v)+'" placeholder="Ämne / rast / lunch"><button onclick="this.parentElement.remove()">✕</button>';e.appendChild(r)}
-function addWeekLesson(){weekRow('12:00','')}function saveWeek(){let day=+document.getElementById('weekDay').value;d.week[day]=[...document.querySelectorAll('#weekEditor .lesson')].map(r=>({time:r.children[0].value,text:r.children[1].value}));save();render();alert('Schemat är sparat.')}document.getElementById('weekDay').onchange=loadWeek;loadWeek();applyBg();render();
-if(!d.widgets.length){['day','schedule','clock'].forEach(addWidget)}
-</script></body></html>
+const board=document.getElementById('board');
+const KEY='klassrumstavlan-v2-fixed';
+let state=JSON.parse(localStorage.getItem(KEY)||'{"widgets":[]}');
+const backgrounds=[
+'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=90',
+'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=90',
+'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2000&q=90',
+'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=90'
+];
+let bgIndex=0;
+function save(){
+ state.widgets=[...document.querySelectorAll('.widget')].map(w=>({id:w.id,type:w.dataset.type,x:w.offsetLeft,y:w.offsetTop,width:w.offsetWidth,height:w.offsetHeight,data:collect(w)}));
+ state.bg=document.body.style.backgroundImage;
+ localStorage.setItem(KEY,JSON.stringify(state));
+}
+function collect(w){
+ let o={}; w.querySelectorAll('[data-k]').forEach(el=>o[el.dataset.k]=el.value);
+ if(w.dataset.type==='traffic') o.active=w.dataset.active||'green';
+ return o;
+}
+function title(type){return({day:'Dagen',clock:'Klocka',timer:'Timer',text:'Anteckningar',traffic:'Trafikljus',random:'Slumpa elev',links:'Mina länkar',schedule:'Veckoschema'})[type]||type}
+function content(type,d={}){
+ if(type==='day')return `<div class="date" id="dayText"></div><div style="text-align:center;font-size:64px">☀️</div><input data-k="note" placeholder="Dagens information" value="${esc(d.note||'')}">`;
+ if(type==='clock')return `<div class="bigtime" id="clockText">--:--</div>`;
+ if(type==='timer')return `<div class="timer" id="timerText">05:00</div><div class="row"><input data-k="minutes" type="number" min="1" value="${esc(d.minutes||5)}"><button class="timerStart">Start</button><button class="timerStop">Stopp</button></div>`;
+ if(type==='text')return `<textarea data-k="text" placeholder="Skriv här...">${esc(d.text||'')}</textarea>`;
+ if(type==='traffic')return `<div class="light red" data-light="red"></div><div class="light yellow" data-light="yellow"></div><div class="light green active" data-light="green"></div><div class="hint">Klicka på en färg.</div>`;
+ if(type==='random')return `<textarea data-k="names" placeholder="Skriv ett namn per rad">${esc(d.names||'')}</textarea><button class="pick">Slumpa</button><h2 class="picked" style="text-align:center"></h2>`;
+ if(type==='links')return `<input data-k="label" placeholder="Namn, t.ex. UR Play" value="${esc(d.label||'')}"><input data-k="url" placeholder="https://..." value="${esc(d.url||'')}"><button class="openLink">Öppna länken</button><div class="hint">Länken öppnas i en ny flik.</div>`;
+ if(type==='schedule')return `<textarea data-k="schedule" placeholder="08:10 Svenska&#10;09:00 Matematik&#10;10:10 Rast">${esc(d.schedule||'')}</textarea><button class="showSchedule">Visa schema</button><div class="scheduleOut"></div>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function add(type, saved){
+ const w=document.createElement('section'); w.className='widget'; w.dataset.type=type; w.id=saved?.id||('w'+Date.now()+Math.random().toString(16).slice(2));
+ w.style.left=(saved?.x??(40+Math.random()*180))+'px';w.style.top=(saved?.y??(40+Math.random()*120))+'px';
+ w.style.width=(saved?.width||320)+'px';w.style.height=(saved?.height||220)+'px';
+ w.innerHTML=`<div class="head"><span>${title(type)}</span><button class="close">×</button></div><div class="body">${content(type,saved?.data||{})}</div>`;
+ board.appendChild(w); wire(w); makeDrag(w);
+ if(type==='traffic'&&saved?.data?.active)setLight(w,saved.data.active);
+ if(type==='schedule')renderSchedule(w);
+ save(); return w;
+}
+function wire(w){
+ w.querySelector('.close').onclick=()=>{w.remove();save()};
+ w.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('change',save));
+ if(w.dataset.type==='day')updateDay(w);
+ if(w.dataset.type==='clock')updateClock(w);
+ if(w.dataset.type==='timer'){
+  let t=null,left=0; const out=w.querySelector('#timerText');
+  const draw=()=>{out.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0')};
+  w.querySelector('.timerStart').onclick=()=>{clearInterval(t);left=Math.max(1,parseInt(w.querySelector('[data-k=minutes]').value)||5)*60;draw();t=setInterval(()=>{left--;draw();if(left<=0){clearInterval(t);alert('Tiden är slut!')}},1000)};
+  w.querySelector('.timerStop').onclick=()=>clearInterval(t);
+ }
+ if(w.dataset.type==='traffic')w.querySelectorAll('[data-light]').forEach(l=>l.onclick=()=>{setLight(w,l.dataset.light);save()});
+ if(w.dataset.type==='random')w.querySelector('.pick').onclick=()=>{const a=w.querySelector('[data-k=names]').value.split(/\n|,/).map(x=>x.trim()).filter(Boolean);w.querySelector('.picked').textContent=a.length?a[Math.floor(Math.random()*a.length)]:'Lägg in namn först'};
+ if(w.dataset.type==='links')w.querySelector('.openLink').onclick=()=>{let u=w.querySelector('[data-k=url]').value.trim();if(!u)return; if(!/^https?:\/\//i.test(u))u='https://'+u;window.open(u,'_blank','noopener')};
+ if(w.dataset.type==='schedule')w.querySelector('.showSchedule').onclick=()=>{renderSchedule(w);save()};
+}
+function setLight(w,c){w.dataset.active=c;w.querySelectorAll('[data-light]').forEach(x=>x.classList.toggle('active',x.dataset.light===c))}
+function renderSchedule(w){const out=w.querySelector('.scheduleOut'),ta=w.querySelector('[data-k=schedule]');if(!out||!ta)return;let rows=ta.value.split('\n').filter(Boolean).map(x=>{let p=x.trim().split(/\s+/,2);return `<tr><td>${esc(p[0]||'')}</td><td>${esc(x.trim().slice((p[0]||'').length).trim())}</td></tr>`}).join('');out.innerHTML=rows?`<table class="schedule"><tbody>${rows}</tbody></table>`:''}
+function updateDay(w){const e=w.querySelector('#dayText');const tick=()=>{const d=new Date();e.textContent=d.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long',year:'numeric'})};tick();setInterval(tick,60000)}
+function updateClock(w){const e=w.querySelector('#clockText');const tick=()=>e.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});tick();setInterval(tick,1000)}
+function makeDrag(w){
+ const h=w.querySelector('.head');let sx,sy,ox,oy,drag=false;
+ h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag=true;sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;h.setPointerCapture(e.pointerId)});
+ h.addEventListener('pointermove',e=>{if(!drag)return;w.style.left=Math.max(0,ox+e.clientX-sx)+'px';w.style.top=Math.max(0,oy+e.clientY-sy)+'px'});
+ h.addEventListener('pointerup',()=>{drag=false;save()});
+ new ResizeObserver(()=>save()).observe(w);
+}
+document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(b.dataset.add));
+document.getElementById('bgBtn').onclick=()=>{bgIndex=(bgIndex+1)%backgrounds.length;document.body.style.backgroundImage=`url("${backgrounds[bgIndex]}")`;save()};
+document.getElementById('bgFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{document.body.style.backgroundImage=`url("${r.result}")`;save()};r.readAsDataURL(f)};
+document.getElementById('clearBtn').onclick=()=>{if(confirm('Återställa tavlan?')){localStorage.removeItem(KEY);location.reload()}};
+if(state.bg)document.body.style.backgroundImage=state.bg; else document.body.style.backgroundImage=`url("${backgrounds[0]}")`;
+if(state.widgets?.length)state.widgets.forEach(x=>add(x.type,x)); else {add('day',{x:40,y:40,width:390,height:230,data:{}});add('clock',{x:460,y:40,width:300,height:180,data:{}})}
+window.addEventListener('beforeunload',save);
+</script>
+</body>
+</html>
