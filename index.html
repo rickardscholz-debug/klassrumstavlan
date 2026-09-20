@@ -15,7 +15,7 @@ body{background:#547890 center/cover no-repeat}
 .note textarea{width:100%;height:100%;border:0;outline:0;resize:none;background:transparent;padding:20px;font:400 21px/1.5 Arial,sans-serif;color:#4c4c43}
 .clockWidget .body{display:flex;align-items:center;justify-content:center;font-size:58px;font-weight:700}
 .dayWidget .today{font-size:29px;font-weight:800;text-transform:capitalize}.dayWidget .date{font-size:22px;margin-top:7px}
-.linksGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.linksGrid button{padding:16px 10px;border:0;border-radius:13px;background:#f0f3f7;font-size:16px;font-weight:700;cursor:pointer}.linksGrid button:hover{background:#e1e8f0}
+.linksGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.linksGrid .serviceLink{display:flex;align-items:center;justify-content:center;padding:16px 10px;border:0;border-radius:13px;background:#f0f3f7;font-size:16px;font-weight:700;cursor:pointer;color:#202735;text-decoration:none;text-align:center}.linksGrid .serviceLink:hover{background:#e1e8f0}
 .imageWidget .body,.videoWidget .body,.pdfWidget .body{padding:0;background:#111}.imageWidget img,.videoWidget video,.pdfWidget iframe{width:100%;height:100%;object-fit:contain;border:0}
 .timerNum{font-size:48px;text-align:center;font-weight:800}.row{display:flex;gap:7px}.row input{width:90px;padding:8px}.row button{flex:1}
 .toolbar{position:fixed;z-index:1000;left:50%;bottom:18px;transform:translateX(-50%);height:78px;max-width:96vw;background:#fff;border-radius:19px;box-shadow:0 10px 35px #0004;display:flex;align-items:center;gap:3px;padding:7px 10px;overflow-x:auto}
@@ -66,7 +66,7 @@ function add(type,s={}){
  let d=s.data||{}, title={note:'Anteckning',day:'Dagen',links:'Länkar',clock:'Klocka',timer:'Timer',image:'Bild',video:'Video',pdf:'PDF'}[type], c='';
  if(type==='note')c=`<textarea data-k="text" placeholder="Gör en anteckning...">${esc(d.text)}</textarea>`;
  if(type==='day')c='<div class="today"></div><div class="date"></div>';
- if(type==='links')c='<div class="linksGrid">'+linkList.map(x=>`<button data-url="${x[2]}">${x[0]} ${x[1]}</button>`).join('')+'</div>';
+ if(type==='links')c='<div class="linksGrid">'+linkList.map(x=>`<a class="serviceLink" href="${x[2]}" target="_blank" rel="noopener noreferrer">${x[0]} ${x[1]}</a>`).join('')+'</div>';
  if(type==='clock')c='<div class="clockText">--:--</div>';
  if(type==='timer')c=`<div class="timerNum">05:00</div><div class="row"><input data-k="minutes" type="number" min="1" value="${esc(d.minutes||5)}"><button class="action start">Start</button><button class="action stop">Stopp</button></div>`;
  if(type==='image')c='<img alt="Infogad bild">';
@@ -79,7 +79,7 @@ function wire(w){
  w.querySelectorAll('[data-k]').forEach(e=>e.addEventListener('input',save));
  if(w.dataset.type==='day'){let a=w.querySelector('.today'),b=w.querySelector('.date'),f=()=>{let n=new Date();a.textContent=n.toLocaleDateString('sv-SE',{weekday:'long'});b.textContent=n.toLocaleDateString('sv-SE',{day:'numeric',month:'long',year:'numeric'})};f();setInterval(f,60000)}
  if(w.dataset.type==='clock'){let e=w.querySelector('.clockText'),f=()=>e.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});f();setInterval(f,1000)}
- if(w.dataset.type==='links')w.querySelectorAll('[data-url]').forEach(b=>b.onclick=()=>{let x=window.open(b.dataset.url,'_blank');if(x)x.opener=null;else location.href=b.dataset.url});
+ 
  if(w.dataset.type==='timer'){let t=null,left=0,out=w.querySelector('.timerNum');let draw=()=>out.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');w.querySelector('.start').onclick=()=>{clearInterval(t);left=Math.max(1,+w.querySelector('[data-k=minutes]').value||5)*60;draw();t=setInterval(()=>{left--;draw();if(left<=0){clearInterval(t);alert('Tiden är slut!')}},1000)};w.querySelector('.stop').onclick=()=>clearInterval(t)}
 }
 function drag(w){let h=w.querySelector('.head'),on=false,sx,sy,ox,oy;h.onpointerdown=e=>{if(e.target.closest('button'))return;on=true;sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;h.setPointerCapture(e.pointerId)};h.onpointermove=e=>{if(on){w.style.left=Math.max(0,ox+e.clientX-sx)+'px';w.style.top=Math.max(0,oy+e.clientY-sy)+'px'}};h.onpointerup=()=>{on=false;save()};new ResizeObserver(save).observe(w)}
