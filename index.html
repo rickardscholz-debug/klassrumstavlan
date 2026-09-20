@@ -1,1 +1,1362 @@
-<!doctype html><html lang="sv"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#255b6c"/><title>Klassrumstavlan – din digitala whiteboard</title><meta name="description" content="En svensk klassrumstavla med redigerbart schema, timer, anteckningar, musik och rörliga bakgrunder."/><link rel="icon" href="./favicon.svg"/></head><body><div id="root"></div><script type="module" src="./main.tsx"></script></body></html>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Klassrumstavlan</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    min-height: 100vh;
+    background: #357b91;
+}
+
+/* BAKGRUND */
+
+#background {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #69c5ed 0%,
+            #8ed4ee 52%,
+            #e6d098 52%,
+            #e6d098 72%,
+            #348b9d 72%,
+            #246979 100%
+        );
+
+    background-size: cover;
+    background-position: center;
+}
+
+/* TOPPMENY */
+
+header {
+    height: 70px;
+    padding: 10px 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: rgba(14, 30, 40, 0.82);
+    backdrop-filter: blur(12px);
+
+    box-shadow: 0 4px 20px rgba(0,0,0,.25);
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    flex: 1;
+}
+
+.clock {
+    font-size: 27px;
+    font-weight: bold;
+}
+
+button {
+    border: 1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.15);
+    color: white;
+
+    padding: 9px 13px;
+    border-radius: 10px;
+
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: rgba(255,255,255,.27);
+}
+
+/* HUVUDYTA */
+
+main {
+    padding: 18px;
+
+    display: grid;
+    grid-template-columns: repeat(12,1fr);
+    gap: 15px;
+}
+
+/* WIDGET */
+
+.widget {
+    background: rgba(19,32,42,.78);
+
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 18px;
+
+    padding: 16px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.22);
+
+    backdrop-filter: blur(12px);
+}
+
+.widget h2 {
+    margin-top: 0;
+    font-size: 19px;
+}
+
+/* SCHEMA */
+
+.schedule {
+    grid-column: span 5;
+}
+
+.lesson {
+    display: grid;
+
+    grid-template-columns: 85px 1fr 38px;
+
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+input {
+    padding: 9px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 15px;
+}
+
+.lesson input {
+    width: 100%;
+}
+
+/* TIMER */
+
+.timer {
+    grid-column: span 3;
+}
+
+#timerDisplay {
+    text-align: center;
+
+    font-size: 55px;
+    font-weight: bold;
+
+    margin: 20px 0;
+}
+
+.timerControls {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+/* ANTECKNINGAR */
+
+.notes {
+    grid-column: span 4;
+}
+
+textarea {
+    width: 100%;
+    height: 190px;
+
+    resize: vertical;
+
+    border: none;
+    border-radius: 12px;
+
+    padding: 12px;
+
+    font-size: 17px;
+}
+
+/* LÄNKAR */
+
+.links {
+    grid-column: span 7;
+}
+
+.linkGrid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(130px,1fr));
+
+    gap: 10px;
+}
+
+.quickLink {
+
+    display: block;
+
+    padding: 17px 8px;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    color: white;
+
+    font-weight: bold;
+
+    border-radius: 13px;
+
+    background: rgba(255,255,255,.15);
+
+    border: 1px solid rgba(255,255,255,.22);
+}
+
+.quickLink:hover {
+
+    background: rgba(255,255,255,.28);
+}
+
+/* MEDDELANDE */
+
+.classTools {
+    grid-column: span 5;
+}
+
+#classMessage {
+
+    min-height: 60px;
+
+    font-size: 34px;
+
+    font-weight: bold;
+
+    text-align: center;
+
+    padding: 10px;
+}
+
+.row {
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+}
+
+.grow {
+
+    flex: 1;
+}
+
+/* SLUMPA */
+
+#randomResult {
+
+    font-size: 25px;
+
+    font-weight: bold;
+}
+
+/* INSTÄLLNINGAR */
+
+dialog {
+
+    width: 90%;
+    max-width: 600px;
+
+    border: none;
+
+    border-radius: 18px;
+
+    padding: 22px;
+
+    background: #172833;
+
+    color: white;
+}
+
+dialog::backdrop {
+
+    background: rgba(0,0,0,.65);
+}
+
+.settingBlock {
+
+    margin: 20px 0;
+}
+
+.small {
+
+    font-size: 13px;
+
+    opacity: .8;
+}
+
+/* MOBIL */
+
+@media(max-width:900px) {
+
+    .schedule,
+    .timer,
+    .notes,
+    .links,
+    .classTools {
+
+        grid-column: 1/-1;
+    }
+
+    header {
+
+        height: auto;
+
+        flex-wrap: wrap;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="background"></div>
+
+<header>
+
+<div class="logo">
+🏫 Klassrumstavlan
+</div>
+
+<button onclick="fullscreen()">
+⛶ Helskärm
+</button>
+
+<button onclick="settings.showModal()">
+⚙ Inställningar
+</button>
+
+<div class="clock" id="clock">
+00:00
+</div>
+
+</header>
+
+
+<main>
+
+
+<!-- DAGENS SCHEMA -->
+
+<section class="widget schedule">
+
+<h2>📅 Dagens schema</h2>
+
+<div id="schedule"></div>
+
+<div class="row">
+
+<button onclick="addLesson()">
+＋ Lägg till
+</button>
+
+<button onclick="clearSchedule()">
+Rensa
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- TIMER -->
+
+<section class="widget timer">
+
+<h2>⏱ Timer</h2>
+
+<div id="timerDisplay">
+05:00
+</div>
+
+<div class="timerControls">
+
+<input
+id="timerMinutes"
+type="number"
+min="1"
+value="5"
+style="width:65px"
+>
+
+<button onclick="startTimer()">
+▶ Start
+</button>
+
+<button onclick="pauseTimer()">
+⏸ Paus
+</button>
+
+<button onclick="resetTimer()">
+↺ Nollställ
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- ANTECKNINGAR -->
+
+<section class="widget notes">
+
+<h2>📝 Anteckningar</h2>
+
+<textarea
+id="notes"
+placeholder="Skriv instruktioner, mål eller information till eleverna här..."
+></textarea>
+
+</section>
+
+
+
+<!-- SNABBLÄNKAR -->
+
+<section class="widget links">
+
+<h2>🔗 Snabblänkar</h2>
+
+<div class="linkGrid">
+
+<a
+class="quickLink"
+href="https://urplay.se/"
+target="_blank">
+📺 UR Play
+</a>
+
+<a
+class="quickLink"
+href="https://www.sli.se/"
+target="_blank">
+🎬 SLI
+</a>
+
+<a
+class="quickLink"
+href="https://skolon.com/"
+target="_blank">
+🎓 Skolon
+</a>
+
+<a
+class="quickLink"
+href="https://www.youtube.com/"
+target="_blank">
+▶ YouTube
+</a>
+
+<a
+class="quickLink"
+href="https://drive.google.com/"
+target="_blank">
+📁 Google Drive
+</a>
+
+<a
+class="quickLink"
+href="https://classroomscreen.com/"
+target="_blank">
+🖥 Classroomscreen
+</a>
+
+</div>
+
+
+<h3>Egna länkar</h3>
+
+<div class="row">
+
+<input
+id="linkName"
+placeholder="Namn"
+>
+
+<input
+id="linkUrl"
+class="grow"
+placeholder="https://..."
+>
+
+<button onclick="addLink()">
+＋ Lägg till
+</button>
+
+</div>
+
+<div
+id="customLinks"
+class="linkGrid"
+style="margin-top:10px">
+</div>
+
+<p class="small">
+Dubbelklicka på en egen länk för att ta bort den.
+</p>
+
+</section>
+
+
+
+<!-- KLASSRUMSVERKTYG -->
+
+<section class="widget classTools">
+
+<h2>📣 Klassrumsverktyg</h2>
+
+<div id="classMessage">
+Välkomna!
+</div>
+
+<div class="row">
+
+<input
+id="messageInput"
+class="grow"
+placeholder="Skriv ett meddelande..."
+>
+
+<button onclick="showMessage()">
+Visa
+</button>
+
+</div>
+
+<br>
+
+<hr>
+
+<h3>🎲 Slumpa elevnummer</h3>
+
+<div class="row">
+
+<span>
+Antal elever:
+</span>
+
+<input
+id="studentCount"
+type="number"
+min="1"
+value="25"
+style="width:70px"
+>
+
+<button onclick="randomStudent()">
+Slumpa
+</button>
+
+<span id="randomResult"></span>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+
+<!-- INSTÄLLNINGAR -->
+
+<dialog id="settings">
+
+<h2>⚙ Inställningar</h2>
+
+
+<div class="settingBlock">
+
+<h3>🖼 Bakgrund från internet</h3>
+
+<div class="row">
+
+<input
+id="backgroundUrl"
+class="grow"
+placeholder="Klistra in bildadress..."
+>
+
+<button onclick="setBackgroundUrl()">
+Använd
+</button>
+
+</div>
+
+</div>
+
+
+<div class="settingBlock">
+
+<h3>📷 Egen bild</h3>
+
+<input
+id="backgroundFile"
+type="file"
+accept="image/*"
+>
+
+<button onclick="setBackgroundFile()">
+Använd bild
+</button>
+
+</div>
+
+
+<div class="settingBlock">
+
+<button onclick="defaultBackground()">
+🌊 Standardbakgrund
+</button>
+
+</div>
+
+
+<p class="small">
+Schema, anteckningar, egna länkar, meddelande och bakgrund
+sparas automatiskt på den här datorn.
+</p>
+
+
+<button onclick="settings.close()">
+Stäng
+</button>
+
+</dialog>
+
+
+
+<script>
+
+/* -------------------------
+   DATA
+------------------------- */
+
+const STORAGE =
+"KlassrumstavlanDataV3";
+
+let data = {};
+
+try {
+
+data =
+JSON.parse(
+localStorage.getItem(STORAGE) || "{}"
+);
+
+}
+catch {
+
+data = {};
+
+}
+
+
+if (!data.schedule) {
+
+data.schedule = [
+
+{
+time:"08:20",
+text:"Start / samling"
+},
+
+{
+time:"09:00",
+text:"Lektion"
+},
+
+{
+time:"10:00",
+text:"Rast"
+},
+
+{
+time:"10:30",
+text:"Lektion"
+}
+
+];
+
+}
+
+if (!data.links)
+data.links = [];
+
+if (!data.notes)
+data.notes = "";
+
+if (!data.message)
+data.message = "Välkomna!";
+
+
+function save() {
+
+data.notes =
+document.getElementById("notes").value;
+
+localStorage.setItem(
+STORAGE,
+JSON.stringify(data)
+);
+
+}
+
+
+
+/* -------------------------
+   KLOCKA
+------------------------- */
+
+function updateClock() {
+
+const now =
+new Date();
+
+document.getElementById("clock")
+.textContent =
+now.toLocaleTimeString(
+"sv-SE",
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+);
+
+}
+
+updateClock();
+
+setInterval(
+updateClock,
+1000
+);
+
+
+
+/* -------------------------
+   SCHEMA
+------------------------- */
+
+function renderSchedule() {
+
+const container =
+document.getElementById("schedule");
+
+container.innerHTML = "";
+
+
+data.schedule.forEach(
+(item,index) => {
+
+const row =
+document.createElement("div");
+
+row.className =
+"lesson";
+
+
+const time =
+document.createElement("input");
+
+time.type =
+"time";
+
+time.value =
+item.time;
+
+
+const text =
+document.createElement("input");
+
+text.value =
+item.text;
+
+text.placeholder =
+"Aktivitet";
+
+
+const remove =
+document.createElement("button");
+
+remove.textContent =
+"✕";
+
+
+time.oninput = function() {
+
+item.time =
+time.value;
+
+save();
+
+};
+
+
+text.oninput = function() {
+
+item.text =
+text.value;
+
+save();
+
+};
+
+
+remove.onclick = function() {
+
+data.schedule.splice(
+index,
+1
+);
+
+save();
+
+renderSchedule();
+
+};
+
+
+row.append(
+time,
+text,
+remove
+);
+
+container.appendChild(
+row
+);
+
+});
+
+}
+
+
+function addLesson() {
+
+data.schedule.push(
+{
+time:"12:00",
+text:"Ny aktivitet"
+}
+);
+
+save();
+
+renderSchedule();
+
+}
+
+
+function clearSchedule() {
+
+if (
+confirm(
+"Vill du rensa dagens schema?"
+)
+) {
+
+data.schedule = [];
+
+save();
+
+renderSchedule();
+
+}
+
+}
+
+
+
+/* -------------------------
+   ANTECKNINGAR
+------------------------- */
+
+const notes =
+document.getElementById("notes");
+
+notes.value =
+data.notes;
+
+notes.addEventListener(
+"input",
+save
+);
+
+
+
+/* -------------------------
+   TIMER
+------------------------- */
+
+let timerLeft =
+300;
+
+let timerInterval =
+null;
+
+
+function updateTimer() {
+
+const minutes =
+Math.floor(
+timerLeft / 60
+);
+
+const seconds =
+timerLeft % 60;
+
+
+document.getElementById(
+"timerDisplay"
+).textContent =
+
+String(minutes)
+.padStart(2,"0")
+
++
+
+":"
+
++
+
+String(seconds)
+.padStart(2,"0");
+
+}
+
+
+function startTimer() {
+
+if (timerInterval)
+return;
+
+
+if (timerLeft <= 0) {
+
+timerLeft =
+
+Math.max(
+1,
+Number(
+document.getElementById(
+"timerMinutes"
+).value
+)
+)
+
+* 60;
+
+}
+
+
+timerInterval =
+setInterval(
+function() {
+
+timerLeft--;
+
+updateTimer();
+
+
+if (
+timerLeft <= 0
+) {
+
+clearInterval(
+timerInterval
+);
+
+timerInterval =
+null;
+
+alert(
+"Tiden är slut!"
+);
+
+}
+
+},
+1000
+);
+
+}
+
+
+function pauseTimer() {
+
+clearInterval(
+timerInterval
+);
+
+timerInterval =
+null;
+
+}
+
+
+function resetTimer() {
+
+pauseTimer();
+
+
+timerLeft =
+
+Math.max(
+1,
+Number(
+document.getElementById(
+"timerMinutes"
+).value
+)
+)
+
+* 60;
+
+
+updateTimer();
+
+}
+
+
+
+/* -------------------------
+   MEDDELANDE
+------------------------- */
+
+document.getElementById(
+"classMessage"
+).textContent =
+data.message;
+
+
+function showMessage() {
+
+const input =
+document.getElementById(
+"messageInput"
+);
+
+data.message =
+input.value.trim()
+||
+"Välkomna!";
+
+
+document.getElementById(
+"classMessage"
+).textContent =
+data.message;
+
+save();
+
+}
+
+
+
+/* -------------------------
+   SLUMPA ELEV
+------------------------- */
+
+function randomStudent() {
+
+const amount =
+
+Math.max(
+1,
+Number(
+document.getElementById(
+"studentCount"
+).value
+)
+);
+
+
+const number =
+
+Math.floor(
+Math.random()
+* amount
+)
++ 1;
+
+
+document.getElementById(
+"randomResult"
+).textContent =
+
+"Nummer "
++
+number;
+
+}
+
+
+
+/* -------------------------
+   EGNA LÄNKAR
+------------------------- */
+
+function renderLinks() {
+
+const container =
+document.getElementById(
+"customLinks"
+);
+
+container.innerHTML =
+"";
+
+
+data.links.forEach(
+(item,index) => {
+
+const link =
+document.createElement("a");
+
+link.className =
+"quickLink";
+
+link.target =
+"_blank";
+
+link.href =
+item.url;
+
+link.textContent =
+"🔗 " + item.name;
+
+
+link.ondblclick =
+function(event) {
+
+event.preventDefault();
+
+data.links.splice(
+index,
+1
+);
+
+save();
+
+renderLinks();
+
+};
+
+
+container.appendChild(
+link
+);
+
+});
+
+}
+
+
+function addLink() {
+
+const name =
+document.getElementById(
+"linkName"
+).value.trim();
+
+let url =
+document.getElementById(
+"linkUrl"
+).value.trim();
+
+
+if (!name || !url)
+return;
+
+
+if (
+!url.startsWith("http://")
+&&
+!url.startsWith("https://")
+) {
+
+url =
+"https://" + url;
+
+}
+
+
+data.links.push(
+{
+name:name,
+url:url
+}
+);
+
+
+document.getElementById(
+"linkName"
+).value =
+"";
+
+document.getElementById(
+"linkUrl"
+).value =
+"";
+
+
+save();
+
+renderLinks();
+
+}
+
+
+
+/* -------------------------
+   BAKGRUND
+------------------------- */
+
+function applyBackground() {
+
+if (data.background) {
+
+document.getElementById(
+"background"
+).style.background =
+
+"url('" +
+data.background +
+"') center / cover fixed";
+
+}
+
+}
+
+
+function setBackgroundUrl() {
+
+const url =
+document.getElementById(
+"backgroundUrl"
+).value.trim();
+
+
+if (!url)
+return;
+
+
+data.background =
+url;
+
+save();
+
+applyBackground();
+
+}
+
+
+function setBackgroundFile() {
+
+const input =
+document.getElementById(
+"backgroundFile"
+);
+
+const file =
+input.files[0];
+
+
+if (!file)
+return;
+
+
+const reader =
+new FileReader();
+
+
+reader.onload =
+function() {
+
+data.background =
+reader.result;
+
+save();
+
+applyBackground();
+
+};
+
+
+reader.readAsDataURL(
+file
+);
+
+}
+
+
+function defaultBackground() {
+
+delete data.background;
+
+save();
+
+location.reload();
+
+}
+
+
+
+/* -------------------------
+   HELSKÄRM
+------------------------- */
+
+function fullscreen() {
+
+if (
+document.documentElement
+.requestFullscreen
+) {
+
+document.documentElement
+.requestFullscreen();
+
+}
+
+}
+
+
+
+/* START */
+
+renderSchedule();
+
+renderLinks();
+
+applyBackground();
+
+updateTimer();
+
+</script>
+
+</body>
+</html>
