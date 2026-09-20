@@ -1,173 +1,2253 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Klassrumstavlan</title>
-<style>
-*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:Inter,Arial,sans-serif;overflow:hidden;color:#202735}
-body{background:#547890 center/cover no-repeat}
-#bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;display:none}
-#board{position:fixed;inset:0 0 112px}
-.widget{position:absolute;min-width:220px;min-height:150px;background:#fff;border-radius:15px;box-shadow:0 12px 35px #0004;resize:both;overflow:hidden;border:1px solid #ffffffaa}
-.head{height:38px;display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#ffffffd9;cursor:move;font-weight:700;font-size:14px}
-.head .close{border:0;background:transparent;font-size:20px;cursor:pointer}.body{height:calc(100% - 38px);padding:13px;overflow:auto}
-.note{background:#fff6c8}.note .head{background:#fff0a6}.note .body{padding:0}
-.note textarea{width:100%;height:100%;border:0;outline:0;resize:none;background:transparent;padding:20px;font:400 21px/1.5 Arial,sans-serif;color:#4c4c43}
-.clockWidget .body{display:flex;align-items:center;justify-content:center;font-size:58px;font-weight:700}
-.dayWidget .today{font-size:29px;font-weight:800;text-transform:capitalize}.dayWidget .date{font-size:22px;margin-top:7px}
-.linksGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.linksGrid .serviceLink{display:flex;align-items:center;justify-content:center;padding:16px 10px;border:0;border-radius:13px;background:#f0f3f7;font-size:16px;font-weight:700;cursor:pointer;color:#202735;text-decoration:none;text-align:center}.linksGrid .serviceLink:hover{background:#e1e8f0}
-.imageWidget .body,.videoWidget .body,.pdfWidget .body{padding:0;background:#111}.imageWidget img,.videoWidget video,.pdfWidget iframe{width:100%;height:100%;object-fit:contain;border:0}
-.timerNum{font-size:48px;text-align:center;font-weight:800}.row{display:flex;gap:7px}.row input{width:90px;padding:8px}.row button{flex:1}
-.toolbar{position:fixed;z-index:1000;left:50%;bottom:18px;transform:translateX(-50%);height:78px;max-width:96vw;background:#fff;border-radius:19px;box-shadow:0 10px 35px #0004;display:flex;align-items:center;gap:3px;padding:7px 10px;overflow-x:auto}
-.tool{min-width:76px;height:64px;border:0;background:transparent;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#202735;font-size:12px;white-space:nowrap}.tool:hover{background:#edf2f8}.ico{font-size:27px;line-height:27px}
-.filetool input{display:none}.moreMenu{position:fixed;z-index:1100;bottom:105px;left:50%;transform:translateX(-50%);display:none;background:#fff;border-radius:15px;box-shadow:0 10px 35px #0004;padding:10px;gap:6px}.moreMenu.open{display:flex}
-button.action{border:0;border-radius:9px;padding:9px 11px;background:#334155;color:#fff;cursor:pointer}
-input,textarea{font:inherit}
-@media(max-width:700px){.toolbar{left:7px;right:7px;transform:none}.tool{min-width:68px}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-.scheduleWidget .body{background:#fff;padding:12px}
-.scheduleTop{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
-.scheduleTop button,.scheduleTop label{border:0;border-radius:9px;background:#eef2f7;padding:9px 10px;font-weight:700;cursor:pointer}
-.scheduleTop input[type=file]{display:none}
-.scheduleHint{font-size:12px;color:#64748b;margin:5px 0 10px}
-.scheduleRows{display:flex;flex-direction:column;gap:7px}
-.scheduleRow{display:grid;grid-template-columns:56px 1fr 92px 34px;gap:6px;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:6px}
-.scheduleIcon{font-size:28px;text-align:center}
-.scheduleRow input{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:7px}
-.scheduleRow .del{border:0;background:transparent;font-size:18px;cursor:pointer}
-.schedulePreview{margin-top:10px;border-top:1px solid #e2e8f0;padding-top:9px}
-.scheduleCard{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:8px;border-bottom:2px solid #334155;padding:7px 3px}
-.scheduleCard .pic{font-size:29px;text-align:center}.scheduleCard .subject{font-weight:800}.scheduleCard .time{font-weight:700;color:#475569}
-.ocrStatus{font-size:12px;color:#475569;margin-top:6px}
-</style></head>
+<title>Klassrumstavlan</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    color: #202735;
+}
+
+body {
+    background-color: #547890;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+/* VIDEOBAKGRUND */
+
+#bgVideo {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    display: none;
+}
+
+/* ARBETSYTA */
+
+#board {
+    position: fixed;
+    inset: 0 0 112px 0;
+}
+
+/* WIDGET */
+
+.widget {
+    position: absolute;
+    min-width: 220px;
+    min-height: 150px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.28);
+    resize: both;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.7);
+}
+
+.head {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: rgba(255,255,255,.90);
+    cursor: move;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.close {
+    border: 0;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.body {
+    height: calc(100% - 38px);
+    padding: 13px;
+    overflow: auto;
+}
+
+/* ANTECKNING */
+
+.note {
+    background: #fff6c8;
+}
+
+.note .head {
+    background: #fff0a6;
+}
+
+.note .body {
+    padding: 0;
+}
+
+.note textarea {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: transparent;
+    padding: 20px;
+    font-size: 21px;
+    line-height: 1.5;
+    color: #4c4c43;
+}
+
+/* KLOCKA */
+
+.clockWidget .body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 58px;
+    font-weight: 700;
+}
+
+/* DAGEN */
+
+.dayWidget .today {
+    font-size: 29px;
+    font-weight: 800;
+    text-transform: capitalize;
+}
+
+.dayWidget .date {
+    font-size: 22px;
+    margin-top: 7px;
+}
+
+/* LÄNKAR */
+
+.linksGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.serviceLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 58px;
+    padding: 14px 10px;
+    border-radius: 13px;
+    background: #f0f3f7;
+    font-size: 16px;
+    font-weight: 700;
+    color: #202735;
+    text-decoration: none;
+    text-align: center;
+}
+
+.serviceLink:hover {
+    background: #dce7f2;
+}
+
+/* BILDER */
+
+.imageWidget .body {
+    padding: 0;
+    background: #111;
+}
+
+.imageWidget img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* TIMER */
+
+.timerNum {
+    font-size: 48px;
+    text-align: center;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.row {
+    display: flex;
+    gap: 7px;
+}
+
+.row input {
+    width: 90px;
+    padding: 8px;
+}
+
+.row button {
+    flex: 1;
+}
+
+button.action {
+    border: 0;
+    border-radius: 9px;
+    padding: 9px 11px;
+    background: #334155;
+    color: white;
+    cursor: pointer;
+}
+
+/* ========================= */
+/* SCHEMA */
+/* ========================= */
+
+.scheduleWidget {
+    min-width: 350px;
+    min-height: 480px;
+}
+
+.scheduleWidget .body {
+    background: white;
+    padding: 12px;
+}
+
+.scheduleTop {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.scheduleTop button,
+.scheduleUpload {
+    border: 0;
+    border-radius: 9px;
+    background: #eef2f7;
+    padding: 9px 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.scheduleUpload input {
+    display: none;
+}
+
+.scheduleHint {
+    font-size: 12px;
+    color: #64748b;
+    margin: 5px 0 10px;
+    line-height: 1.4;
+}
+
+.scheduleRows {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.scheduleRow {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px 32px;
+    gap: 6px;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 6px;
+}
+
+.scheduleIcon {
+    font-size: 28px;
+    text-align: center;
+}
+
+.scheduleRow input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 7px;
+}
+
+.scheduleRow .del {
+    border: 0;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.schedulePreview {
+    margin-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 9px;
+}
+
+.scheduleCard {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid #334155;
+    padding: 8px 3px;
+}
+
+.scheduleCard .pic {
+    font-size: 30px;
+    text-align: center;
+}
+
+.scheduleCard .subject {
+    font-weight: 800;
+}
+
+.scheduleCard .time {
+    font-weight: 700;
+    color: #475569;
+}
+
+.ocrStatus {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 7px;
+}
+
+/* ========================= */
+/* VERKTYGSRAD */
+/* ========================= */
+
+.toolbar {
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    height: 78px;
+    max-width: 96vw;
+    background: white;
+    border-radius: 19px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.30);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 7px 10px;
+    overflow-x: auto;
+}
+
+.tool {
+    min-width: 76px;
+    height: 64px;
+    border: 0;
+    background: transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #202735;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.tool:hover {
+    background: #edf2f8;
+}
+
+.ico {
+    font-size: 27px;
+    line-height: 27px;
+}
+
+/* DÖLJ FILINPUT */
+
+.hiddenFile {
+    display: none;
+}
+
+@media(max-width:700px) {
+
+    .toolbar {
+        left: 7px;
+        right: 7px;
+        transform: none;
+    }
+
+    .tool {
+        min-width: 68px;
+    }
+}
+
+</style>
+</head>
+
 <body>
-<video id="bgVideo" muted loop playsinline></video>
+
+<!-- VIDEO SOM BAKGRUND -->
+
+<video
+    id="bgVideo"
+    muted
+    loop
+    playsinline>
+</video>
+
+
+<!-- ARBETSYTA -->
+
 <div id="board"></div>
 
+
+<!-- DOLDA FILVÄLJARE -->
+
+<input
+    id="imageFile"
+    class="hiddenFile"
+    type="file"
+    accept="image/*">
+
+<input
+    id="bgFile"
+    class="hiddenFile"
+    type="file"
+    accept="image/*,video/mp4,video/webm,video/ogg">
+
+
+<!-- ======================= -->
+<!-- VERKTYGSRAD -->
+<!-- ======================= -->
+
 <div class="toolbar">
-<button class="tool" id="btnNote" data-add="note"><span class="ico">📝</span><span>Anteckning</span></button>
-<button class="tool" id="btnDay" data-add="day"><span class="ico">📅</span><span>Dagen</span></button>
-<button class="tool" id="btnLinks" data-add="links"><span class="ico">🔗</span><span>Länkar</span></button>
-<button class="tool" id="btnClock" data-add="clock"><span class="ico">🕒</span><span>Klocka</span></button>
-<button class="tool" id="btnTimer" data-add="timer"><span class="ico">⌛</span><span>Timer</span></button>
-<label class="tool filetool"><span class="ico">🖼️</span><span>Bild</span><input id="imageFile" type="file" accept="image/*"></label>
-<label class="tool filetool"><span class="ico">🏞️</span><span>Bakgrund</span><input id="bgFile" type="file" accept="image/*,video/mp4,video/webm,video/ogg"></label>
-<button class="tool" id="btnSchedule"><span class="ico">📋</span><span>Schema</span></button>
+
+
+<button class="tool" id="btnNote">
+
+    <span class="ico">📝</span>
+    <span>Anteckning</span>
+
+</button>
+
+
+<button class="tool" id="btnDay">
+
+    <span class="ico">📅</span>
+    <span>Dagen</span>
+
+</button>
+
+
+<button class="tool" id="btnLinks">
+
+    <span class="ico">🔗</span>
+    <span>Länkar</span>
+
+</button>
+
+
+<button class="tool" id="btnClock">
+
+    <span class="ico">🕒</span>
+    <span>Klocka</span>
+
+</button>
+
+
+<button class="tool" id="btnTimer">
+
+    <span class="ico">⌛</span>
+    <span>Timer</span>
+
+</button>
+
+
+<button class="tool" id="btnImage">
+
+    <span class="ico">🖼️</span>
+    <span>Bild</span>
+
+</button>
+
+
+<button class="tool" id="btnBackground">
+
+    <span class="ico">🏞️</span>
+    <span>Bakgrund</span>
+
+</button>
+
+
+<!-- ÖVRIGT ÄR BORTTAGET -->
+
+<button class="tool" id="btnSchedule">
+
+    <span class="ico">📋</span>
+    <span>Schema</span>
+
+</button>
+
+
 </div>
+
+
 <script>
-const board=document.querySelector('#board'), KEY='klassrumstavlan-v5', bgVideo=document.querySelector('#bgVideo');
-let state={widgets:[]}, bgURL=null;
-try { state=JSON.parse(localStorage.getItem(KEY)||'{"widgets":[]}'); }
-catch(e) { state={widgets:[]}; localStorage.removeItem(KEY); }
-const linkList=[
- ['🧩','Skolon','https://skolon.com/'],
- ['▶️','UR Play','https://urplay.se/'],
- ['📺','SVT Play','https://www.svtplay.se/'],
- ['🎬','SLI','https://sliplay.se/'],
- ['🔴','YouTube','https://www.youtube.com/']
+
+/* ========================= */
+/* GRUND */
+/* ========================= */
+
+const board =
+    document.getElementById("board");
+
+const bgVideo =
+    document.getElementById("bgVideo");
+
+const imageFile =
+    document.getElementById("imageFile");
+
+const bgFile =
+    document.getElementById("bgFile");
+
+
+const KEY =
+    "klassrumstavlan-v9";
+
+
+let state = {
+    widgets: []
+};
+
+
+try {
+
+    const saved =
+        localStorage.getItem(KEY);
+
+    if(saved) {
+
+        state =
+            JSON.parse(saved);
+    }
+
+}
+catch(error) {
+
+    state = {
+        widgets: []
+    };
+}
+
+
+let backgroundURL = null;
+
+
+/* ========================= */
+/* LÄNKAR */
+/* ========================= */
+
+const linkList = [
+
+    [
+        "🧩",
+        "Skolon",
+        "https://skolon.com/"
+    ],
+
+    [
+        "▶️",
+        "UR Play",
+        "https://urplay.se/"
+    ],
+
+    [
+        "📺",
+        "SVT Play",
+        "https://www.svtplay.se/"
+    ],
+
+    [
+        "🎬",
+        "SLI",
+        "https://sliplay.se/"
+    ],
+
+    [
+        "🔴",
+        "YouTube",
+        "https://www.youtube.com/"
+    ]
+
 ];
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function collect(w){let d={};w.querySelectorAll('[data-k]').forEach(e=>d[e.dataset.k]=e.value);return d}
-function save(){state.widgets=[...document.querySelectorAll('.widget')].map(w=>({id:w.id,type:w.dataset.type,x:w.offsetLeft,y:w.offsetTop,width:w.offsetWidth,height:w.offsetHeight,data:collect(w)}));localStorage.setItem(KEY,JSON.stringify(state))}
-function add(type,s={}){
- let w=document.createElement('section');w.className='widget '+type+'Widget '+(type==='note'?'note':'');w.dataset.type=type;w.id=s.id||'w'+Date.now()+Math.random();
- let size={note:[325,390],day:[350,190],links:[390,300],clock:[300,170],timer:[320,200],image:[480,350],video:[480,350],pdf:[480,400],schedule:[390,560]}[type]||[330,220];
- w.style.left=(s.x??60+Math.random()*250)+'px';w.style.top=(s.y??50+Math.random()*140)+'px';w.style.width=(s.width||size[0])+'px';w.style.height=(s.height||size[1])+'px';
- let d=s.data||{}, title={note:'Anteckning',day:'Dagen',links:'Länkar',clock:'Klocka',timer:'Timer',image:'Bild',video:'Video',pdf:'PDF'}[type], c='';
- if(type==='note')c=`<textarea data-k="text" placeholder="Gör en anteckning...">${esc(d.text)}</textarea>`;
- if(type==='day')c='<div class="today"></div><div class="date"></div>';
- if(type==='links')c='<div class="linksGrid">'+linkList.map(x=>`<a class="serviceLink" href="${x[2]}" target="_blank" rel="noopener noreferrer">${x[0]} ${x[1]}</a>`).join('')+'</div>';
- if(type==='clock')c='<div class="clockText">--:--</div>';
- if(type==='timer')c=`<div class="timerNum">05:00</div><div class="row"><input data-k="minutes" type="number" min="1" value="${esc(d.minutes||5)}"><button class="action start">Start</button><button class="action stop">Stopp</button></div>`;
- if(type==='image')c='<img alt="Infogad bild">';
- if(type==='video')c='<video controls playsinline></video>';
- if(type==='pdf')c='<iframe title="PDF"></iframe>';
- if(type==='schedule')c=`<div class="scheduleTop">
-   <button class="addScheduleRow">＋ Rad</button>
-   <label>📷 Läs schema från bild<input class="scheduleImage" type="file" accept="image/*"></label>
-   <button class="makePreview">Visa</button>
- </div>
- <div class="scheduleHint">Snabbast: lägg till rader själv – eller välj en bild av elevernas schema. Bilden läses lokalt i webbläsaren och föreslår tider/ämnen som du sedan kan rätta.</div>
- <div class="scheduleRows"></div>
- <div class="ocrStatus"></div>
- <div class="schedulePreview"></div>`;
 
- w.innerHTML=`<div class="head"><span>${title}</span><button class="close">×</button></div><div class="body">${c}</div>`;board.appendChild(w);wire(w);drag(w);save();return w
-}
-function wire(w){
- w.querySelector('.close').onclick=()=>{if(w._url)URL.revokeObjectURL(w._url);w.remove();save()};
- w.querySelectorAll('[data-k]').forEach(e=>e.addEventListener('input',save));
- if(w.dataset.type==='day'){let a=w.querySelector('.today'),b=w.querySelector('.date'),f=()=>{let n=new Date();a.textContent=n.toLocaleDateString('sv-SE',{weekday:'long'});b.textContent=n.toLocaleDateString('sv-SE',{day:'numeric',month:'long',year:'numeric'})};f();setInterval(f,60000)}
- if(w.dataset.type==='clock'){let e=w.querySelector('.clockText'),f=()=>e.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});f();setInterval(f,1000)}
- 
- if(w.dataset.type==='timer'){let t=null,left=0,out=w.querySelector('.timerNum');let draw=()=>out.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');w.querySelector('.start').onclick=()=>{clearInterval(t);left=Math.max(1,+w.querySelector('[data-k=minutes]').value||5)*60;draw();t=setInterval(()=>{left--;draw();if(left<=0){clearInterval(t);alert('Tiden är slut!')}},1000)};w.querySelector('.stop').onclick=()=>clearInterval(t)}
 
- if(w.dataset.type==='schedule'){
-   const rows=w.querySelector('.scheduleRows'), status=w.querySelector('.ocrStatus');
-   const icons={svenska:'🇸🇪',sva:'🇸🇪',matte:'➗',matematik:'➗',so:'🌍',geografi:'🌍',historia:'🏰',religion:'🕊️',no:'🔬',naturkunskap:'🔬',engelska:'🇬🇧',musik:'🎵',bild:'🎨',idrott:'⚽',rast:'🛝',lunch:'🍽️',slöjd:'🧵'};
-   function iconFor(t){let q=t.toLowerCase();for(const k in icons)if(q.includes(k))return icons[k];return '📘'}
-   function row(subject='',time='',icon=''){
-     const r=document.createElement('div');r.className='scheduleRow';
-     r.innerHTML=`<div class="scheduleIcon">${icon||iconFor(subject)}</div><input class="schSubject" placeholder="Ämne/aktivitet" value="${subject.replace(/"/g,'&quot;')}"><input class="schTime" placeholder="08:10–09:00" value="${time.replace(/"/g,'&quot;')}"><button class="del">×</button>`;
-     r.querySelector('.del').onclick=()=>r.remove();
-     r.querySelector('.schSubject').oninput=()=>r.querySelector('.scheduleIcon').textContent=iconFor(r.querySelector('.schSubject').value);
-     rows.appendChild(r);
-   }
-   function preview(){
-     const list=[...rows.querySelectorAll('.scheduleRow')];
-     w.querySelector('.schedulePreview').innerHTML=list.map(r=>`<div class="scheduleCard"><div class="pic">${r.querySelector('.scheduleIcon').textContent}</div><div class="subject">${r.querySelector('.schSubject').value||'Aktivitet'}</div><div class="time">${r.querySelector('.schTime').value}</div></div>`).join('');
-   }
-   w.querySelector('.addScheduleRow').onclick=()=>row();
-   w.querySelector('.makePreview').onclick=preview;
-   if(!rows.children.length){row('SO','08:10–09:00');row('Rast','09:00–09:20');row('Matematik','09:20–10:10');row('Lunch','11:20–12:00');}
-   w.querySelector('.scheduleImage').onchange=async e=>{
-     const file=e.target.files[0];if(!file)return;
-     status.textContent='Läser bilden… första gången kan detta ta en stund.';
-     try{
-       if(!window.Tesseract){
-         await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});
-       }
-       const result=await Tesseract.recognize(file,'swe+eng');
-       const text=result.data.text||'';
-       const lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean);
-       const timeRx=/(\d{1,2}[:.]\d{2})\s*[-–—]?\s*(\d{1,2}[:.]\d{2})?/;
-       const known=['Svenska','SvA','Matematik','Matte','SO','Geografi','Historia','Religion','NO','Engelska','Musik','Bild','Idrott','Rast','Lunch','Slöjd'];
-       rows.innerHTML='';
-       for(const line of lines){
-         const low=line.toLowerCase();let subject=known.find(k=>low.includes(k.toLowerCase()));
-         if(!subject)continue;
-         const m=line.match(timeRx);let time=m?(m[1].replace('.',':')+(m[2]?'–'+m[2].replace('.',':'):'')):'';
-         row(subject,time);
-       }
-       if(!rows.children.length){row();status.textContent='Jag kunde inte säkert hitta ämnen i bilden. Lägg in/rätta raderna manuellt.'}
-       else status.textContent='Förslag klart. Kontrollera tider och ämnen och tryck Visa.';
-       preview();
-     }catch(err){status.textContent='Bildläsningen kunde inte starta. Du kan fortfarande skapa schemat snabbt med ＋ Rad.'}
-     e.target.value='';
-   };
- }
+/* ========================= */
+/* SPARA */
+/* ========================= */
+
+function collect(widget) {
+
+    const data = {};
+
+    widget
+        .querySelectorAll("[data-k]")
+        .forEach(element => {
+
+            data[element.dataset.k] =
+                element.value;
+
+        });
+
+    return data;
 }
-function drag(w){let h=w.querySelector('.head'),on=false,sx,sy,ox,oy;h.onpointerdown=e=>{if(e.target.closest('button'))return;on=true;sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;h.setPointerCapture(e.pointerId)};h.onpointermove=e=>{if(on){w.style.left=Math.max(0,ox+e.clientX-sx)+'px';w.style.top=Math.max(0,oy+e.clientY-sy)+'px'}};h.onpointerup=()=>{on=false;save()};new ResizeObserver(save).observe(w)}
-document.getElementById('btnNote').addEventListener('click',()=>add('note'));
-document.getElementById('btnDay').addEventListener('click',()=>add('day'));
-document.getElementById('btnLinks').addEventListener('click',()=>add('links'));
-document.getElementById('btnClock').addEventListener('click',()=>add('clock'));
-document.getElementById('btnTimer').addEventListener('click',()=>add('timer'));
-function fileWidget(id,type,sel){
- const input=document.querySelector(id);
- input.onchange=e=>{
-   const f=e.target.files[0];
-   if(!f) return;
-   const w=add(type);
-   const u=URL.createObjectURL(f);
-   w._url=u;
-   w.querySelector(sel).src=u;
-   if(type==='video') w.querySelector(sel).load();
-   e.target.value='';
- };
+
+
+function save() {
+
+    state.widgets =
+        [...document.querySelectorAll(".widget")]
+        .map(widget => ({
+
+            id: widget.id,
+
+            type:
+                widget.dataset.type,
+
+            x:
+                widget.offsetLeft,
+
+            y:
+                widget.offsetTop,
+
+            width:
+                widget.offsetWidth,
+
+            height:
+                widget.offsetHeight,
+
+            data:
+                collect(widget)
+
+        }));
+
+
+    try {
+
+        localStorage.setItem(
+            KEY,
+            JSON.stringify(state)
+        );
+
+    }
+    catch(error) {
+
+        console.log(
+            "Kunde inte spara."
+        );
+    }
+
 }
-fileWidget('#imageFile','image','img');fileWidget('#videoFile','video','video');fileWidget('#pdfFile','pdf','iframe');
-document.querySelector('#bgFile').onchange=e=>{let f=e.target.files[0];if(!f)return;if(bgURL)URL.revokeObjectURL(bgURL);bgURL=URL.createObjectURL(f);document.body.style.backgroundImage='none';bgVideo.pause();bgVideo.style.display='none';bgVideo.removeAttribute('src');if(f.type.startsWith('image/'))document.body.style.backgroundImage=`url("${bgURL}")`;else if(f.type.startsWith('video/')){bgVideo.src=bgURL;bgVideo.style.display='block';bgVideo.load();bgVideo.play().catch(()=>{})}e.target.value=''};
-document.querySelector('#btnSchedule').onclick=()=>add('schedule');
-if(state.widgets?.length)state.widgets.forEach(x=>add(x.type,x));
-</script></body></html>
+
+
+/* ========================= */
+/* SKAPA WIDGET */
+/* ========================= */
+
+function add(type, saved = {}) {
+
+
+    const widget =
+        document.createElement("section");
+
+
+    widget.className =
+        "widget " +
+        type +
+        "Widget " +
+        (type === "note"
+            ? "note"
+            : "");
+
+
+    widget.dataset.type =
+        type;
+
+
+    widget.id =
+        saved.id ||
+        "widget-" +
+        Date.now() +
+        "-" +
+        Math.floor(
+            Math.random() * 10000
+        );
+
+
+    const sizes = {
+
+        note:
+            [340,390],
+
+        day:
+            [350,190],
+
+        links:
+            [410,320],
+
+        clock:
+            [310,170],
+
+        timer:
+            [330,210],
+
+        image:
+            [480,350],
+
+        schedule:
+            [400,560]
+
+    };
+
+
+    const size =
+        sizes[type] ||
+        [330,220];
+
+
+    widget.style.left =
+        (saved.x ??
+        60 + Math.random()*250)
+        + "px";
+
+
+    widget.style.top =
+        (saved.y ??
+        50 + Math.random()*140)
+        + "px";
+
+
+    widget.style.width =
+        (saved.width ||
+        size[0])
+        + "px";
+
+
+    widget.style.height =
+        (saved.height ||
+        size[1])
+        + "px";
+
+
+    const data =
+        saved.data || {};
+
+
+    const titles = {
+
+        note:
+            "Anteckning",
+
+        day:
+            "Dagen",
+
+        links:
+            "Länkar",
+
+        clock:
+            "Klocka",
+
+        timer:
+            "Timer",
+
+        image:
+            "Bild",
+
+        schedule:
+            "Dagens schema"
+
+    };
+
+
+    let content = "";
+
+
+/* ========================= */
+/* ANTECKNING */
+/* ========================= */
+
+    if(type === "note") {
+
+        content = `
+
+<textarea
+data-k="text"
+placeholder="Gör en anteckning...">${data.text || ""}</textarea>
+
+        `;
+    }
+
+
+/* ========================= */
+/* DAGEN */
+/* ========================= */
+
+    if(type === "day") {
+
+        content = `
+
+<div class="today"></div>
+
+<div class="date"></div>
+
+        `;
+    }
+
+
+/* ========================= */
+/* LÄNKAR */
+/* ========================= */
+
+    if(type === "links") {
+
+        content =
+            '<div class="linksGrid">' +
+
+            linkList.map(link => `
+
+<a
+class="serviceLink"
+href="${link[2]}"
+target="_blank"
+rel="noopener noreferrer">
+
+${link[0]} ${link[1]}
+
+</a>
+
+            `).join("") +
+
+            "</div>";
+    }
+
+
+/* ========================= */
+/* KLOCKA */
+/* ========================= */
+
+    if(type === "clock") {
+
+        content = `
+
+<div class="clockText">
+--:--
+</div>
+
+        `;
+    }
+
+
+/* ========================= */
+/* TIMER */
+/* ========================= */
+
+    if(type === "timer") {
+
+        content = `
+
+<div class="timerNum">
+05:00
+</div>
+
+<div class="row">
+
+<input
+data-k="minutes"
+type="number"
+min="1"
+value="${data.minutes || 5}">
+
+<button class="action start">
+Start
+</button>
+
+<button class="action stop">
+Stopp
+</button>
+
+</div>
+
+        `;
+    }
+
+
+/* ========================= */
+/* BILD */
+/* ========================= */
+
+    if(type === "image") {
+
+        content = `
+
+<img alt="Infogad bild">
+
+        `;
+    }
+
+
+/* ========================= */
+/* SCHEMA */
+/* ========================= */
+
+    if(type === "schedule") {
+
+        content = `
+
+<div class="scheduleTop">
+
+<button class="addScheduleRow">
+＋ Rad
+</button>
+
+<label class="scheduleUpload">
+
+📷 Läs schema från bild
+
+<input
+class="scheduleImage"
+type="file"
+accept="image/*">
+
+</label>
+
+<button class="makePreview">
+Visa schema
+</button>
+
+</div>
+
+
+<div class="scheduleHint">
+
+Lägg snabbt till dagens lektioner,
+eller ladda upp en bild av elevernas schema.
+Du kan sedan kontrollera och ändra
+ämnen och tider.
+
+</div>
+
+
+<div class="scheduleRows"></div>
+
+<div class="ocrStatus"></div>
+
+<div class="schedulePreview"></div>
+
+        `;
+    }
+
+
+/* BYGG RUTAN */
+
+    widget.innerHTML = `
+
+<div class="head">
+
+<span>
+${titles[type]}
+</span>
+
+<button class="close">
+×
+</button>
+
+</div>
+
+<div class="body">
+
+${content}
+
+</div>
+
+    `;
+
+
+    board.appendChild(
+        widget
+    );
+
+
+    wire(
+        widget
+    );
+
+
+    makeDraggable(
+        widget
+    );
+
+
+    save();
+
+
+    return widget;
+}
+
+
+/* ========================= */
+/* WIDGET-FUNKTIONER */
+/* ========================= */
+
+function wire(widget) {
+
+
+/* STÄNG */
+
+    widget
+        .querySelector(".close")
+        .addEventListener(
+            "click",
+            () => {
+
+                if(widget._url) {
+
+                    URL.revokeObjectURL(
+                        widget._url
+                    );
+                }
+
+                widget.remove();
+
+                save();
+
+            }
+        );
+
+
+/* SPARA TEXT */
+
+    widget
+        .querySelectorAll("[data-k]")
+        .forEach(element => {
+
+            element.addEventListener(
+                "input",
+                save
+            );
+
+        });
+
+
+/* ========================= */
+/* DAGEN */
+/* ========================= */
+
+    if(
+        widget.dataset.type ===
+        "day"
+    ) {
+
+        const weekday =
+            widget.querySelector(
+                ".today"
+            );
+
+        const date =
+            widget.querySelector(
+                ".date"
+            );
+
+
+        function updateDay() {
+
+            const now =
+                new Date();
+
+
+            weekday.textContent =
+                now.toLocaleDateString(
+                    "sv-SE",
+                    {
+                        weekday:
+                            "long"
+                    }
+                );
+
+
+            date.textContent =
+                now.toLocaleDateString(
+                    "sv-SE",
+                    {
+                        day:
+                            "numeric",
+
+                        month:
+                            "long",
+
+                        year:
+                            "numeric"
+                    }
+                );
+        }
+
+
+        updateDay();
+
+        setInterval(
+            updateDay,
+            60000
+        );
+    }
+
+
+/* ========================= */
+/* KLOCKA */
+/* ========================= */
+
+    if(
+        widget.dataset.type ===
+        "clock"
+    ) {
+
+        const clock =
+            widget.querySelector(
+                ".clockText"
+            );
+
+
+        function updateClock() {
+
+            clock.textContent =
+                new Date()
+                .toLocaleTimeString(
+                    "sv-SE",
+                    {
+                        hour:
+                            "2-digit",
+
+                        minute:
+                            "2-digit",
+
+                        second:
+                            "2-digit"
+                    }
+                );
+        }
+
+
+        updateClock();
+
+        setInterval(
+            updateClock,
+            1000
+        );
+    }
+
+
+/* ========================= */
+/* TIMER */
+/* ========================= */
+
+    if(
+        widget.dataset.type ===
+        "timer"
+    ) {
+
+        let timer = null;
+
+        let seconds = 0;
+
+
+        const output =
+            widget.querySelector(
+                ".timerNum"
+            );
+
+
+        const input =
+            widget.querySelector(
+                '[data-k="minutes"]'
+            );
+
+
+        function drawTimer() {
+
+            const minutes =
+                Math.floor(
+                    seconds / 60
+                );
+
+
+            const remaining =
+                seconds % 60;
+
+
+            output.textContent =
+                String(minutes)
+                    .padStart(2,"0")
+                +
+                ":"
+                +
+                String(remaining)
+                    .padStart(2,"0");
+        }
+
+
+        widget
+            .querySelector(".start")
+            .addEventListener(
+                "click",
+                () => {
+
+                    clearInterval(
+                        timer
+                    );
+
+
+                    seconds =
+                        Math.max(
+                            1,
+                            Number(
+                                input.value
+                            ) || 5
+                        )
+                        * 60;
+
+
+                    drawTimer();
+
+
+                    timer =
+                        setInterval(
+                            () => {
+
+                                seconds--;
+
+                                drawTimer();
+
+
+                                if(
+                                    seconds <= 0
+                                ) {
+
+                                    clearInterval(
+                                        timer
+                                    );
+
+                                    alert(
+                                        "Tiden är slut!"
+                                    );
+                                }
+
+                            },
+                            1000
+                        );
+                }
+            );
+
+
+        widget
+            .querySelector(".stop")
+            .addEventListener(
+                "click",
+                () => {
+
+                    clearInterval(
+                        timer
+                    );
+
+                }
+            );
+    }
+
+
+/* ========================= */
+/* SCHEMA */
+/* ========================= */
+
+    if(
+        widget.dataset.type ===
+        "schedule"
+    ) {
+
+        const rows =
+            widget.querySelector(
+                ".scheduleRows"
+            );
+
+
+        const status =
+            widget.querySelector(
+                ".ocrStatus"
+            );
+
+
+        const icons = {
+
+            svenska:
+                "🇸🇪",
+
+            sva:
+                "🇸🇪",
+
+            matte:
+                "➗",
+
+            matematik:
+                "➗",
+
+            so:
+                "🌍",
+
+            geografi:
+                "🌍",
+
+            historia:
+                "🏰",
+
+            religion:
+                "🕊️",
+
+            no:
+                "🔬",
+
+            engelska:
+                "🇬🇧",
+
+            musik:
+                "🎵",
+
+            bild:
+                "🎨",
+
+            idrott:
+                "⚽",
+
+            rast:
+                "🛝",
+
+            lunch:
+                "🍽️",
+
+            slöjd:
+                "🧵"
+
+        };
+
+
+        function iconFor(text) {
+
+            const value =
+                text.toLowerCase();
+
+
+            for(
+                const key in icons
+            ) {
+
+                if(
+                    value.includes(key)
+                ) {
+
+                    return icons[key];
+                }
+            }
+
+
+            return "📘";
+        }
+
+
+        function addRow(
+            subject = "",
+            time = ""
+        ) {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "scheduleRow";
+
+
+            row.innerHTML = `
+
+<div class="scheduleIcon">
+
+${iconFor(subject)}
+
+</div>
+
+
+<input
+class="schSubject"
+placeholder="Ämne eller aktivitet"
+value="${subject}">
+
+
+<input
+class="schTime"
+placeholder="08:10–09:00"
+value="${time}">
+
+
+<button class="del">
+×
+</button>
+
+            `;
+
+
+            const subjectInput =
+                row.querySelector(
+                    ".schSubject"
+                );
+
+
+            subjectInput.addEventListener(
+                "input",
+                () => {
+
+                    row
+                        .querySelector(
+                            ".scheduleIcon"
+                        )
+                        .textContent =
+                        iconFor(
+                            subjectInput.value
+                        );
+
+                }
+            );
+
+
+            row
+                .querySelector(".del")
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        row.remove();
+
+                    }
+                );
+
+
+            rows.appendChild(
+                row
+            );
+        }
+
+
+        function preview() {
+
+            const allRows =
+                [...rows.querySelectorAll(
+                    ".scheduleRow"
+                )];
+
+
+            const html =
+                allRows.map(row => {
+
+
+                    const icon =
+                        row.querySelector(
+                            ".scheduleIcon"
+                        ).textContent;
+
+
+                    const subject =
+                        row.querySelector(
+                            ".schSubject"
+                        ).value ||
+                        "Aktivitet";
+
+
+                    const time =
+                        row.querySelector(
+                            ".schTime"
+                        ).value;
+
+
+                    return `
+
+<div class="scheduleCard">
+
+<div class="pic">
+${icon}
+</div>
+
+<div class="subject">
+${subject}
+</div>
+
+<div class="time">
+${time}
+</div>
+
+</div>
+
+                    `;
+
+                }).join("");
+
+
+            widget
+                .querySelector(
+                    ".schedulePreview"
+                )
+                .innerHTML =
+                html;
+        }
+
+
+/* LÄGG TILL RAD */
+
+        widget
+            .querySelector(
+                ".addScheduleRow"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    addRow();
+
+                }
+            );
+
+
+/* VISA */
+
+        widget
+            .querySelector(
+                ".makePreview"
+            )
+            .addEventListener(
+                "click",
+                preview
+            );
+
+
+/* EXEMPELRADER */
+
+        addRow(
+            "SO",
+            "08:10–09:00"
+        );
+
+        addRow(
+            "Rast",
+            "09:00–09:20"
+        );
+
+        addRow(
+            "Matematik",
+            "09:20–10:10"
+        );
+
+        addRow(
+            "Lunch",
+            "11:20–12:00"
+        );
+
+
+/* ========================= */
+/* LÄS SCHEMA FRÅN BILD */
+/* ========================= */
+
+        const scheduleImage =
+            widget.querySelector(
+                ".scheduleImage"
+            );
+
+
+        scheduleImage
+            .addEventListener(
+                "change",
+                async event => {
+
+
+                    const file =
+                        event.target.files[0];
+
+
+                    if(!file) {
+
+                        return;
+                    }
+
+
+                    status.textContent =
+                        "Läser bilden...";
+
+
+                    try {
+
+
+/* LADDA OCR-BIBLIOTEK */
+
+                        if(
+                            !window.Tesseract
+                        ) {
+
+                            await new Promise(
+                                (
+                                    resolve,
+                                    reject
+                                ) => {
+
+                                    const script =
+                                        document.createElement(
+                                            "script"
+                                        );
+
+
+                                    script.src =
+"https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+
+
+                                    script.onload =
+                                        resolve;
+
+
+                                    script.onerror =
+                                        reject;
+
+
+                                    document.head
+                                        .appendChild(
+                                            script
+                                        );
+
+                                }
+                            );
+                        }
+
+
+                        status.textContent =
+                            "Tolkar schema...";
+
+
+                        const result =
+                            await Tesseract.recognize(
+                                file,
+                                "swe+eng"
+                            );
+
+
+                        const text =
+                            result.data.text ||
+                            "";
+
+
+                        const lines =
+                            text
+                            .split(/\n/)
+                            .map(
+                                line =>
+                                line.trim()
+                            )
+                            .filter(Boolean);
+
+
+                        const knownSubjects = [
+
+                            "Svenska",
+                            "SvA",
+                            "Matematik",
+                            "Matte",
+                            "SO",
+                            "Geografi",
+                            "Historia",
+                            "Religion",
+                            "NO",
+                            "Engelska",
+                            "Musik",
+                            "Bild",
+                            "Idrott",
+                            "Rast",
+                            "Lunch",
+                            "Slöjd"
+
+                        ];
+
+
+                        rows.innerHTML =
+                            "";
+
+
+                        for(
+                            const line of lines
+                        ) {
+
+                            const lower =
+                                line.toLowerCase();
+
+
+                            const subject =
+                                knownSubjects.find(
+                                    item =>
+                                    lower.includes(
+                                        item.toLowerCase()
+                                    )
+                                );
+
+
+                            if(!subject) {
+
+                                continue;
+                            }
+
+
+                            const timeMatch =
+                                line.match(
+/(\d{1,2}[:.]\d{2})\s*[-–—]?\s*(\d{1,2}[:.]\d{2})?/
+                                );
+
+
+                            let time =
+                                "";
+
+
+                            if(timeMatch) {
+
+                                time =
+                                    timeMatch[1]
+                                    .replace(
+                                        ".",
+                                        ":"
+                                    );
+
+
+                                if(
+                                    timeMatch[2]
+                                ) {
+
+                                    time +=
+                                        "–" +
+                                        timeMatch[2]
+                                        .replace(
+                                            ".",
+                                            ":"
+                                        );
+                                }
+                            }
+
+
+                            addRow(
+                                subject,
+                                time
+                            );
+                        }
+
+
+                        if(
+                            !rows.children.length
+                        ) {
+
+                            addRow();
+
+
+                            status.textContent =
+                                "Jag kunde inte läsa schemat säkert. Lägg till eller rätta raderna manuellt.";
+
+                        }
+
+                        else {
+
+                            status.textContent =
+                                "Klart! Kontrollera ämnen och tider och tryck sedan Visa schema.";
+
+                        }
+
+
+                        preview();
+
+                    }
+
+                    catch(error) {
+
+                        console.log(
+                            error
+                        );
+
+
+                        status.textContent =
+                            "Bildläsningen kunde inte starta. Du kan fortfarande skapa schemat med ＋ Rad.";
+
+                    }
+
+
+                    event.target.value =
+                        "";
+
+                }
+            );
+    }
+
+}
+
+
+/* ========================= */
+/* FLYTTA WIDGET */
+/* ========================= */
+
+function makeDraggable(widget) {
+
+
+    const handle =
+        widget.querySelector(
+            ".head"
+        );
+
+
+    let dragging =
+        false;
+
+
+    let startX =
+        0;
+
+
+    let startY =
+        0;
+
+
+    let originalX =
+        0;
+
+
+    let originalY =
+        0;
+
+
+    handle.addEventListener(
+        "pointerdown",
+        event => {
+
+
+            if(
+                event.target
+                .closest("button")
+            ) {
+
+                return;
+            }
+
+
+            dragging =
+                true;
+
+
+            startX =
+                event.clientX;
+
+
+            startY =
+                event.clientY;
+
+
+            originalX =
+                widget.offsetLeft;
+
+
+            originalY =
+                widget.offsetTop;
+
+
+            handle.setPointerCapture(
+                event.pointerId
+            );
+
+        }
+    );
+
+
+    handle.addEventListener(
+        "pointermove",
+        event => {
+
+
+            if(!dragging) {
+
+                return;
+            }
+
+
+            widget.style.left =
+                Math.max(
+                    0,
+                    originalX +
+                    event.clientX -
+                    startX
+                )
+                + "px";
+
+
+            widget.style.top =
+                Math.max(
+                    0,
+                    originalY +
+                    event.clientY -
+                    startY
+                )
+                + "px";
+
+        }
+    );
+
+
+    handle.addEventListener(
+        "pointerup",
+        () => {
+
+            dragging =
+                false;
+
+            save();
+
+        }
+    );
+
+
+    new ResizeObserver(
+        save
+    ).observe(
+        widget
+    );
+
+}
+
+
+/* ========================= */
+/* KNAPPAR */
+/* ========================= */
+
+document
+.getElementById("btnNote")
+.addEventListener(
+    "click",
+    () => add("note")
+);
+
+
+document
+.getElementById("btnDay")
+.addEventListener(
+    "click",
+    () => add("day")
+);
+
+
+document
+.getElementById("btnLinks")
+.addEventListener(
+    "click",
+    () => add("links")
+);
+
+
+document
+.getElementById("btnClock")
+.addEventListener(
+    "click",
+    () => add("clock")
+);
+
+
+document
+.getElementById("btnTimer")
+.addEventListener(
+    "click",
+    () => add("timer")
+);
+
+
+/* ========================= */
+/* SCHEMA */
+/* ========================= */
+
+document
+.getElementById("btnSchedule")
+.addEventListener(
+    "click",
+    () => {
+
+        add("schedule");
+
+    }
+);
+
+
+/* ========================= */
+/* BILD */
+/* ========================= */
+
+document
+.getElementById("btnImage")
+.addEventListener(
+    "click",
+    () => {
+
+        imageFile.click();
+
+    }
+);
+
+
+imageFile.addEventListener(
+    "change",
+    event => {
+
+
+        const file =
+            event.target.files[0];
+
+
+        if(!file) {
+
+            return;
+        }
+
+
+        const widget =
+            add("image");
+
+
+        const url =
+            URL.createObjectURL(
+                file
+            );
+
+
+        widget._url =
+            url;
+
+
+        widget
+            .querySelector("img")
+            .src =
+            url;
+
+
+        event.target.value =
+            "";
+
+    }
+);
+
+
+/* ========================= */
+/* BAKGRUND */
+/* ========================= */
+
+/*
+VIKTIG ÄNDRING:
+
+Bakgrundsknappen är nu en vanlig knapp.
+Den öppnar den dolda filväljaren direkt.
+
+Detta är stabilare än att använda
+ett label-element runt input.
+*/
+
+document
+.getElementById(
+    "btnBackground"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        bgFile.click();
+
+    }
+);
+
+
+bgFile.addEventListener(
+    "change",
+    event => {
+
+
+        const file =
+            event.target.files[0];
+
+
+        if(!file) {
+
+            return;
+        }
+
+
+/* TA BORT GAMMAL OBJECT URL */
+
+        if(backgroundURL) {
+
+            URL.revokeObjectURL(
+                backgroundURL
+            );
+        }
+
+
+/* SKAPA NY */
+
+        backgroundURL =
+            URL.createObjectURL(
+                file
+            );
+
+
+/* NOLLSTÄLL GAMMAL BAKGRUND */
+
+        document.body
+            .style
+            .backgroundImage =
+            "none";
+
+
+        bgVideo.pause();
+
+
+        bgVideo.style.display =
+            "none";
+
+
+        bgVideo.removeAttribute(
+            "src"
+        );
+
+
+/* ========================= */
+/* BILD / GIF */
+/* ========================= */
+
+        if(
+            file.type
+            .startsWith("image/")
+        ) {
+
+            document.body
+                .style
+                .backgroundImage =
+                'url("' +
+                backgroundURL +
+                '")';
+
+
+            document.body
+                .style
+                .backgroundSize =
+                "cover";
+
+
+            document.body
+                .style
+                .backgroundPosition =
+                "center";
+
+
+            document.body
+                .style
+                .backgroundRepeat =
+                "no-repeat";
+
+        }
+
+
+/* ========================= */
+/* VIDEO */
+/* ========================= */
+
+        else if(
+            file.type
+            .startsWith("video/")
+        ) {
+
+            bgVideo.src =
+                backgroundURL;
+
+
+            bgVideo.style.display =
+                "block";
+
+
+            bgVideo.load();
+
+
+            const playPromise =
+                bgVideo.play();
+
+
+            if(
+                playPromise !==
+                undefined
+            ) {
+
+                playPromise.catch(
+                    error => {
+
+                        console.log(
+                            "Videon väntar på användarklick."
+                        );
+
+                    }
+                );
+            }
+        }
+
+
+        else {
+
+            alert(
+                "Den här filtypen kan inte användas som bakgrund."
+            );
+        }
+
+
+        event.target.value =
+            "";
+
+    }
+);
+
+
+/* ========================= */
+/* ÅTERSKAPA SPARADE RUTOR */
+/* ========================= */
+
+if(
+    state.widgets &&
+    Array.isArray(
+        state.widgets
+    )
+) {
+
+    state.widgets
+        .forEach(
+            savedWidget => {
+
+                add(
+                    savedWidget.type,
+                    savedWidget
+                );
+
+            }
+        );
+}
+
+</script>
+
+</body>
+</html>
