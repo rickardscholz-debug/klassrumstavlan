@@ -30,11 +30,11 @@ input,textarea{font:inherit}
 <div id="board"></div>
 
 <div class="toolbar">
-<button class="tool" data-add="note"><span class="ico">📝</span><span>Anteckning</span></button>
-<button class="tool" data-add="day"><span class="ico">📅</span><span>Dagen</span></button>
-<button class="tool" data-add="links"><span class="ico">🔗</span><span>Länkar</span></button>
-<button class="tool" data-add="clock"><span class="ico">🕒</span><span>Klocka</span></button>
-<button class="tool" data-add="timer"><span class="ico">⌛</span><span>Timer</span></button>
+<button class="tool" id="btnNote" data-add="note"><span class="ico">📝</span><span>Anteckning</span></button>
+<button class="tool" id="btnDay" data-add="day"><span class="ico">📅</span><span>Dagen</span></button>
+<button class="tool" id="btnLinks" data-add="links"><span class="ico">🔗</span><span>Länkar</span></button>
+<button class="tool" id="btnClock" data-add="clock"><span class="ico">🕒</span><span>Klocka</span></button>
+<button class="tool" id="btnTimer" data-add="timer"><span class="ico">⌛</span><span>Timer</span></button>
 <label class="tool filetool"><span class="ico">🖼️</span><span>Bild</span><input id="imageFile" type="file" accept="image/*"></label>
 <label class="tool filetool"><span class="ico">🏞️</span><span>Bakgrund</span><input id="bgFile" type="file" accept="image/*,video/mp4,video/webm,video/ogg"></label>
 <button class="tool" id="more"><span class="ico">▦</span><span>Mer</span></button>
@@ -48,9 +48,11 @@ input,textarea{font:inherit}
 
 <script>
 const board=document.querySelector('#board'), KEY='klassrumstavlan-v5', bgVideo=document.querySelector('#bgVideo');
-let state=JSON.parse(localStorage.getItem(KEY)||'{"widgets":[]}'), bgURL=null;
+let state={widgets:[]}, bgURL=null;
+try { state=JSON.parse(localStorage.getItem(KEY)||'{"widgets":[]}'); }
+catch(e) { state={widgets:[]}; localStorage.removeItem(KEY); }
 const linkList=[
- ['🧩','Skolon','https://skolon.com/sv/hem/'],
+ ['🧩','Skolon','https://skolon.com/'],
  ['▶️','UR Play','https://urplay.se/'],
  ['📺','SVT Play','https://www.svtplay.se/'],
  ['🎬','SLI','https://sliplay.se/'],
@@ -83,7 +85,11 @@ function wire(w){
  if(w.dataset.type==='timer'){let t=null,left=0,out=w.querySelector('.timerNum');let draw=()=>out.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');w.querySelector('.start').onclick=()=>{clearInterval(t);left=Math.max(1,+w.querySelector('[data-k=minutes]').value||5)*60;draw();t=setInterval(()=>{left--;draw();if(left<=0){clearInterval(t);alert('Tiden är slut!')}},1000)};w.querySelector('.stop').onclick=()=>clearInterval(t)}
 }
 function drag(w){let h=w.querySelector('.head'),on=false,sx,sy,ox,oy;h.onpointerdown=e=>{if(e.target.closest('button'))return;on=true;sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;h.setPointerCapture(e.pointerId)};h.onpointermove=e=>{if(on){w.style.left=Math.max(0,ox+e.clientX-sx)+'px';w.style.top=Math.max(0,oy+e.clientY-sy)+'px'}};h.onpointerup=()=>{on=false;save()};new ResizeObserver(save).observe(w)}
-document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(b.dataset.add));
+document.getElementById('btnNote').addEventListener('click',()=>add('note'));
+document.getElementById('btnDay').addEventListener('click',()=>add('day'));
+document.getElementById('btnLinks').addEventListener('click',()=>add('links'));
+document.getElementById('btnClock').addEventListener('click',()=>add('clock'));
+document.getElementById('btnTimer').addEventListener('click',()=>add('timer'));
 function fileWidget(id,type,sel){document.querySelector(id).onchange=e=>{let f=e.target.files[0];if(!f)return,w=add(type),u=URL.createObjectURL(f);w._url=u;w.querySelector(sel).src=u;if(type==='video')w.querySelector(sel).load();e.target.value=''}}
 fileWidget('#imageFile','image','img');fileWidget('#videoFile','video','video');fileWidget('#pdfFile','pdf','iframe');
 document.querySelector('#bgFile').onchange=e=>{let f=e.target.files[0];if(!f)return;if(bgURL)URL.revokeObjectURL(bgURL);bgURL=URL.createObjectURL(f);document.body.style.backgroundImage='none';bgVideo.pause();bgVideo.style.display='none';bgVideo.removeAttribute('src');if(f.type.startsWith('image/'))document.body.style.backgroundImage=`url("${bgURL}")`;else if(f.type.startsWith('video/')){bgVideo.src=bgURL;bgVideo.style.display='block';bgVideo.load();bgVideo.play().catch(()=>{})}e.target.value=''};
