@@ -139,7 +139,7 @@ body {
 
 .linksGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2,1fr);
     gap: 10px;
 }
 
@@ -164,15 +164,25 @@ body {
 
 /* BILDER */
 
-.imageWidget .body {
+.imageWidget .body,
+.scheduleWidget .body {
     padding: 0;
     background: #111;
 }
 
-.imageWidget img {
+.imageWidget img,
+.scheduleWidget img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
+}
+
+/* SCHEMA */
+
+.scheduleWidget {
+    min-width: 300px;
+    min-height: 300px;
 }
 
 /* TIMER */
@@ -207,122 +217,7 @@ button.action {
     cursor: pointer;
 }
 
-/* ========================= */
-/* SCHEMA */
-/* ========================= */
-
-.scheduleWidget {
-    min-width: 350px;
-    min-height: 480px;
-}
-
-.scheduleWidget .body {
-    background: white;
-    padding: 12px;
-}
-
-.scheduleTop {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-.scheduleTop button,
-.scheduleUpload {
-    border: 0;
-    border-radius: 9px;
-    background: #eef2f7;
-    padding: 9px 10px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.scheduleUpload input {
-    display: none;
-}
-
-.scheduleHint {
-    font-size: 12px;
-    color: #64748b;
-    margin: 5px 0 10px;
-    line-height: 1.4;
-}
-
-.scheduleRows {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.scheduleRow {
-    display: grid;
-    grid-template-columns: 50px 1fr 100px 32px;
-    gap: 6px;
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 6px;
-}
-
-.scheduleIcon {
-    font-size: 28px;
-    text-align: center;
-}
-
-.scheduleRow input {
-    width: 100%;
-    border: 1px solid #cbd5e1;
-    border-radius: 7px;
-    padding: 7px;
-}
-
-.scheduleRow .del {
-    border: 0;
-    background: transparent;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.schedulePreview {
-    margin-top: 12px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 9px;
-}
-
-.scheduleCard {
-    display: grid;
-    grid-template-columns: 48px 1fr auto;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 2px solid #334155;
-    padding: 8px 3px;
-}
-
-.scheduleCard .pic {
-    font-size: 30px;
-    text-align: center;
-}
-
-.scheduleCard .subject {
-    font-weight: 800;
-}
-
-.scheduleCard .time {
-    font-weight: 700;
-    color: #475569;
-}
-
-.ocrStatus {
-    font-size: 12px;
-    color: #475569;
-    margin-top: 7px;
-}
-
-/* ========================= */
 /* VERKTYGSRAD */
-/* ========================= */
 
 .toolbar {
     position: fixed;
@@ -368,8 +263,6 @@ button.action {
     line-height: 27px;
 }
 
-/* DÖLJ FILINPUT */
-
 .hiddenFile {
     display: none;
 }
@@ -392,17 +285,12 @@ button.action {
 
 <body>
 
-<!-- VIDEO SOM BAKGRUND -->
-
 <video
     id="bgVideo"
     muted
     loop
     playsinline>
 </video>
-
-
-<!-- ARBETSYTA -->
 
 <div id="board"></div>
 
@@ -421,88 +309,72 @@ button.action {
     type="file"
     accept="image/*,video/mp4,video/webm,video/ogg">
 
+<!--
+SCHEMA:
+multiple gör att du kan välja flera schemabilder
+från samma mapp samtidigt.
+-->
 
-<!-- ======================= -->
+<input
+    id="scheduleFile"
+    class="hiddenFile"
+    type="file"
+    accept="image/*"
+    multiple>
+
+
 <!-- VERKTYGSRAD -->
-<!-- ======================= -->
 
 <div class="toolbar">
 
-
 <button class="tool" id="btnNote">
-
     <span class="ico">📝</span>
     <span>Anteckning</span>
-
 </button>
-
 
 <button class="tool" id="btnDay">
-
     <span class="ico">📅</span>
     <span>Dagen</span>
-
 </button>
-
 
 <button class="tool" id="btnLinks">
-
     <span class="ico">🔗</span>
     <span>Länkar</span>
-
 </button>
-
 
 <button class="tool" id="btnClock">
-
     <span class="ico">🕒</span>
     <span>Klocka</span>
-
 </button>
-
 
 <button class="tool" id="btnTimer">
-
     <span class="ico">⌛</span>
     <span>Timer</span>
-
 </button>
-
 
 <button class="tool" id="btnImage">
-
     <span class="ico">🖼️</span>
     <span>Bild</span>
-
 </button>
-
 
 <button class="tool" id="btnBackground">
-
     <span class="ico">🏞️</span>
     <span>Bakgrund</span>
-
 </button>
-
-
-<!-- ÖVRIGT ÄR BORTTAGET -->
 
 <button class="tool" id="btnSchedule">
-
     <span class="ico">📋</span>
     <span>Schema</span>
-
 </button>
-
 
 </div>
 
 
 <script>
 
-/* ========================= */
-/* GRUND */
-/* ========================= */
+/* =========================
+   GRUND
+========================= */
 
 const board =
     document.getElementById("board");
@@ -516,9 +388,11 @@ const imageFile =
 const bgFile =
     document.getElementById("bgFile");
 
+const scheduleFile =
+    document.getElementById("scheduleFile");
 
 const KEY =
-    "klassrumstavlan-v9";
+    "klassrumstavlan-v10";
 
 
 let state = {
@@ -549,9 +423,9 @@ catch(error) {
 let backgroundURL = null;
 
 
-/* ========================= */
-/* LÄNKAR */
-/* ========================= */
+/* =========================
+   LÄNKAR
+========================= */
 
 const linkList = [
 
@@ -588,9 +462,9 @@ const linkList = [
 ];
 
 
-/* ========================= */
-/* SPARA */
-/* ========================= */
+/* =========================
+   SPARA
+========================= */
 
 function collect(widget) {
 
@@ -613,9 +487,25 @@ function save() {
 
     state.widgets =
         [...document.querySelectorAll(".widget")]
+        .filter(widget => {
+
+            /*
+            Lokalt uppladdade bilder sparas inte mellan
+            fullständiga omladdningar eftersom webbläsaren
+            inte tillåter att sidan sparar åtkomst till
+            användarens filer.
+            */
+
+            return (
+                widget.dataset.type !== "image" &&
+                widget.dataset.type !== "schedule"
+            );
+
+        })
         .map(widget => ({
 
-            id: widget.id,
+            id:
+                widget.id,
 
             type:
                 widget.dataset.type,
@@ -656,12 +546,11 @@ function save() {
 }
 
 
-/* ========================= */
-/* SKAPA WIDGET */
-/* ========================= */
+/* =========================
+   SKAPA WIDGET
+========================= */
 
 function add(type, saved = {}) {
-
 
     const widget =
         document.createElement("section");
@@ -711,7 +600,7 @@ function add(type, saved = {}) {
             [480,350],
 
         schedule:
-            [400,560]
+            [500,600]
 
     };
 
@@ -778,9 +667,7 @@ function add(type, saved = {}) {
     let content = "";
 
 
-/* ========================= */
 /* ANTECKNING */
-/* ========================= */
 
     if(type === "note") {
 
@@ -794,9 +681,7 @@ placeholder="Gör en anteckning...">${data.text || ""}</textarea>
     }
 
 
-/* ========================= */
 /* DAGEN */
-/* ========================= */
 
     if(type === "day") {
 
@@ -810,9 +695,7 @@ placeholder="Gör en anteckning...">${data.text || ""}</textarea>
     }
 
 
-/* ========================= */
 /* LÄNKAR */
-/* ========================= */
 
     if(type === "links") {
 
@@ -837,9 +720,7 @@ ${link[0]} ${link[1]}
     }
 
 
-/* ========================= */
 /* KLOCKA */
-/* ========================= */
 
     if(type === "clock") {
 
@@ -853,9 +734,7 @@ ${link[0]} ${link[1]}
     }
 
 
-/* ========================= */
 /* TIMER */
-/* ========================= */
 
     if(type === "timer") {
 
@@ -887,9 +766,7 @@ Stopp
     }
 
 
-/* ========================= */
 /* BILD */
-/* ========================= */
 
     if(type === "image") {
 
@@ -901,59 +778,17 @@ Stopp
     }
 
 
-/* ========================= */
-/* SCHEMA */
-/* ========================= */
+/* SCHEMABILD */
 
     if(type === "schedule") {
 
         content = `
 
-<div class="scheduleTop">
-
-<button class="addScheduleRow">
-＋ Rad
-</button>
-
-<label class="scheduleUpload">
-
-📷 Läs schema från bild
-
-<input
-class="scheduleImage"
-type="file"
-accept="image/*">
-
-</label>
-
-<button class="makePreview">
-Visa schema
-</button>
-
-</div>
-
-
-<div class="scheduleHint">
-
-Lägg snabbt till dagens lektioner,
-eller ladda upp en bild av elevernas schema.
-Du kan sedan kontrollera och ändra
-ämnen och tider.
-
-</div>
-
-
-<div class="scheduleRows"></div>
-
-<div class="ocrStatus"></div>
-
-<div class="schedulePreview"></div>
+<img alt="Dagens schema">
 
         `;
     }
 
-
-/* BYGG RUTAN */
 
     widget.innerHTML = `
 
@@ -1000,9 +835,9 @@ ${content}
 }
 
 
-/* ========================= */
-/* WIDGET-FUNKTIONER */
-/* ========================= */
+/* =========================
+   WIDGET-FUNKTIONER
+========================= */
 
 function wire(widget) {
 
@@ -1044,9 +879,7 @@ function wire(widget) {
         });
 
 
-/* ========================= */
 /* DAGEN */
-/* ========================= */
 
     if(
         widget.dataset.type ===
@@ -1106,9 +939,7 @@ function wire(widget) {
     }
 
 
-/* ========================= */
 /* KLOCKA */
-/* ========================= */
 
     if(
         widget.dataset.type ===
@@ -1150,18 +981,18 @@ function wire(widget) {
     }
 
 
-/* ========================= */
 /* TIMER */
-/* ========================= */
 
     if(
         widget.dataset.type ===
         "timer"
     ) {
 
-        let timer = null;
+        let timer =
+            null;
 
-        let seconds = 0;
+        let seconds =
+            0;
 
 
         const output =
@@ -1190,12 +1021,12 @@ function wire(widget) {
 
             output.textContent =
                 String(minutes)
-                    .padStart(2,"0")
+                .padStart(2,"0")
                 +
                 ":"
                 +
                 String(remaining)
-                    .padStart(2,"0");
+                .padStart(2,"0");
         }
 
 
@@ -1266,545 +1097,14 @@ function wire(widget) {
             );
     }
 
-
-/* ========================= */
-/* SCHEMA */
-/* ========================= */
-
-    if(
-        widget.dataset.type ===
-        "schedule"
-    ) {
-
-        const rows =
-            widget.querySelector(
-                ".scheduleRows"
-            );
-
-
-        const status =
-            widget.querySelector(
-                ".ocrStatus"
-            );
-
-
-        const icons = {
-
-            svenska:
-                "🇸🇪",
-
-            sva:
-                "🇸🇪",
-
-            matte:
-                "➗",
-
-            matematik:
-                "➗",
-
-            so:
-                "🌍",
-
-            geografi:
-                "🌍",
-
-            historia:
-                "🏰",
-
-            religion:
-                "🕊️",
-
-            no:
-                "🔬",
-
-            engelska:
-                "🇬🇧",
-
-            musik:
-                "🎵",
-
-            bild:
-                "🎨",
-
-            idrott:
-                "⚽",
-
-            rast:
-                "🛝",
-
-            lunch:
-                "🍽️",
-
-            slöjd:
-                "🧵"
-
-        };
-
-
-        function iconFor(text) {
-
-            const value =
-                text.toLowerCase();
-
-
-            for(
-                const key in icons
-            ) {
-
-                if(
-                    value.includes(key)
-                ) {
-
-                    return icons[key];
-                }
-            }
-
-
-            return "📘";
-        }
-
-
-        function addRow(
-            subject = "",
-            time = ""
-        ) {
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "scheduleRow";
-
-
-            row.innerHTML = `
-
-<div class="scheduleIcon">
-
-${iconFor(subject)}
-
-</div>
-
-
-<input
-class="schSubject"
-placeholder="Ämne eller aktivitet"
-value="${subject}">
-
-
-<input
-class="schTime"
-placeholder="08:10–09:00"
-value="${time}">
-
-
-<button class="del">
-×
-</button>
-
-            `;
-
-
-            const subjectInput =
-                row.querySelector(
-                    ".schSubject"
-                );
-
-
-            subjectInput.addEventListener(
-                "input",
-                () => {
-
-                    row
-                        .querySelector(
-                            ".scheduleIcon"
-                        )
-                        .textContent =
-                        iconFor(
-                            subjectInput.value
-                        );
-
-                }
-            );
-
-
-            row
-                .querySelector(".del")
-                .addEventListener(
-                    "click",
-                    () => {
-
-                        row.remove();
-
-                    }
-                );
-
-
-            rows.appendChild(
-                row
-            );
-        }
-
-
-        function preview() {
-
-            const allRows =
-                [...rows.querySelectorAll(
-                    ".scheduleRow"
-                )];
-
-
-            const html =
-                allRows.map(row => {
-
-
-                    const icon =
-                        row.querySelector(
-                            ".scheduleIcon"
-                        ).textContent;
-
-
-                    const subject =
-                        row.querySelector(
-                            ".schSubject"
-                        ).value ||
-                        "Aktivitet";
-
-
-                    const time =
-                        row.querySelector(
-                            ".schTime"
-                        ).value;
-
-
-                    return `
-
-<div class="scheduleCard">
-
-<div class="pic">
-${icon}
-</div>
-
-<div class="subject">
-${subject}
-</div>
-
-<div class="time">
-${time}
-</div>
-
-</div>
-
-                    `;
-
-                }).join("");
-
-
-            widget
-                .querySelector(
-                    ".schedulePreview"
-                )
-                .innerHTML =
-                html;
-        }
-
-
-/* LÄGG TILL RAD */
-
-        widget
-            .querySelector(
-                ".addScheduleRow"
-            )
-            .addEventListener(
-                "click",
-                () => {
-
-                    addRow();
-
-                }
-            );
-
-
-/* VISA */
-
-        widget
-            .querySelector(
-                ".makePreview"
-            )
-            .addEventListener(
-                "click",
-                preview
-            );
-
-
-/* EXEMPELRADER */
-
-        addRow(
-            "SO",
-            "08:10–09:00"
-        );
-
-        addRow(
-            "Rast",
-            "09:00–09:20"
-        );
-
-        addRow(
-            "Matematik",
-            "09:20–10:10"
-        );
-
-        addRow(
-            "Lunch",
-            "11:20–12:00"
-        );
-
-
-/* ========================= */
-/* LÄS SCHEMA FRÅN BILD */
-/* ========================= */
-
-        const scheduleImage =
-            widget.querySelector(
-                ".scheduleImage"
-            );
-
-
-        scheduleImage
-            .addEventListener(
-                "change",
-                async event => {
-
-
-                    const file =
-                        event.target.files[0];
-
-
-                    if(!file) {
-
-                        return;
-                    }
-
-
-                    status.textContent =
-                        "Läser bilden...";
-
-
-                    try {
-
-
-/* LADDA OCR-BIBLIOTEK */
-
-                        if(
-                            !window.Tesseract
-                        ) {
-
-                            await new Promise(
-                                (
-                                    resolve,
-                                    reject
-                                ) => {
-
-                                    const script =
-                                        document.createElement(
-                                            "script"
-                                        );
-
-
-                                    script.src =
-"https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-
-
-                                    script.onload =
-                                        resolve;
-
-
-                                    script.onerror =
-                                        reject;
-
-
-                                    document.head
-                                        .appendChild(
-                                            script
-                                        );
-
-                                }
-                            );
-                        }
-
-
-                        status.textContent =
-                            "Tolkar schema...";
-
-
-                        const result =
-                            await Tesseract.recognize(
-                                file,
-                                "swe+eng"
-                            );
-
-
-                        const text =
-                            result.data.text ||
-                            "";
-
-
-                        const lines =
-                            text
-                            .split(/\n/)
-                            .map(
-                                line =>
-                                line.trim()
-                            )
-                            .filter(Boolean);
-
-
-                        const knownSubjects = [
-
-                            "Svenska",
-                            "SvA",
-                            "Matematik",
-                            "Matte",
-                            "SO",
-                            "Geografi",
-                            "Historia",
-                            "Religion",
-                            "NO",
-                            "Engelska",
-                            "Musik",
-                            "Bild",
-                            "Idrott",
-                            "Rast",
-                            "Lunch",
-                            "Slöjd"
-
-                        ];
-
-
-                        rows.innerHTML =
-                            "";
-
-
-                        for(
-                            const line of lines
-                        ) {
-
-                            const lower =
-                                line.toLowerCase();
-
-
-                            const subject =
-                                knownSubjects.find(
-                                    item =>
-                                    lower.includes(
-                                        item.toLowerCase()
-                                    )
-                                );
-
-
-                            if(!subject) {
-
-                                continue;
-                            }
-
-
-                            const timeMatch =
-                                line.match(
-/(\d{1,2}[:.]\d{2})\s*[-–—]?\s*(\d{1,2}[:.]\d{2})?/
-                                );
-
-
-                            let time =
-                                "";
-
-
-                            if(timeMatch) {
-
-                                time =
-                                    timeMatch[1]
-                                    .replace(
-                                        ".",
-                                        ":"
-                                    );
-
-
-                                if(
-                                    timeMatch[2]
-                                ) {
-
-                                    time +=
-                                        "–" +
-                                        timeMatch[2]
-                                        .replace(
-                                            ".",
-                                            ":"
-                                        );
-                                }
-                            }
-
-
-                            addRow(
-                                subject,
-                                time
-                            );
-                        }
-
-
-                        if(
-                            !rows.children.length
-                        ) {
-
-                            addRow();
-
-
-                            status.textContent =
-                                "Jag kunde inte läsa schemat säkert. Lägg till eller rätta raderna manuellt.";
-
-                        }
-
-                        else {
-
-                            status.textContent =
-                                "Klart! Kontrollera ämnen och tider och tryck sedan Visa schema.";
-
-                        }
-
-
-                        preview();
-
-                    }
-
-                    catch(error) {
-
-                        console.log(
-                            error
-                        );
-
-
-                        status.textContent =
-                            "Bildläsningen kunde inte starta. Du kan fortfarande skapa schemat med ＋ Rad.";
-
-                    }
-
-
-                    event.target.value =
-                        "";
-
-                }
-            );
-    }
-
 }
 
 
-/* ========================= */
-/* FLYTTA WIDGET */
-/* ========================= */
+/* =========================
+   FLYTTA WIDGET
+========================= */
 
 function makeDraggable(widget) {
-
 
     const handle =
         widget.querySelector(
@@ -1815,18 +1115,14 @@ function makeDraggable(widget) {
     let dragging =
         false;
 
-
     let startX =
         0;
-
 
     let startY =
         0;
 
-
     let originalX =
         0;
-
 
     let originalY =
         0;
@@ -1930,9 +1226,9 @@ function makeDraggable(widget) {
 }
 
 
-/* ========================= */
-/* KNAPPAR */
-/* ========================= */
+/* =========================
+   VANLIGA KNAPPAR
+========================= */
 
 document
 .getElementById("btnNote")
@@ -1974,25 +1270,9 @@ document
 );
 
 
-/* ========================= */
-/* SCHEMA */
-/* ========================= */
-
-document
-.getElementById("btnSchedule")
-.addEventListener(
-    "click",
-    () => {
-
-        add("schedule");
-
-    }
-);
-
-
-/* ========================= */
-/* BILD */
-/* ========================= */
+/* =========================
+   VANLIG BILD
+========================= */
 
 document
 .getElementById("btnImage")
@@ -2048,19 +1328,143 @@ imageFile.addEventListener(
 );
 
 
-/* ========================= */
-/* BAKGRUND */
-/* ========================= */
+/* =========================
+   NY SCHEMAFUNKTION
+========================= */
 
 /*
-VIKTIG ÄNDRING:
+Klick på Schema öppnar datorns
+filväljare direkt.
 
-Bakgrundsknappen är nu en vanlig knapp.
-Den öppnar den dolda filväljaren direkt.
-
-Detta är stabilare än att använda
-ett label-element runt input.
+Du kan välja en eller flera
+bilder/skärmdumpar från din
+schemamapp.
 */
+
+document
+.getElementById("btnSchedule")
+.addEventListener(
+    "click",
+    () => {
+
+        scheduleFile.click();
+
+    }
+);
+
+
+scheduleFile.addEventListener(
+    "change",
+    event => {
+
+
+        const files =
+            Array.from(
+                event.target.files
+            );
+
+
+        if(
+            files.length === 0
+        ) {
+
+            return;
+        }
+
+
+        files.forEach(
+            (file,index) => {
+
+
+                if(
+                    !file.type
+                    .startsWith("image/")
+                ) {
+
+                    return;
+                }
+
+
+                const widget =
+                    add(
+                        "schedule",
+                        {
+                            x:
+                                70 +
+                                index * 35,
+
+                            y:
+                                45 +
+                                index * 35,
+
+                            width:
+                                500,
+
+                            height:
+                                600
+                        }
+                    );
+
+
+                const url =
+                    URL.createObjectURL(
+                        file
+                    );
+
+
+                widget._url =
+                    url;
+
+
+                const image =
+                    widget.querySelector(
+                        "img"
+                    );
+
+
+                image.src =
+                    url;
+
+
+                /*
+                Filnamnet visas i rubriken.
+                Exempel:
+                måndag.png
+                tisdag.jpg
+                */
+
+                const title =
+                    widget.querySelector(
+                        ".head span"
+                    );
+
+
+                title.textContent =
+                    file.name
+                    .replace(
+                        /\.[^/.]+$/,
+                        ""
+                    );
+
+            }
+        );
+
+
+        /*
+        Gör att samma fil kan
+        väljas igen senare.
+        */
+
+        event.target.value =
+            "";
+
+    }
+);
+
+
+/* =========================
+   BAKGRUND
+========================= */
 
 document
 .getElementById(
@@ -2091,8 +1495,6 @@ bgFile.addEventListener(
         }
 
 
-/* TA BORT GAMMAL OBJECT URL */
-
         if(backgroundURL) {
 
             URL.revokeObjectURL(
@@ -2101,15 +1503,11 @@ bgFile.addEventListener(
         }
 
 
-/* SKAPA NY */
-
         backgroundURL =
             URL.createObjectURL(
                 file
             );
 
-
-/* NOLLSTÄLL GAMMAL BAKGRUND */
 
         document.body
             .style
@@ -2129,9 +1527,7 @@ bgFile.addEventListener(
         );
 
 
-/* ========================= */
 /* BILD / GIF */
-/* ========================= */
 
         if(
             file.type
@@ -2166,9 +1562,7 @@ bgFile.addEventListener(
         }
 
 
-/* ========================= */
 /* VIDEO */
-/* ========================= */
 
         else if(
             file.type
@@ -2186,25 +1580,12 @@ bgFile.addEventListener(
             bgVideo.load();
 
 
-            const playPromise =
-                bgVideo.play();
-
-
-            if(
-                playPromise !==
-                undefined
-            ) {
-
-                playPromise.catch(
-                    error => {
-
-                        console.log(
-                            "Videon väntar på användarklick."
-                        );
-
-                    }
+            bgVideo
+                .play()
+                .catch(
+                    () => {}
                 );
-            }
+
         }
 
 
@@ -2223,9 +1604,9 @@ bgFile.addEventListener(
 );
 
 
-/* ========================= */
-/* ÅTERSKAPA SPARADE RUTOR */
-/* ========================= */
+/* =========================
+   ÅTERSKAPA SPARADE RUTOR
+========================= */
 
 if(
     state.widgets &&
