@@ -164,25 +164,80 @@ body {
 
 /* BILDER */
 
-.imageWidget .body,
-.scheduleWidget .body {
+.imageWidget .body {
     padding: 0;
     background: #111;
 }
 
-.imageWidget img,
-.scheduleWidget img {
+.imageWidget img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
 }
 
-/* SCHEMA */
+/* =========================
+   SCHEMA
+========================= */
 
 .scheduleWidget {
     min-width: 300px;
     min-height: 300px;
+}
+
+.scheduleWidget .body {
+    padding: 0;
+    background: #111;
+    overflow: auto;
+    position: relative;
+}
+
+.scheduleWidget img {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    object-fit: contain;
+    display: block;
+    transform-origin: top left;
+}
+
+/* ZOOMKNAPPAR */
+
+.scheduleZoom {
+    position: sticky;
+    top: 10px;
+    float: right;
+    margin-right: 10px;
+    margin-bottom: -48px;
+    z-index: 20;
+    display: flex;
+    gap: 5px;
+    background: rgba(255,255,255,.94);
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.25);
+}
+
+.scheduleZoom button {
+    min-width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 8px;
+    background: #334155;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+.scheduleZoom button:hover {
+    background: #475569;
+}
+
+.scheduleZoom .zoomReset {
+    min-width: 62px;
+    font-size: 13px;
 }
 
 /* TIMER */
@@ -308,12 +363,6 @@ button.action {
     class="hiddenFile"
     type="file"
     accept="image/*,video/mp4,video/webm,video/ogg">
-
-<!--
-SCHEMA:
-multiple gör att du kan välja flera schemabilder
-från samma mapp samtidigt.
--->
 
 <input
     id="scheduleFile"
@@ -488,13 +537,6 @@ function save() {
     state.widgets =
         [...document.querySelectorAll(".widget")]
         .filter(widget => {
-
-            /*
-            Lokalt uppladdade bilder sparas inte mellan
-            fullständiga omladdningar eftersom webbläsaren
-            inte tillåter att sidan sparar åtkomst till
-            användarens filer.
-            */
 
             return (
                 widget.dataset.type !== "image" &&
@@ -778,11 +820,35 @@ Stopp
     }
 
 
-/* SCHEMABILD */
+/* =========================
+   SCHEMABILD MED ZOOM
+========================= */
 
     if(type === "schedule") {
 
         content = `
+
+<div class="scheduleZoom">
+
+<button
+class="zoomOut"
+title="Zooma ut">
+−
+</button>
+
+<button
+class="zoomReset"
+title="Återställ zoom">
+100%
+</button>
+
+<button
+class="zoomIn"
+title="Zooma in">
++
+</button>
+
+</div>
 
 <img alt="Dagens schema">
 
@@ -1097,6 +1163,148 @@ function wire(widget) {
             );
     }
 
+
+/* =========================
+   ZOOM FÖR SCHEMA
+========================= */
+
+    if(
+        widget.dataset.type ===
+        "schedule"
+    ) {
+
+        const image =
+            widget.querySelector("img");
+
+        const zoomIn =
+            widget.querySelector(".zoomIn");
+
+        const zoomOut =
+            widget.querySelector(".zoomOut");
+
+        const zoomReset =
+            widget.querySelector(".zoomReset");
+
+        const body =
+            widget.querySelector(".body");
+
+
+        let zoom =
+            1;
+
+
+        function updateZoom() {
+
+            image.style.width =
+                (zoom * 100) + "%";
+
+            image.style.height =
+                "auto";
+
+            image.style.minHeight =
+                "0";
+
+            image.style.maxWidth =
+                "none";
+
+            zoomReset.textContent =
+                Math.round(
+                    zoom * 100
+                ) + "%";
+        }
+
+
+        zoomIn.addEventListener(
+            "click",
+            () => {
+
+                zoom =
+                    Math.min(
+                        4,
+                        zoom + 0.25
+                    );
+
+                updateZoom();
+
+            }
+        );
+
+
+        zoomOut.addEventListener(
+            "click",
+            () => {
+
+                zoom =
+                    Math.max(
+                        0.5,
+                        zoom - 0.25
+                    );
+
+                updateZoom();
+
+            }
+        );
+
+
+        zoomReset.addEventListener(
+            "click",
+            () => {
+
+                zoom = 1;
+
+                updateZoom();
+
+            }
+        );
+
+
+/* CTRL + MUSHJUL */
+
+        body.addEventListener(
+            "wheel",
+            event => {
+
+                if(!event.ctrlKey) {
+
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                if(
+                    event.deltaY < 0
+                ) {
+
+                    zoom =
+                        Math.min(
+                            4,
+                            zoom + 0.1
+                        );
+
+                }
+
+                else {
+
+                    zoom =
+                        Math.max(
+                            0.5,
+                            zoom - 0.1
+                        );
+                }
+
+
+                updateZoom();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+    }
+
 }
 
 
@@ -1329,16 +1537,15 @@ imageFile.addEventListener(
 
 
 /* =========================
-   NY SCHEMAFUNKTION
+   SCHEMA
 ========================= */
 
 /*
 Klick på Schema öppnar datorns
-filväljare direkt.
+filväljare.
 
 Du kan välja en eller flera
-bilder/skärmdumpar från din
-schemamapp.
+bilder/skärmdumpar.
 */
 
 document
@@ -1426,13 +1633,6 @@ scheduleFile.addEventListener(
                     url;
 
 
-                /*
-                Filnamnet visas i rubriken.
-                Exempel:
-                måndag.png
-                tisdag.jpg
-                */
-
                 const title =
                     widget.querySelector(
                         ".head span"
@@ -1449,11 +1649,6 @@ scheduleFile.addEventListener(
             }
         );
 
-
-        /*
-        Gör att samma fil kan
-        väljas igen senare.
-        */
 
         event.target.value =
             "";
