@@ -3,1824 +3,1374 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Klassrumstavlan</title>
-
 <style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;overflow:hidden;color:#202735}
+body{background:#6b8798 center/cover no-repeat}
+#bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;display:none}
+#board{position:fixed;inset:0 0 112px}
 
-* {
-    box-sizing: border-box;
+.widget{
+ position:absolute;min-width:240px;min-height:150px;width:360px;height:220px;
+ background:#fffffff2;border:1px solid #ffffffaa;border-radius:18px;
+ box-shadow:0 12px 35px #0004;resize:both;overflow:hidden;z-index:10
+}
+.head{
+ height:44px;display:flex;align-items:center;gap:8px;padding:7px 10px;
+ background:#f3f6f8e8;cursor:move;font-weight:800;font-size:14px;
+ border-bottom:1px solid #dfe6eb
+}
+.head .title{display:flex;align-items:center;gap:7px}
+.head .close,.head .mini{
+ margin-left:auto;border:0;background:transparent;font-size:19px;cursor:pointer;
+ width:28px;height:28px;border-radius:8px
+}
+.head .mini{margin-left:auto;font-size:16px}
+.head .mini:hover,.head .close:hover{background:#e3eaf0}
+.body{height:calc(100% - 44px);padding:13px;overflow:auto}
+.widget.minimized{height:44px!important;min-height:44px!important;resize:none}
+.widget.minimized .body{display:none}
+.widget.minimized .close{margin-left:0}
+.widget.minimized .mini{margin-left:auto}
+
+.note .body{padding:0}
+.note textarea{
+ width:100%;height:100%;border:0;outline:0;resize:none;background:#fffdf1;
+ padding:18px;font:400 20px/1.5 Arial,sans-serif;color:#4c4c43
+}
+.clockText,.timerNum{
+ display:flex;align-items:center;justify-content:center;
+ height:100%;font-size:54px;font-weight:850
+}
+.today{font-size:29px;font-weight:850;text-transform:capitalize}
+.date{font-size:21px;margin-top:6px}
+.muted{color:#64748b;font-size:12px}
+
+.linksGrid{
+ display:grid;grid-template-columns:repeat(2,1fr);gap:9px
+}
+.serviceLink{
+ display:flex;align-items:center;justify-content:center;
+ padding:14px 9px;border:0;border-radius:12px;background:#edf2f6;
+ color:#202735;font-size:15px;font-weight:750;
+ text-decoration:none;text-align:center
+}
+.serviceLink:hover{background:#dfe8ee}
+
+.row{
+ display:flex;gap:7px;align-items:center;flex-wrap:wrap
+}
+.row input{
+ padding:8px;border:1px solid #cbd5e1;border-radius:9px
+}
+.action{
+ border:0;border-radius:9px;padding:9px 11px;
+ background:#334155;color:#fff;cursor:pointer
+}
+.action.secondary{
+ background:#e8eef3;color:#202735
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    color: #202735;
+.toolbar{
+ position:fixed;z-index:1000;left:50%;bottom:18px;
+ transform:translateX(-50%);min-height:78px;max-width:96vw;
+ background:#fff;border-radius:19px;
+ box-shadow:0 10px 35px #0004;display:flex;
+ align-items:center;gap:3px;padding:7px 10px;
+ overflow-x:auto
+}
+.tool{
+ min-width:76px;height:64px;border:0;background:transparent;
+ border-radius:12px;cursor:pointer;
+ display:flex;flex-direction:column;align-items:center;
+ justify-content:center;gap:5px;color:#202735;
+ font-size:12px;white-space:nowrap
+}
+.tool:hover{background:#edf2f8}
+.ico{font-size:27px;line-height:27px}
+.filetool input{display:none}
+
+.popover{
+ position:fixed;z-index:1200;left:50%;bottom:105px;
+ transform:translateX(-50%);width:min(850px,94vw);
+ max-height:60vh;overflow:auto;background:#fff;
+ border-radius:18px;box-shadow:0 15px 45px #0005;
+ padding:14px;display:none
+}
+.popover.open{display:block}
+.popHead{
+ display:flex;align-items:center;gap:8px;margin-bottom:10px
+}
+.popHead h3{margin:0;font-size:17px}
+.popClose{
+ margin-left:auto;border:0;background:#edf2f6;
+ border-radius:9px;padding:7px 10px;cursor:pointer
+}
+.bgCategories{
+ display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px
+}
+.bgCategories button{
+ border:0;border-radius:9px;padding:8px 10px;
+ background:#edf2f6;cursor:pointer
+}
+.bgCategories button.active{
+ background:#334155;color:#fff
+}
+.bgGrid{
+ display:grid;grid-template-columns:repeat(5,1fr);gap:8px
+}
+.bgChoice{
+ height:82px;border:2px solid transparent;
+ border-radius:12px;background-size:cover;
+ background-position:center;cursor:pointer;
+ box-shadow:inset 0 0 0 999px #0001
+}
+.bgChoice:hover{border-color:#334155}
+.bgLabel{
+ display:block;color:#fff;text-shadow:0 1px 4px #000;
+ font-weight:800;font-size:12px;padding:8px
 }
 
-body {
-    background-color: #547890;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+.scheduleRows{
+ display:flex;flex-direction:column;gap:7px
+}
+.scheduleRow{
+ display:grid;grid-template-columns:45px 1fr 105px 34px;
+ gap:6px;align-items:center;background:#f8fafc;
+ border:1px solid #e2e8f0;border-radius:10px;padding:6px
+}
+.scheduleIcon{font-size:27px;text-align:center}
+.scheduleRow input{
+ width:100%;border:1px solid #cbd5e1;
+ border-radius:7px;padding:7px
+}
+.scheduleRow .del{
+ border:0;background:transparent;font-size:18px;cursor:pointer
+}
+.schedulePreview{
+ margin-top:10px;border-top:1px solid #e2e8f0;padding-top:9px
+}
+.scheduleCard{
+ display:grid;grid-template-columns:44px 1fr auto;
+ align-items:center;gap:8px;
+ border-bottom:2px solid #334155;padding:7px 3px
+}
+.scheduleCard .pic{font-size:28px;text-align:center}
+.scheduleCard .subject{font-weight:800}
+.scheduleCard .time{
+ font-weight:700;color:#475569
 }
 
-/* VIDEOBAKGRUND */
-
-#bgVideo {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-    display: none;
+.nowActions{
+ display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px
+}
+.nowActions button{
+ border:0;border-radius:9px;padding:8px 10px;
+ background:#edf2f6;cursor:pointer
+}
+.nowTitle{
+ font-size:22px;font-weight:850;margin-bottom:8px
+}
+.nowNote{
+ width:100%;min-height:80px;
+ border:1px solid #d6dee5;border-radius:10px;
+ padding:10px;resize:vertical
+}
+.nowLinkList{
+ display:flex;flex-direction:column;gap:6px;margin-top:8px
+}
+.nowLink{
+ display:flex;align-items:center;gap:8px;
+ background:#edf2f6;border-radius:9px;padding:8px 10px;
+ text-decoration:none;color:#202735;font-weight:700
+}
+.smallInput{
+ width:100%;padding:8px;
+ border:1px solid #cbd5e1;border-radius:9px
 }
 
-/* ARBETSYTA */
-
-#board {
-    position: fixed;
-    inset: 0 0 112px 0;
+@media(max-width:700px){
+ .toolbar{left:7px;right:7px;transform:none}
+ .tool{min-width:68px}
+ .bgGrid{grid-template-columns:repeat(3,1fr)}
 }
-
-/* WIDGET */
-
-.widget {
-    position: absolute;
-    min-width: 220px;
-    min-height: 150px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 12px 35px rgba(0,0,0,.28);
-    resize: both;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.7);
-}
-
-.head {
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 10px;
-    background: rgba(255,255,255,.90);
-    cursor: move;
-    font-weight: 700;
-    font-size: 14px;
-}
-
-.close {
-    border: 0;
-    background: transparent;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.body {
-    height: calc(100% - 38px);
-    padding: 13px;
-    overflow: auto;
-}
-
-/* ANTECKNING */
-
-.note {
-    background: #fff6c8;
-}
-
-.note .head {
-    background: #fff0a6;
-}
-
-.note .body {
-    padding: 0;
-}
-
-.note textarea {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    outline: 0;
-    resize: none;
-    background: transparent;
-    padding: 20px;
-    font-size: 21px;
-    line-height: 1.5;
-    color: #4c4c43;
-}
-
-/* KLOCKA */
-
-.clockWidget .body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 58px;
-    font-weight: 700;
-}
-
-/* DAGEN */
-
-.dayWidget .today {
-    font-size: 29px;
-    font-weight: 800;
-    text-transform: capitalize;
-}
-
-.dayWidget .date {
-    font-size: 22px;
-    margin-top: 7px;
-}
-
-/* LÄNKAR */
-
-.linksGrid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 10px;
-}
-
-.serviceLink {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 58px;
-    padding: 14px 10px;
-    border-radius: 13px;
-    background: #f0f3f7;
-    font-size: 16px;
-    font-weight: 700;
-    color: #202735;
-    text-decoration: none;
-    text-align: center;
-}
-
-.serviceLink:hover {
-    background: #dce7f2;
-}
-
-/* BILDER */
-
-.imageWidget .body {
-    padding: 0;
-    background: #111;
-}
-
-.imageWidget img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-}
-
-/* =========================
-   SCHEMA
-========================= */
-
-.scheduleWidget {
-    min-width: 300px;
-    min-height: 300px;
-}
-
-.scheduleWidget .body {
-    padding: 0;
-    background: #111;
-    overflow: auto;
-    position: relative;
-}
-
-.scheduleWidget img {
-    width: 100%;
-    height: auto;
-    min-height: 100%;
-    object-fit: contain;
-    display: block;
-    transform-origin: top left;
-}
-
-/* ZOOMKNAPPAR */
-
-.scheduleZoom {
-    position: sticky;
-    top: 10px;
-    float: right;
-    margin-right: 10px;
-    margin-bottom: -48px;
-    z-index: 20;
-    display: flex;
-    gap: 5px;
-    background: rgba(255,255,255,.94);
-    padding: 5px;
-    border-radius: 10px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.25);
-}
-
-.scheduleZoom button {
-    min-width: 38px;
-    height: 38px;
-    border: 0;
-    border-radius: 8px;
-    background: #334155;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 8px;
-}
-
-.scheduleZoom button:hover {
-    background: #475569;
-}
-
-.scheduleZoom .zoomReset {
-    min-width: 62px;
-    font-size: 13px;
-}
-
-/* TIMER */
-
-.timerNum {
-    font-size: 48px;
-    text-align: center;
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.row {
-    display: flex;
-    gap: 7px;
-}
-
-.row input {
-    width: 90px;
-    padding: 8px;
-}
-
-.row button {
-    flex: 1;
-}
-
-button.action {
-    border: 0;
-    border-radius: 9px;
-    padding: 9px 11px;
-    background: #334155;
-    color: white;
-    cursor: pointer;
-}
-
-/* VERKTYGSRAD */
-
-.toolbar {
-    position: fixed;
-    z-index: 1000;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%);
-    height: 78px;
-    max-width: 96vw;
-    background: white;
-    border-radius: 19px;
-    box-shadow: 0 10px 35px rgba(0,0,0,.30);
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 7px 10px;
-    overflow-x: auto;
-}
-
-.tool {
-    min-width: 76px;
-    height: 64px;
-    border: 0;
-    background: transparent;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    color: #202735;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.tool:hover {
-    background: #edf2f8;
-}
-
-.ico {
-    font-size: 27px;
-    line-height: 27px;
-}
-
-.hiddenFile {
-    display: none;
-}
-
-@media(max-width:700px) {
-
-    .toolbar {
-        left: 7px;
-        right: 7px;
-        transform: none;
-    }
-
-    .tool {
-        min-width: 68px;
-    }
-}
-
 </style>
 </head>
 
 <body>
 
-<video
-    id="bgVideo"
-    muted
-    loop
-    playsinline>
-</video>
+<video id="bgVideo" muted loop playsinline></video>
 
 <div id="board"></div>
 
+<div id="backgroundPanel" class="popover">
 
-<!-- DOLDA FILVÄLJARE -->
+ <div class="popHead">
+  <h3>🏞️ Välj bakgrund</h3>
+  <button class="popClose"
+          onclick="closePanel('backgroundPanel')">
+    Stäng
+  </button>
+ </div>
 
-<input
-    id="imageFile"
-    class="hiddenFile"
-    type="file"
-    accept="image/*">
+ <div class="bgCategories" id="bgCategories"></div>
 
-<input
-    id="bgFile"
-    class="hiddenFile"
-    type="file"
-    accept="image/*,video/mp4,video/webm,video/ogg">
+ <div class="bgGrid" id="bgGrid"></div>
 
-<input
-    id="scheduleFile"
-    class="hiddenFile"
-    type="file"
-    accept="image/*"
-    multiple>
-
-
-<!-- VERKTYGSRAD -->
+</div>
 
 <div class="toolbar">
 
-<button class="tool" id="btnNote">
-    <span class="ico">📝</span>
-    <span>Anteckning</span>
-</button>
+ <button class="tool" onclick="add('note')">
+  <span class="ico">📝</span>
+  <span>Anteckning</span>
+ </button>
 
-<button class="tool" id="btnDay">
-    <span class="ico">📅</span>
-    <span>Dagen</span>
-</button>
+ <button class="tool" onclick="add('now')">
+  <span class="ico">▶️</span>
+  <span>NU</span>
+ </button>
 
-<button class="tool" id="btnLinks">
-    <span class="ico">🔗</span>
-    <span>Länkar</span>
-</button>
+ <button class="tool" onclick="add('day')">
+  <span class="ico">📅</span>
+  <span>Dagen</span>
+ </button>
 
-<button class="tool" id="btnClock">
-    <span class="ico">🕒</span>
-    <span>Klocka</span>
-</button>
+ <button class="tool" onclick="add('schedule')">
+  <span class="ico">📋</span>
+  <span>Schema</span>
+ </button>
 
-<button class="tool" id="btnTimer">
-    <span class="ico">⌛</span>
-    <span>Timer</span>
-</button>
+ <button class="tool" onclick="add('links')">
+  <span class="ico">🔗</span>
+  <span>Länkar</span>
+ </button>
 
-<button class="tool" id="btnImage">
-    <span class="ico">🖼️</span>
-    <span>Bild</span>
-</button>
+ <button class="tool" onclick="add('clock')">
+  <span class="ico">🕒</span>
+  <span>Klocka</span>
+ </button>
 
-<button class="tool" id="btnBackground">
-    <span class="ico">🏞️</span>
-    <span>Bakgrund</span>
-</button>
+ <button class="tool" onclick="add('timer')">
+  <span class="ico">⌛</span>
+  <span>Timer</span>
+ </button>
 
-<button class="tool" id="btnSchedule">
-    <span class="ico">📋</span>
-    <span>Schema</span>
-</button>
+ <button class="tool"
+         onclick="document.getElementById('backgroundPanel').classList.toggle('open')">
+  <span class="ico">🏞️</span>
+  <span>Bakgrund</span>
+ </button>
+
+ <label class="tool filetool">
+  <span class="ico">🖼️</span>
+  <span>Bild</span>
+  <input id="imageFile" type="file" accept="image/*">
+ </label>
+
+ <button class="tool" onclick="fullscreen()">
+  <span class="ico">⛶</span>
+  <span>Helskärm</span>
+ </button>
 
 </div>
-
 
 <script>
 
-/* =========================
-   GRUND
-========================= */
+const board=document.getElementById('board');
+const bgVideo=document.getElementById('bgVideo');
 
-const board =
-    document.getElementById("board");
+const KEY='klassrumstavlan-v6';
 
-const bgVideo =
-    document.getElementById("bgVideo");
+let state={
+ widgets:[],
+ background:null
+};
 
-const imageFile =
-    document.getElementById("imageFile");
+try{
+ state=JSON.parse(
+  localStorage.getItem(KEY) ||
+  '{"widgets":[],"background":null}'
+ );
+}catch(e){}
 
-const bgFile =
-    document.getElementById("bgFile");
+const esc=s=>String(s??'').replace(
+ /[&<>"']/g,
+ m=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+ }[m])
+);
 
-const scheduleFile =
-    document.getElementById("scheduleFile");
+const save=()=>{
+ state.widgets=[
+  ...document.querySelectorAll('.widget')
+ ].map(w=>({
+  id:w.id,
+  type:w.dataset.type,
+  x:w.offsetLeft,
+  y:w.offsetTop,
+  width:w.offsetWidth,
+  height:w.offsetHeight,
+  min:w.classList.contains('minimized'),
+  data:collect(w)
+ }));
 
-const KEY =
-    "klassrumstavlan-v10";
+ localStorage.setItem(KEY,JSON.stringify(state));
+};
+
+function collect(w){
+
+ let d={};
+
+ w.querySelectorAll('[data-k]').forEach(e=>{
+  d[e.dataset.k]=e.value;
+ });
+
+ return d;
+}
 
 
-let state = {
-    widgets: []
+/* ---------------- BACKGROUNDS ---------------- */
+
+const backgrounds={
+
+ "Lugna":[
+
+  ["Strand",
+   "linear-gradient(135deg,#496f80,#d7c7a1)"],
+
+  ["Skog",
+   "linear-gradient(135deg,#193b2b,#789b78,#d8c99d)"],
+
+  ["Himmel",
+   "linear-gradient(135deg,#426b86,#a9c9d7,#e8d8bd)"],
+
+  ["Sjö",
+   "linear-gradient(135deg,#214d68,#78a9b9,#d7d4bd)"],
+
+  ["Solnedgång",
+   "linear-gradient(135deg,#513f52,#b77c63,#e0b67b)"]
+
+ ],
+
+ "Årstider":[
+
+  ["Vår",
+   "linear-gradient(135deg,#729b72,#b7d39a,#ead5a0)"],
+
+  ["Sommar",
+   "linear-gradient(135deg,#3c7284,#8fc2ba,#e7d19a)"],
+
+  ["Höst",
+   "linear-gradient(135deg,#634f3d,#a8794e,#d5bd8b)"],
+
+  ["Vinter",
+   "linear-gradient(135deg,#6d8492,#b9cad2,#e8edf0)"],
+
+  ["Jul",
+   "linear-gradient(135deg,#315247,#7f9b72,#c7b78a)"]
+
+ ],
+
+ "Enkla":[
+
+  ["Ljus",
+   "linear-gradient(135deg,#e7edf1,#ffffff)"],
+
+  ["Sand",
+   "linear-gradient(135deg,#d8c6a4,#f1e7d1)"],
+
+  ["Grå",
+   "linear-gradient(135deg,#65727c,#b7c0c5)"],
+
+  ["Grön",
+   "linear-gradient(135deg,#54735d,#a9c1a5)"],
+
+  ["Blå",
+   "linear-gradient(135deg,#52748c,#b4ccd7)"]
+
+ ],
+
+ "Fantasi":[
+
+  ["Rymd",
+   "linear-gradient(135deg,#20294e,#59688d,#b38c73)"],
+
+  ["Sagobok",
+   "linear-gradient(135deg,#64526d,#b49a76,#d9c8a5)"],
+
+  ["Äventyr",
+   "linear-gradient(135deg,#355f68,#8b9f78,#d4b47a)"],
+
+  ["Hav",
+   "linear-gradient(135deg,#17485d,#4c8da0,#c3d2c8)"],
+
+  ["Moln",
+   "linear-gradient(135deg,#6f8292,#cbd7dc,#f4f1e8)"]
+
+ ]
+
 };
 
 
-try {
+function renderBgMenu(){
 
-    const saved =
-        localStorage.getItem(KEY);
+ const cats=document.getElementById('bgCategories');
+ const grid=document.getElementById('bgGrid');
 
-    if(saved) {
+ cats.innerHTML='';
 
-        state =
-            JSON.parse(saved);
-    }
+ Object.keys(backgrounds).forEach((cat,i)=>{
 
-}
-catch(error) {
+  const b=document.createElement('button');
 
-    state = {
-        widgets: []
-    };
-}
+  b.textContent=cat;
 
+  b.onclick=()=>showBgCategory(cat);
 
-let backgroundURL = null;
+  if(i===0)b.classList.add('active');
 
+  cats.appendChild(b);
 
-/* =========================
-   LÄNKAR
-========================= */
+ });
 
-const linkList = [
-
-    [
-        "🧩",
-        "Skolon",
-        "https://skolon.com/"
-    ],
-
-    [
-        "▶️",
-        "UR Play",
-        "https://urplay.se/"
-    ],
-
-    [
-        "📺",
-        "SVT Play",
-        "https://www.svtplay.se/"
-    ],
-
-    [
-        "🎬",
-        "SLI",
-        "https://sliplay.se/"
-    ],
-
-    [
-        "🔴",
-        "YouTube",
-        "https://www.youtube.com/"
-    ]
-
-];
-
-
-/* =========================
-   SPARA
-========================= */
-
-function collect(widget) {
-
-    const data = {};
-
-    widget
-        .querySelectorAll("[data-k]")
-        .forEach(element => {
-
-            data[element.dataset.k] =
-                element.value;
-
-        });
-
-    return data;
-}
-
-
-function save() {
-
-    state.widgets =
-        [...document.querySelectorAll(".widget")]
-        .filter(widget => {
-
-            return (
-                widget.dataset.type !== "image" &&
-                widget.dataset.type !== "schedule"
-            );
-
-        })
-        .map(widget => ({
-
-            id:
-                widget.id,
-
-            type:
-                widget.dataset.type,
-
-            x:
-                widget.offsetLeft,
-
-            y:
-                widget.offsetTop,
-
-            width:
-                widget.offsetWidth,
-
-            height:
-                widget.offsetHeight,
-
-            data:
-                collect(widget)
-
-        }));
-
-
-    try {
-
-        localStorage.setItem(
-            KEY,
-            JSON.stringify(state)
-        );
-
-    }
-    catch(error) {
-
-        console.log(
-            "Kunde inte spara."
-        );
-    }
+ showBgCategory(Object.keys(backgrounds)[0]);
 
 }
 
 
-/* =========================
-   SKAPA WIDGET
-========================= */
+function showBgCategory(cat){
 
-function add(type, saved = {}) {
+ document.querySelectorAll(
+  '.bgCategories button'
+ ).forEach(
+  b=>b.classList.toggle(
+   'active',
+   b.textContent===cat
+  )
+ );
 
-    const widget =
-        document.createElement("section");
+ const grid=document.getElementById('bgGrid');
 
+ grid.innerHTML='';
 
-    widget.className =
-        "widget " +
-        type +
-        "Widget " +
-        (type === "note"
-            ? "note"
-            : "");
+ backgrounds[cat].forEach(([name,bg])=>{
 
+  const b=document.createElement('button');
 
-    widget.dataset.type =
-        type;
+  b.className='bgChoice';
 
+  b.style.background=bg;
 
-    widget.id =
-        saved.id ||
-        "widget-" +
-        Date.now() +
-        "-" +
-        Math.floor(
-            Math.random() * 10000
-        );
+  b.innerHTML=
+   '<span class="bgLabel">'+
+   name+
+   '</span>';
 
+  b.onclick=()=>{
 
-    const sizes = {
+   document.body.style.backgroundImage='none';
 
-        note:
-            [340,390],
+   bgVideo.style.display='none';
 
-        day:
-            [350,190],
+   bgVideo.pause();
 
-        links:
-            [410,320],
+   state.background={
+    kind:'css',
+    value:bg
+   };
 
-        clock:
-            [310,170],
+   localStorage.setItem(
+    KEY,
+    JSON.stringify(state)
+   );
 
-        timer:
-            [330,210],
+   document.body.style.background=bg;
 
-        image:
-            [480,350],
+   closePanel('backgroundPanel');
 
-        schedule:
-            [500,600]
+  };
 
-    };
+  grid.appendChild(b);
 
-
-    const size =
-        sizes[type] ||
-        [330,220];
-
-
-    widget.style.left =
-        (saved.x ??
-        60 + Math.random()*250)
-        + "px";
-
-
-    widget.style.top =
-        (saved.y ??
-        50 + Math.random()*140)
-        + "px";
-
-
-    widget.style.width =
-        (saved.width ||
-        size[0])
-        + "px";
-
-
-    widget.style.height =
-        (saved.height ||
-        size[1])
-        + "px";
-
-
-    const data =
-        saved.data || {};
-
-
-    const titles = {
-
-        note:
-            "Anteckning",
-
-        day:
-            "Dagen",
-
-        links:
-            "Länkar",
-
-        clock:
-            "Klocka",
-
-        timer:
-            "Timer",
-
-        image:
-            "Bild",
-
-        schedule:
-            "Dagens schema"
-
-    };
-
-
-    let content = "";
-
-
-/* ANTECKNING */
-
-    if(type === "note") {
-
-        content = `
-
-<textarea
-data-k="text"
-placeholder="Gör en anteckning...">${data.text || ""}</textarea>
-
-        `;
-    }
-
-
-/* DAGEN */
-
-    if(type === "day") {
-
-        content = `
-
-<div class="today"></div>
-
-<div class="date"></div>
-
-        `;
-    }
-
-
-/* LÄNKAR */
-
-    if(type === "links") {
-
-        content =
-            '<div class="linksGrid">' +
-
-            linkList.map(link => `
-
-<a
-class="serviceLink"
-href="${link[2]}"
-target="_blank"
-rel="noopener noreferrer">
-
-${link[0]} ${link[1]}
-
-</a>
-
-            `).join("") +
-
-            "</div>";
-    }
-
-
-/* KLOCKA */
-
-    if(type === "clock") {
-
-        content = `
-
-<div class="clockText">
---:--
-</div>
-
-        `;
-    }
-
-
-/* TIMER */
-
-    if(type === "timer") {
-
-        content = `
-
-<div class="timerNum">
-05:00
-</div>
-
-<div class="row">
-
-<input
-data-k="minutes"
-type="number"
-min="1"
-value="${data.minutes || 5}">
-
-<button class="action start">
-Start
-</button>
-
-<button class="action stop">
-Stopp
-</button>
-
-</div>
-
-        `;
-    }
-
-
-/* BILD */
-
-    if(type === "image") {
-
-        content = `
-
-<img alt="Infogad bild">
-
-        `;
-    }
-
-
-/* =========================
-   SCHEMABILD MED ZOOM
-========================= */
-
-    if(type === "schedule") {
-
-        content = `
-
-<div class="scheduleZoom">
-
-<button
-class="zoomOut"
-title="Zooma ut">
-−
-</button>
-
-<button
-class="zoomReset"
-title="Återställ zoom">
-100%
-</button>
-
-<button
-class="zoomIn"
-title="Zooma in">
-+
-</button>
-
-</div>
-
-<img alt="Dagens schema">
-
-        `;
-    }
-
-
-    widget.innerHTML = `
-
-<div class="head">
-
-<span>
-${titles[type]}
-</span>
-
-<button class="close">
-×
-</button>
-
-</div>
-
-<div class="body">
-
-${content}
-
-</div>
-
-    `;
-
-
-    board.appendChild(
-        widget
-    );
-
-
-    wire(
-        widget
-    );
-
-
-    makeDraggable(
-        widget
-    );
-
-
-    save();
-
-
-    return widget;
-}
-
-
-/* =========================
-   WIDGET-FUNKTIONER
-========================= */
-
-function wire(widget) {
-
-
-/* STÄNG */
-
-    widget
-        .querySelector(".close")
-        .addEventListener(
-            "click",
-            () => {
-
-                if(widget._url) {
-
-                    URL.revokeObjectURL(
-                        widget._url
-                    );
-                }
-
-                widget.remove();
-
-                save();
-
-            }
-        );
-
-
-/* SPARA TEXT */
-
-    widget
-        .querySelectorAll("[data-k]")
-        .forEach(element => {
-
-            element.addEventListener(
-                "input",
-                save
-            );
-
-        });
-
-
-/* DAGEN */
-
-    if(
-        widget.dataset.type ===
-        "day"
-    ) {
-
-        const weekday =
-            widget.querySelector(
-                ".today"
-            );
-
-        const date =
-            widget.querySelector(
-                ".date"
-            );
-
-
-        function updateDay() {
-
-            const now =
-                new Date();
-
-
-            weekday.textContent =
-                now.toLocaleDateString(
-                    "sv-SE",
-                    {
-                        weekday:
-                            "long"
-                    }
-                );
-
-
-            date.textContent =
-                now.toLocaleDateString(
-                    "sv-SE",
-                    {
-                        day:
-                            "numeric",
-
-                        month:
-                            "long",
-
-                        year:
-                            "numeric"
-                    }
-                );
-        }
-
-
-        updateDay();
-
-        setInterval(
-            updateDay,
-            60000
-        );
-    }
-
-
-/* KLOCKA */
-
-    if(
-        widget.dataset.type ===
-        "clock"
-    ) {
-
-        const clock =
-            widget.querySelector(
-                ".clockText"
-            );
-
-
-        function updateClock() {
-
-            clock.textContent =
-                new Date()
-                .toLocaleTimeString(
-                    "sv-SE",
-                    {
-                        hour:
-                            "2-digit",
-
-                        minute:
-                            "2-digit",
-
-                        second:
-                            "2-digit"
-                    }
-                );
-        }
-
-
-        updateClock();
-
-        setInterval(
-            updateClock,
-            1000
-        );
-    }
-
-
-/* TIMER */
-
-    if(
-        widget.dataset.type ===
-        "timer"
-    ) {
-
-        let timer =
-            null;
-
-        let seconds =
-            0;
-
-
-        const output =
-            widget.querySelector(
-                ".timerNum"
-            );
-
-
-        const input =
-            widget.querySelector(
-                '[data-k="minutes"]'
-            );
-
-
-        function drawTimer() {
-
-            const minutes =
-                Math.floor(
-                    seconds / 60
-                );
-
-
-            const remaining =
-                seconds % 60;
-
-
-            output.textContent =
-                String(minutes)
-                .padStart(2,"0")
-                +
-                ":"
-                +
-                String(remaining)
-                .padStart(2,"0");
-        }
-
-
-        widget
-            .querySelector(".start")
-            .addEventListener(
-                "click",
-                () => {
-
-                    clearInterval(
-                        timer
-                    );
-
-
-                    seconds =
-                        Math.max(
-                            1,
-                            Number(
-                                input.value
-                            ) || 5
-                        )
-                        * 60;
-
-
-                    drawTimer();
-
-
-                    timer =
-                        setInterval(
-                            () => {
-
-                                seconds--;
-
-                                drawTimer();
-
-
-                                if(
-                                    seconds <= 0
-                                ) {
-
-                                    clearInterval(
-                                        timer
-                                    );
-
-                                    alert(
-                                        "Tiden är slut!"
-                                    );
-                                }
-
-                            },
-                            1000
-                        );
-                }
-            );
-
-
-        widget
-            .querySelector(".stop")
-            .addEventListener(
-                "click",
-                () => {
-
-                    clearInterval(
-                        timer
-                    );
-
-                }
-            );
-    }
-
-
-/* =========================
-   ZOOM FÖR SCHEMA
-========================= */
-
-    if(
-        widget.dataset.type ===
-        "schedule"
-    ) {
-
-        const image =
-            widget.querySelector("img");
-
-        const zoomIn =
-            widget.querySelector(".zoomIn");
-
-        const zoomOut =
-            widget.querySelector(".zoomOut");
-
-        const zoomReset =
-            widget.querySelector(".zoomReset");
-
-        const body =
-            widget.querySelector(".body");
-
-
-        let zoom =
-            1;
-
-
-        function updateZoom() {
-
-            image.style.width =
-                (zoom * 100) + "%";
-
-            image.style.height =
-                "auto";
-
-            image.style.minHeight =
-                "0";
-
-            image.style.maxWidth =
-                "none";
-
-            zoomReset.textContent =
-                Math.round(
-                    zoom * 100
-                ) + "%";
-        }
-
-
-        zoomIn.addEventListener(
-            "click",
-            () => {
-
-                zoom =
-                    Math.min(
-                        4,
-                        zoom + 0.25
-                    );
-
-                updateZoom();
-
-            }
-        );
-
-
-        zoomOut.addEventListener(
-            "click",
-            () => {
-
-                zoom =
-                    Math.max(
-                        0.5,
-                        zoom - 0.25
-                    );
-
-                updateZoom();
-
-            }
-        );
-
-
-        zoomReset.addEventListener(
-            "click",
-            () => {
-
-                zoom = 1;
-
-                updateZoom();
-
-            }
-        );
-
-
-/* CTRL + MUSHJUL */
-
-        body.addEventListener(
-            "wheel",
-            event => {
-
-                if(!event.ctrlKey) {
-
-                    return;
-                }
-
-
-                event.preventDefault();
-
-
-                if(
-                    event.deltaY < 0
-                ) {
-
-                    zoom =
-                        Math.min(
-                            4,
-                            zoom + 0.1
-                        );
-
-                }
-
-                else {
-
-                    zoom =
-                        Math.max(
-                            0.5,
-                            zoom - 0.1
-                        );
-                }
-
-
-                updateZoom();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-    }
+ });
 
 }
 
 
-/* =========================
-   FLYTTA WIDGET
-========================= */
+function closePanel(id){
 
-function makeDraggable(widget) {
+ document
+  .getElementById(id)
+  .classList
+  .remove('open');
 
-    const handle =
-        widget.querySelector(
-            ".head"
-        );
+}
 
-
-    let dragging =
-        false;
-
-    let startX =
-        0;
-
-    let startY =
-        0;
-
-    let originalX =
-        0;
-
-    let originalY =
-        0;
+renderBgMenu();
 
 
-    handle.addEventListener(
-        "pointerdown",
-        event => {
+/* ---------------- ADD WIDGET ---------------- */
+
+function add(type,s={}){
+
+ const w=document.createElement('section');
+
+ w.className=
+  'widget '+
+  (type==='note'?'note ':'')+
+  (s.min?'minimized':'');
+
+ w.dataset.type=type;
+
+ w.id=
+  s.id ||
+  ('w'+Date.now()+Math.random());
+
+ const size={
+
+  note:[360,300],
+
+  now:[420,360],
+
+  day:[350,190],
+
+  schedule:[420,520],
+
+  links:[390,300],
+
+  clock:[300,180],
+
+  timer:[320,210],
+
+  image:[480,350]
+
+ }[type]||[350,220];
 
 
-            if(
-                event.target
-                .closest("button")
-            ) {
+ w.style.left=
+  (s.x??70+Math.random()*180)+'px';
 
-                return;
-            }
+ w.style.top=
+  (s.y??50+Math.random()*120)+'px';
 
+ w.style.width=
+  (s.width||size[0])+'px';
 
-            dragging =
-                true;
-
-
-            startX =
-                event.clientX;
+ w.style.height=
+  (s.height||size[1])+'px';
 
 
-            startY =
-                event.clientY;
+ const d=s.data||{};
+
+ const title={
+
+  note:'📝 Anteckning',
+
+  now:'▶️ NU',
+
+  day:'📅 Dagen',
+
+  schedule:'📋 Schema',
+
+  links:'🔗 Länkar',
+
+  clock:'🕒 Klocka',
+
+  timer:'⌛ Timer',
+
+  image:'🖼️ Bild'
+
+ }[type];
 
 
-            originalX =
-                widget.offsetLeft;
+ let c='';
 
 
-            originalY =
-                widget.offsetTop;
+ if(type==='note')
+
+  c=
+   '<textarea data-k="text" '+
+   'placeholder="Skriv här...">'+
+   esc(d.text)+
+   '</textarea>';
 
 
-            handle.setPointerCapture(
-                event.pointerId
-            );
+ if(type==='day')
 
-        }
-    );
-
-
-    handle.addEventListener(
-        "pointermove",
-        event => {
+  c=
+   '<div class="today"></div>'+
+   '<div class="date"></div>'+
+   '<p class="muted">'+
+   'Datum och veckodag uppdateras automatiskt.'+
+   '</p>';
 
 
-            if(!dragging) {
+ if(type==='clock')
 
-                return;
-            }
-
-
-            widget.style.left =
-                Math.max(
-                    0,
-                    originalX +
-                    event.clientX -
-                    startX
-                )
-                + "px";
+  c=
+   '<div class="clockText">--:--</div>';
 
 
-            widget.style.top =
-                Math.max(
-                    0,
-                    originalY +
-                    event.clientY -
-                    startY
-                )
-                + "px";
+ if(type==='links')
 
-        }
-    );
+  c=
+   '<div class="linksGrid">'+
+
+   [
+    ['▶️','UR Play','https://urplay.se/'],
+    ['📺','SVT Play','https://www.svtplay.se/'],
+    ['🧩','Skolon','https://skolon.com/'],
+    ['🎬','SLI','https://sliplay.se/'],
+    ['🔴','YouTube','https://www.youtube.com/']
+
+   ].map(x=>
+
+    '<a class="serviceLink" '+
+    'href="'+x[2]+'" '+
+    'target="_blank" '+
+    'rel="noopener noreferrer">'+
+    x[0]+' '+x[1]+
+    '</a>'
+
+   ).join('')+
+
+   '</div>'+
+
+   '<p class="muted">'+
+   'Lägg egna länkar i NU-fönstret för en specifik lektion.'+
+   '</p>';
 
 
-    handle.addEventListener(
-        "pointerup",
-        () => {
+ if(type==='timer')
 
-            dragging =
-                false;
+  c=
+   '<div class="timerNum">05:00</div>'+
+   '<div class="row">'+
+   '<input data-k="minutes" type="number" min="1" value="'+
+   esc(d.minutes||5)+
+   '">' +
+   '<button class="action start">Start</button>'+
+   '<button class="action secondary stop">Stopp</button>'+
+   '</div>';
 
-            save();
 
-        }
-    );
+ if(type==='image')
+
+  c=
+   '<input type="file" accept="image/*" '+
+   'onchange="loadImage(this,'+
+   JSON.stringify(w.id)+')">'+
+   '<img alt="Bild" '+
+   'style="max-width:100%;margin-top:10px;border-radius:10px">';
 
 
-    new ResizeObserver(
-        save
-    ).observe(
-        widget
-    );
+ if(type==='now')
+
+  c=nowBody(d);
+
+
+ if(type==='schedule')
+
+  c=scheduleBody();
+
+
+ w.innerHTML=
+
+  '<div class="head">'+
+
+   '<span class="title">'+
+   title+
+   '</span>'+
+
+   '<button class="mini" title="Minimera">−</button>'+
+
+   '<button class="close" title="Stäng">×</button>'+
+
+  '</div>'+
+
+  '<div class="body">'+
+  c+
+  '</div>';
+
+
+ board.appendChild(w);
+
+ wire(w);
+
+ drag(w);
+
+ save();
+
+ return w;
 
 }
 
 
-/* =========================
-   VANLIGA KNAPPAR
-========================= */
+/* ---------------- NU-FÖNSTER ---------------- */
 
-document
-.getElementById("btnNote")
-.addEventListener(
-    "click",
-    () => add("note")
-);
+function nowBody(d){
+
+ const links=d.links?
+  JSON.parse(d.links):
+  [];
+
+ return (
+
+  '<div class="nowTitle">'+
+  esc(d.subject||'Dagens lektion')+
+  '</div>'+
+
+  '<div class="nowActions">'+
+
+   '<button onclick="nowAddLink(this)">'+
+   '🔗 Lägg till länk'+
+   '</button>'+
+
+   '<button onclick="nowAddLink(this,\'UR Play\')">'+
+   '▶️ UR Play'+
+   '</button>'+
+
+  '</div>'+
+
+  '<textarea class="nowNote" '+
+  'data-k="note" '+
+  'placeholder="Skriv instruktioner, uppgifter eller bildstödsord...">'+
+  esc(d.note||'')+
+  '</textarea>'+
+
+  '<div class="nowLinkList">'+
+
+   links.map(x=>
+
+    '<a class="nowLink" '+
+    'href="'+esc(x.url)+'" '+
+    'target="_blank" '+
+    'rel="noopener noreferrer">'+
+    '▶️ '+esc(x.name)+
+    '</a>'
+
+   ).join('')+
+
+  '</div>'
+
+ );
+
+}
 
 
-document
-.getElementById("btnDay")
-.addEventListener(
-    "click",
-    () => add("day")
-);
+function nowAddLink(btn,preset){
+
+ const w=btn.closest('.widget');
+
+ let name,url;
+
+ if(preset){
+
+  name=preset;
+
+  url='https://urplay.se/';
+
+ }else{
+
+  name=prompt(
+   'Namn på länken, t.ex. "Film om vikingatiden":',
+   ''
+  );
+
+  if(!name)return;
+
+  url=prompt(
+   'Klistra in webbadressen:',
+   'https://'
+  );
+
+  if(!url)return;
+
+ }
+
+ if(!/^https?:\/\//i.test(url))
+
+  url='https://'+url;
 
 
-document
-.getElementById("btnLinks")
-.addEventListener(
-    "click",
-    () => add("links")
-);
+ let links=[];
+
+ try{
+
+  links=JSON.parse(
+   w.querySelector(
+    '[data-k="links"]'
+   )?.value||'[]'
+  );
+
+ }catch(e){}
 
 
-document
-.getElementById("btnClock")
-.addEventListener(
-    "click",
-    () => add("clock")
-);
+ links.push({
+  name,
+  url
+ });
 
 
-document
-.getElementById("btnTimer")
-.addEventListener(
-    "click",
-    () => add("timer")
-);
+ let hidden=w.querySelector(
+  '[data-k="links"]'
+ );
 
 
-/* =========================
-   VANLIG BILD
-========================= */
+ if(!hidden){
 
-document
-.getElementById("btnImage")
-.addEventListener(
-    "click",
-    () => {
+  hidden=document.createElement('input');
 
-        imageFile.click();
+  hidden.type='hidden';
+
+  hidden.dataset.k='links';
+
+  w.querySelector('.body')
+   .appendChild(hidden);
+
+ }
+
+
+ hidden.value=
+  JSON.stringify(links);
+
+
+ const a=document.createElement('a');
+
+ a.className='nowLink';
+
+ a.href=url;
+
+ a.target='_blank';
+
+ a.rel='noopener noreferrer';
+
+ a.textContent=
+  '▶️ '+name;
+
+
+ w.querySelector(
+  '.nowLinkList'
+ ).appendChild(a);
+
+
+ save();
+
+}
+
+
+/* ---------------- SCHEMA ---------------- */
+
+function scheduleBody(){
+
+ return (
+
+  '<div class="row">'+
+
+   '<button class="action addRow">'+
+   '＋ Rad'+
+   '</button>'+
+
+   '<button class="action secondary preview">'+
+   'Visa'+
+   '</button>'+
+
+  '</div>'+
+
+  '<p class="muted">'+
+  'Bygg dagens schema en gång och använd det som stöd på tavlan.'+
+  '</p>'+
+
+  '<div class="scheduleRows"></div>'+
+
+  '<div class="schedulePreview"></div>'
+
+ );
+
+}
+
+
+/* ---------------- WIDGET EVENTS ---------------- */
+
+function wire(w){
+
+ w.querySelector('.close').onclick=()=>{
+
+  w.remove();
+
+  save();
+
+ };
+
+
+ w.querySelector('.mini').onclick=()=>{
+
+  w.classList.toggle('minimized');
+
+  save();
+
+ };
+
+
+ w.querySelectorAll('[data-k]')
+  .forEach(e=>
+   e.addEventListener(
+    'input',
+    save
+   )
+  );
+
+
+ if(w.dataset.type==='day'){
+
+  const f=()=>{
+
+   let n=new Date();
+
+   w.querySelector('.today')
+    .textContent=
+    n.toLocaleDateString(
+     'sv-SE',
+     {weekday:'long'}
+    );
+
+   w.querySelector('.date')
+    .textContent=
+    n.toLocaleDateString(
+     'sv-SE',
+     {
+      day:'numeric',
+      month:'long',
+      year:'numeric'
+     }
+    );
+
+  };
+
+  f();
+
+  setInterval(f,60000);
+
+ }
+
+
+ if(w.dataset.type==='clock'){
+
+  const f=()=>
+
+   w.querySelector('.clockText')
+    .textContent=
+    new Date().toLocaleTimeString(
+     'sv-SE',
+     {
+      hour:'2-digit',
+      minute:'2-digit',
+      second:'2-digit'
+     }
+    );
+
+  f();
+
+  setInterval(f,1000);
+
+ }
+
+
+ if(w.dataset.type==='timer'){
+
+  let t=null;
+
+  let left=300;
+
+  const draw=()=>{
+
+   w.querySelector('.timerNum')
+    .textContent=
+    String(Math.floor(left/60))
+     .padStart(2,'0')+
+    ':'+
+    String(left%60)
+     .padStart(2,'0');
+
+  };
+
+
+  w.querySelector('.start').onclick=()=>{
+
+   clearInterval(t);
+
+   left=
+    Math.max(
+     1,
+     +w.querySelector(
+      '[data-k="minutes"]'
+     ).value||5
+    )*60;
+
+   draw();
+
+   t=setInterval(()=>{
+
+    left--;
+
+    draw();
+
+    if(left<=0){
+
+     clearInterval(t);
+
+     alert('Tiden är slut!');
 
     }
-);
 
+   },1000);
 
-imageFile.addEventListener(
-    "change",
-    event => {
+  };
 
 
-        const file =
-            event.target.files[0];
+  w.querySelector('.stop').onclick=()=>
 
+   clearInterval(t);
 
-        if(!file) {
+ }
 
-            return;
-        }
 
+ if(w.dataset.type==='schedule'){
 
-        const widget =
-            add("image");
+  const rows=
+   w.querySelector('.scheduleRows');
 
+  const preview=
+   w.querySelector('.schedulePreview');
 
-        const url =
-            URL.createObjectURL(
-                file
-            );
 
+  const icons={
 
-        widget._url =
-            url;
+   svenska:'🇸🇪',
 
+   sva:'🇸🇪',
 
-        widget
-            .querySelector("img")
-            .src =
-            url;
+   matte:'➗',
 
+   matematik:'➗',
 
-        event.target.value =
-            "";
+   so:'🌍',
 
-    }
-);
+   no:'🔬',
 
+   engelska:'🇬🇧',
 
-/* =========================
-   SCHEMA
-========================= */
+   musik:'🎵',
 
-/*
-Klick på Schema öppnar datorns
-filväljare.
+   bild:'🎨',
 
-Du kan välja en eller flera
-bilder/skärmdumpar.
-*/
+   idrott:'⚽',
 
-document
-.getElementById("btnSchedule")
-.addEventListener(
-    "click",
-    () => {
+   rast:'🛝',
 
-        scheduleFile.click();
+   lunch:'🍽️',
 
-    }
-);
+   slöjd:'🧵'
 
+  };
 
-scheduleFile.addEventListener(
-    "change",
-    event => {
 
+  const iconFor=t=>{
 
-        const files =
-            Array.from(
-                event.target.files
-            );
+   let q=t.toLowerCase();
 
+   for(const k in icons)
 
-        if(
-            files.length === 0
-        ) {
+    if(q.includes(k))
 
-            return;
-        }
+     return icons[k];
 
+   return '📘';
 
-        files.forEach(
-            (file,index) => {
+  };
 
 
-                if(
-                    !file.type
-                    .startsWith("image/")
-                ) {
+  function row(subject='',time=''){
 
-                    return;
-                }
+   let r=
+    document.createElement('div');
 
+   r.className='scheduleRow';
 
-                const widget =
-                    add(
-                        "schedule",
-                        {
-                            x:
-                                70 +
-                                index * 35,
 
-                            y:
-                                45 +
-                                index * 35,
+   r.innerHTML=
 
-                            width:
-                                500,
+    '<div class="scheduleIcon">'+
+    iconFor(subject)+
+    '</div>'+
 
-                            height:
-                                600
-                        }
-                    );
+    '<input class="schSubject" '+
+    'placeholder="Ämne/aktivitet" '+
+    'value="'+esc(subject)+'">'+
 
+    '<input class="schTime" '+
+    'placeholder="08:10–09:00" '+
+    'value="'+esc(time)+'">'+
 
-                const url =
-                    URL.createObjectURL(
-                        file
-                    );
+    '<button class="del">×</button>';
 
 
-                widget._url =
-                    url;
+   r.querySelector('.del').onclick=()=>
 
+    r.remove();
 
-                const image =
-                    widget.querySelector(
-                        "img"
-                    );
 
+   r.querySelector('.schSubject').oninput=()=>{
 
-                image.src =
-                    url;
+    r.querySelector(
+     '.scheduleIcon'
+    ).textContent=
+     iconFor(
+      r.querySelector(
+       '.schSubject'
+      ).value
+     );
 
+   };
 
-                const title =
-                    widget.querySelector(
-                        ".head span"
-                    );
 
+   rows.appendChild(r);
 
-                title.textContent =
-                    file.name
-                    .replace(
-                        /\.[^/.]+$/,
-                        ""
-                    );
+  }
 
-            }
-        );
 
+  function makePreview(){
 
-        event.target.value =
-            "";
+   preview.innerHTML=
 
-    }
-);
+    [...rows.children]
+     .map(r=>
 
+      '<div class="scheduleCard">'+
 
-/* =========================
-   BAKGRUND
-========================= */
+       '<div class="pic">'+
+       r.querySelector(
+        '.scheduleIcon'
+       ).textContent+
+       '</div>'+
 
-document
-.getElementById(
-    "btnBackground"
-)
-.addEventListener(
-    "click",
-    () => {
+       '<div class="subject">'+
+       esc(
+        r.querySelector(
+         '.schSubject'
+        ).value||
+        'Aktivitet'
+       )+
+       '</div>'+
 
-        bgFile.click();
+       '<div class="time">'+
+       esc(
+        r.querySelector(
+         '.schTime'
+        ).value
+       )+
+       '</div>'+
 
-    }
-);
+      '</div>'
 
+     ).join('');
 
-bgFile.addEventListener(
-    "change",
-    event => {
+  }
 
 
-        const file =
-            event.target.files[0];
+  w.querySelector('.addRow').onclick=()=>row();
 
+  w.querySelector('.preview').onclick=
+   makePreview;
 
-        if(!file) {
 
-            return;
-        }
+  row(
+   'Svenska',
+   '08:10–09:00'
+  );
 
+  row(
+   'Rast',
+   '09:00–09:20'
+  );
 
-        if(backgroundURL) {
+  row(
+   'Matematik',
+   '09:20–10:10'
+  );
 
-            URL.revokeObjectURL(
-                backgroundURL
-            );
-        }
+  row(
+   'Lunch',
+   '11:20–12:00'
+  );
 
+ }
 
-        backgroundURL =
-            URL.createObjectURL(
-                file
-            );
+}
 
 
-        document.body
-            .style
-            .backgroundImage =
-            "none";
+/* ---------------- DRAG ---------------- */
 
+function drag(w){
 
-        bgVideo.pause();
+ const h=w.querySelector('.head');
 
+ let on=false;
 
-        bgVideo.style.display =
-            "none";
+ let sx,sy,ox,oy;
 
 
-        bgVideo.removeAttribute(
-            "src"
-        );
+ h.onpointerdown=e=>{
 
+  if(e.target.closest('button'))
+   return;
 
-/* BILD / GIF */
+  on=true;
 
-        if(
-            file.type
-            .startsWith("image/")
-        ) {
+  sx=e.clientX;
+  sy=e.clientY;
 
-            document.body
-                .style
-                .backgroundImage =
-                'url("' +
-                backgroundURL +
-                '")';
+  ox=w.offsetLeft;
+  oy=w.offsetTop;
 
+  h.setPointerCapture(
+   e.pointerId
+  );
 
-            document.body
-                .style
-                .backgroundSize =
-                "cover";
+ };
 
 
-            document.body
-                .style
-                .backgroundPosition =
-                "center";
+ h.onpointermove=e=>{
 
+  if(on){
 
-            document.body
-                .style
-                .backgroundRepeat =
-                "no-repeat";
+   w.style.left=
+    Math.max(
+     0,
+     ox+e.clientX-sx
+    )+'px';
 
-        }
+   w.style.top=
+    Math.max(
+     0,
+     oy+e.clientY-sy
+    )+'px';
 
+  }
 
-/* VIDEO */
+ };
 
-        else if(
-            file.type
-            .startsWith("video/")
-        ) {
 
-            bgVideo.src =
-                backgroundURL;
+ h.onpointerup=()=>{
 
+  on=false;
 
-            bgVideo.style.display =
-                "block";
+  save();
 
+ };
 
-            bgVideo.load();
 
+ new ResizeObserver(save)
+  .observe(w);
 
-            bgVideo
-                .play()
-                .catch(
-                    () => {}
-                );
+}
 
-        }
 
+/* ---------------- BILD ---------------- */
 
-        else {
+function loadImage(input,id){
 
-            alert(
-                "Den här filtypen kan inte användas som bakgrund."
-            );
-        }
+ const f=input.files[0];
 
+ if(!f)return;
 
-        event.target.value =
-            "";
+ const w=
+  document.getElementById(id);
 
-    }
-);
+ const img=
+  w.querySelector('img');
 
+ img.src=
+  URL.createObjectURL(f);
 
-/* =========================
-   ÅTERSKAPA SPARADE RUTOR
-========================= */
+ input.value='';
 
-if(
-    state.widgets &&
-    Array.isArray(
-        state.widgets
-    )
-) {
+ save();
 
-    state.widgets
-        .forEach(
-            savedWidget => {
+}
 
-                add(
-                    savedWidget.type,
-                    savedWidget
-                );
 
-            }
-        );
+document.getElementById(
+ 'imageFile'
+).onchange=e=>{
+
+ const f=e.target.files[0];
+
+ if(!f)return;
+
+ const w=add('image');
+
+ w.querySelector('img').src=
+  URL.createObjectURL(f);
+
+ e.target.value='';
+
+};
+
+
+/* ---------------- FULLSKÄRM ---------------- */
+
+function fullscreen(){
+
+ document.documentElement
+  .requestFullscreen?.();
+
+}
+
+
+/* ---------------- SPARAD BAKGRUND ---------------- */
+
+function applySavedBg(){
+
+ if(!state.background)
+  return;
+
+ if(
+  state.background.kind==='css'
+ ){
+
+  document.body.style.background=
+   state.background.value;
+
+ }
+
+}
+
+applySavedBg();
+
+
+/* ---------------- ÅTERSTÄLL WIDGETS ---------------- */
+
+if(state.widgets?.length){
+
+ state.widgets.forEach(
+  x=>add(x.type,x)
+ );
+
+}else{
+
+ add('day');
+
+ add('schedule');
+
+ add('clock');
+
 }
 
 </script>
