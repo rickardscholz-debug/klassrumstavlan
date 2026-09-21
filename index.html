@@ -1,1377 +1,3174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Klassrumstavlan</title>
+
 <style>
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;overflow:hidden;color:#202735}
-body{background:#6b8798 center/cover no-repeat}
-#bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;display:none}
-#board{position:fixed;inset:0 0 112px}
-
-.widget{
- position:absolute;min-width:240px;min-height:150px;width:360px;height:220px;
- background:#fffffff2;border:1px solid #ffffffaa;border-radius:18px;
- box-shadow:0 12px 35px #0004;resize:both;overflow:hidden;z-index:10
-}
-.head{
- height:44px;display:flex;align-items:center;gap:8px;padding:7px 10px;
- background:#f3f6f8e8;cursor:move;font-weight:800;font-size:14px;
- border-bottom:1px solid #dfe6eb
-}
-.head .title{display:flex;align-items:center;gap:7px}
-.head .close,.head .mini{
- margin-left:auto;border:0;background:transparent;font-size:19px;cursor:pointer;
- width:28px;height:28px;border-radius:8px
-}
-.head .mini{margin-left:auto;font-size:16px}
-.head .mini:hover,.head .close:hover{background:#e3eaf0}
-.body{height:calc(100% - 44px);padding:13px;overflow:auto}
-.widget.minimized{height:44px!important;min-height:44px!important;resize:none}
-.widget.minimized .body{display:none}
-.widget.minimized .close{margin-left:0}
-.widget.minimized .mini{margin-left:auto}
-
-.note .body{padding:0}
-.note textarea{
- width:100%;height:100%;border:0;outline:0;resize:none;background:#fffdf1;
- padding:18px;font:400 20px/1.5 Arial,sans-serif;color:#4c4c43
-}
-.clockText,.timerNum{
- display:flex;align-items:center;justify-content:center;
- height:100%;font-size:54px;font-weight:850
-}
-.today{font-size:29px;font-weight:850;text-transform:capitalize}
-.date{font-size:21px;margin-top:6px}
-.muted{color:#64748b;font-size:12px}
-
-.linksGrid{
- display:grid;grid-template-columns:repeat(2,1fr);gap:9px
-}
-.serviceLink{
- display:flex;align-items:center;justify-content:center;
- padding:14px 9px;border:0;border-radius:12px;background:#edf2f6;
- color:#202735;font-size:15px;font-weight:750;
- text-decoration:none;text-align:center
-}
-.serviceLink:hover{background:#dfe8ee}
-
-.row{
- display:flex;gap:7px;align-items:center;flex-wrap:wrap
-}
-.row input{
- padding:8px;border:1px solid #cbd5e1;border-radius:9px
-}
-.action{
- border:0;border-radius:9px;padding:9px 11px;
- background:#334155;color:#fff;cursor:pointer
-}
-.action.secondary{
- background:#e8eef3;color:#202735
+*{
+  box-sizing:border-box;
 }
 
-.toolbar{
- position:fixed;z-index:1000;left:50%;bottom:18px;
- transform:translateX(-50%);min-height:78px;max-width:96vw;
- background:#fff;border-radius:19px;
- box-shadow:0 10px 35px #0004;display:flex;
- align-items:center;gap:3px;padding:7px 10px;
- overflow-x:auto
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+  color:#172033;
 }
+
+body{
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transition:background-image .3s ease;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+#toolbar{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:10000;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:10px 14px;
+
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:22px;
+
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
+}
+
 .tool{
- min-width:76px;height:64px;border:0;background:transparent;
- border-radius:12px;cursor:pointer;
- display:flex;flex-direction:column;align-items:center;
- justify-content:center;gap:5px;color:#202735;
- font-size:12px;white-space:nowrap
-}
-.tool:hover{background:#edf2f8}
-.ico{font-size:27px;line-height:27px}
-.filetool input{display:none}
+  width:62px;
+  height:62px;
+  border:0;
+  background:transparent;
+  border-radius:16px;
+  cursor:pointer;
 
-.popover{
- position:fixed;z-index:1200;left:50%;bottom:105px;
- transform:translateX(-50%);width:min(850px,94vw);
- max-height:60vh;overflow:auto;background:#fff;
- border-radius:18px;box-shadow:0 15px 45px #0005;
- padding:14px;display:none
-}
-.popover.open{display:block}
-.popHead{
- display:flex;align-items:center;gap:8px;margin-bottom:10px
-}
-.popHead h3{margin:0;font-size:17px}
-.popClose{
- margin-left:auto;border:0;background:#edf2f6;
- border-radius:9px;padding:7px 10px;cursor:pointer
-}
-.bgCategories{
- display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px
-}
-.bgCategories button{
- border:0;border-radius:9px;padding:8px 10px;
- background:#edf2f6;cursor:pointer
-}
-.bgCategories button.active{
- background:#334155;color:#fff
-}
-.bgGrid{
- display:grid;grid-template-columns:repeat(5,1fr);gap:8px
-}
-.bgChoice{
- height:82px;border:2px solid transparent;
- border-radius:12px;background-size:cover;
- background-position:center;cursor:pointer;
- box-shadow:inset 0 0 0 999px #0001
-}
-.bgChoice:hover{border-color:#334155}
-.bgLabel{
- display:block;color:#fff;text-shadow:0 1px 4px #000;
- font-weight:800;font-size:12px;padding:8px
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+
+  color:#172033;
+  font-size:11px;
 }
 
-.scheduleRows{
- display:flex;flex-direction:column;gap:7px
+.tool:hover{
+  background:#f0f3f8;
 }
+
+.toolIcon{
+  font-size:27px;
+  line-height:27px;
+}
+
+.toolText{
+  white-space:nowrap;
+}
+
+/* =========================
+   GEMENSAMT FÖNSTER
+========================= */
+
+.window{
+  position:absolute;
+
+  min-width:280px;
+  min-height:180px;
+
+  width:420px;
+  height:300px;
+
+  background:rgba(255,255,255,.98);
+
+  border:1px solid rgba(20,30,50,.12);
+  border-radius:18px;
+
+  box-shadow:0 12px 35px rgba(0,0,0,.20);
+
+  overflow:hidden;
+
+  resize:both;
+
+  z-index:100;
+}
+
+.window.hidden{
+  display:none;
+}
+
+.window.minimized{
+  width:230px !important;
+  height:58px !important;
+  min-width:230px;
+  min-height:58px;
+  resize:none;
+}
+
+.window.minimized .windowBody{
+  display:none;
+}
+
+.windowHeader{
+  height:58px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 12px 0 17px;
+
+  background:#ffffff;
+
+  border-bottom:1px solid #e7eaf0;
+
+  cursor:move;
+
+  user-select:none;
+}
+
+.windowTitle{
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  font-size:17px;
+  font-weight:700;
+}
+
+.windowTitleIcon{
+  font-size:23px;
+}
+
+.windowButtons{
+  display:flex;
+  gap:5px;
+}
+
+.windowButton{
+  width:34px;
+  height:34px;
+
+  border:0;
+  border-radius:10px;
+
+  background:#f3f5f8;
+
+  cursor:pointer;
+
+  font-size:17px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.windowButton:hover{
+  background:#e7ebf1;
+}
+
+.windowBody{
+  width:100%;
+  height:calc(100% - 58px);
+  padding:16px;
+
+  overflow:auto;
+}
+
+/* =========================
+   ANTECKNING
+========================= */
+
+.noteArea{
+  width:100%;
+  height:100%;
+
+  border:0;
+  outline:0;
+  resize:none;
+
+  font-size:18px;
+  line-height:1.55;
+
+  color:#172033;
+  background:white;
+}
+
+/* =========================
+   REDIGERBAR TEXT
+========================= */
+
+.editor{
+  width:100%;
+  min-height:150px;
+
+  padding:14px;
+
+  border:1px solid #dfe4ec;
+  border-radius:12px;
+
+  outline:none;
+
+  font-size:17px;
+  line-height:1.5;
+
+  background:#fff;
+}
+
+.editor:focus{
+  border-color:#aeb8c9;
+  box-shadow:0 0 0 3px rgba(100,120,160,.08);
+}
+
+.editor img{
+  max-width:100%;
+  height:auto;
+
+  border-radius:10px;
+  margin:8px 0;
+
+  display:block;
+}
+
+/* =========================
+   REDIGERINGSKNAPPAR
+========================= */
+
+.editToolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+
+  margin-bottom:10px;
+}
+
+.editButton{
+  border:1px solid #dce1e8;
+
+  background:#f7f8fa;
+
+  padding:8px 11px;
+
+  border-radius:9px;
+
+  cursor:pointer;
+
+  font-size:13px;
+}
+
+.editButton:hover{
+  background:#eceff4;
+}
+
+/* =========================
+   DAGENS PLAN
+========================= */
+
+.dayHeading{
+  width:100%;
+
+  padding:10px 12px;
+
+  margin-bottom:10px;
+
+  border:1px solid #e1e5eb;
+  border-radius:10px;
+
+  font-size:22px;
+  font-weight:700;
+
+  outline:none;
+}
+
+.dayHeading:focus{
+  border-color:#aeb8c9;
+}
+
+.dayDate{
+  color:#687386;
+  margin-bottom:12px;
+}
+
+/* =========================
+   NU
+========================= */
+
+.nuSubject{
+  width:100%;
+
+  padding:10px 12px;
+
+  border:1px solid #e1e5eb;
+  border-radius:10px;
+
+  font-size:20px;
+  font-weight:700;
+
+  outline:none;
+
+  margin-bottom:10px;
+}
+
+.nuSubject:focus{
+  border-color:#aeb8c9;
+}
+
+/* =========================
+   LÄNKAR
+========================= */
+
+.linkList{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.linkItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:11px 13px;
+
+  background:#f6f8fb;
+
+  border-radius:10px;
+
+  text-decoration:none;
+
+  color:#172033;
+
+  border:1px solid #e6e9ef;
+}
+
+.linkItem:hover{
+  background:#edf1f6;
+}
+
+/* =========================
+   SCHEMA
+========================= */
+
+.schedule{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
 .scheduleRow{
- display:grid;grid-template-columns:45px 1fr 105px 34px;
- gap:6px;align-items:center;background:#f8fafc;
- border:1px solid #e2e8f0;border-radius:10px;padding:6px
-}
-.scheduleIcon{font-size:27px;text-align:center}
-.scheduleRow input{
- width:100%;border:1px solid #cbd5e1;
- border-radius:7px;padding:7px
-}
-.scheduleRow .del{
- border:0;background:transparent;font-size:18px;cursor:pointer
-}
-.schedulePreview{
- margin-top:10px;border-top:1px solid #e2e8f0;padding-top:9px
-}
-.scheduleCard{
- display:grid;grid-template-columns:44px 1fr auto;
- align-items:center;gap:8px;
- border-bottom:2px solid #334155;padding:7px 3px
-}
-.scheduleCard .pic{font-size:28px;text-align:center}
-.scheduleCard .subject{font-weight:800}
-.scheduleCard .time{
- font-weight:700;color:#475569
+  display:grid;
+  grid-template-columns:80px 1fr 40px 35px;
+
+  align-items:center;
+
+  gap:7px;
 }
 
-.nowActions{
- display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px
+.scheduleInput{
+  min-width:0;
+
+  padding:8px;
+
+  border:1px solid #dfe4eb;
+  border-radius:8px;
+
+  outline:none;
 }
-.nowActions button{
- border:0;border-radius:9px;padding:8px 10px;
- background:#edf2f6;cursor:pointer
+
+.scheduleInput:focus{
+  border-color:#aeb8c9;
 }
-.nowTitle{
- font-size:22px;font-weight:850;margin-bottom:8px
+
+.scheduleDelete{
+  border:0;
+
+  width:30px;
+  height:30px;
+
+  border-radius:8px;
+
+  background:#f2f4f7;
+
+  cursor:pointer;
 }
-.nowNote{
- width:100%;min-height:80px;
- border:1px solid #d6dee5;border-radius:10px;
- padding:10px;resize:vertical
+
+/* =========================
+   KLOCKA
+========================= */
+
+.clock{
+  height:100%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  flex-direction:column;
+
+  gap:8px;
 }
-.nowLinkList{
- display:flex;flex-direction:column;gap:6px;margin-top:8px
+
+.clockTime{
+  font-size:55px;
+  font-weight:700;
 }
-.nowLink{
- display:flex;align-items:center;gap:8px;
- background:#edf2f6;border-radius:9px;padding:8px 10px;
- text-decoration:none;color:#202735;font-weight:700
+
+.clockDate{
+  font-size:17px;
+  color:#6c7585;
 }
-.smallInput{
- width:100%;padding:8px;
- border:1px solid #cbd5e1;border-radius:9px
+
+/* =========================
+   TIMER
+========================= */
+
+.timer{
+  height:100%;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  gap:15px;
 }
+
+.timerDisplay{
+  font-size:60px;
+  font-weight:700;
+}
+
+.timerControls{
+  display:flex;
+  gap:8px;
+}
+
+.timerControls button{
+  padding:9px 14px;
+
+  border:1px solid #dce1e8;
+  border-radius:9px;
+
+  background:#f6f8fa;
+
+  cursor:pointer;
+}
+
+/* =========================
+   BAKGRUNDSMENY
+========================= */
+
+#backgroundPanel{
+  position:fixed;
+
+  top:0;
+  right:0;
+
+  width:min(780px,100vw);
+  height:100vh;
+
+  background:#fff;
+
+  z-index:20000;
+
+  box-shadow:-8px 0 35px rgba(0,0,0,.18);
+
+  display:none;
+
+  overflow:auto;
+}
+
+#backgroundPanel.open{
+  display:block;
+}
+
+.bgHeader{
+  position:sticky;
+  top:0;
+
+  z-index:5;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:22px 25px;
+
+  background:white;
+
+  border-bottom:1px solid #e8ebef;
+}
+
+.bgHeader h2{
+  margin:0;
+
+  font-size:25px;
+}
+
+.bgClose{
+  width:44px;
+  height:44px;
+
+  border:1px solid #e0e4ea;
+  border-radius:50%;
+
+  background:white;
+
+  cursor:pointer;
+
+  font-size:25px;
+}
+
+.bgSection{
+  padding:20px 25px 5px;
+}
+
+.bgSectionTitle{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.bgGrid{
+  display:grid;
+
+  grid-template-columns:repeat(4,1fr);
+
+  gap:12px;
+}
+
+.bgCard{
+  height:100px;
+
+  border-radius:9px;
+
+  overflow:hidden;
+
+  cursor:pointer;
+
+  position:relative;
+
+  border:2px solid transparent;
+
+  background-size:cover;
+  background-position:center;
+}
+
+.bgCard:hover{
+  border-color:#75839a;
+}
+
+.bgCard img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.bgAdd{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  flex-direction:column;
+
+  gap:7px;
+
+  background:#f4f6f9;
+
+  border:2px dashed #c8ced8;
+
+  color:#536074;
+
+  font-weight:600;
+}
+
+.bgAdd span:first-child{
+  font-size:28px;
+}
+
+/* =========================
+   FILER
+========================= */
+
+.hiddenFile{
+  display:none;
+}
+
+/* =========================
+   DAGENS SCHEMA
+========================= */
+
+.daySchedule{
+  margin-top:14px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.dayScheduleRow{
+  display:grid;
+
+  grid-template-columns:75px 1fr 38px;
+
+  gap:8px;
+
+  align-items:center;
+}
+
+.dayScheduleRow input{
+  min-width:0;
+
+  border:1px solid #dfe4eb;
+
+  border-radius:9px;
+
+  padding:9px;
+
+  outline:none;
+}
+
+.dayScheduleRow input:focus{
+  border-color:#aeb8c9;
+}
+
+.dayScheduleRow button{
+  width:32px;
+  height:32px;
+
+  border:0;
+  border-radius:8px;
+
+  background:#f1f3f6;
+
+  cursor:pointer;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media(max-width:700px){
- .toolbar{left:7px;right:7px;transform:none}
- .tool{min-width:68px}
- .bgGrid{grid-template-columns:repeat(3,1fr)}
+
+  #toolbar{
+    max-width:95vw;
+
+    overflow-x:auto;
+
+    justify-content:flex-start;
+  }
+
+  .tool{
+    flex:0 0 58px;
+  }
+
+  .bgGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .window{
+    width:90vw;
+    height:65vh;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<video id="bgVideo" muted loop playsinline></video>
+<!-- =====================================================
+     TOOLBAR
+===================================================== -->
 
-<div id="board"></div>
+<div id="toolbar">
 
-<div id="backgroundPanel" class="popover">
-
- <div class="popHead">
-  <h3>🏞️ Välj bakgrund</h3>
-  <button class="popClose"
-          onclick="closePanel('backgroundPanel')">
-    Stäng
+  <button class="tool" onclick="createNote()">
+    <span class="toolIcon">📝</span>
+    <span class="toolText">Anteckning</span>
   </button>
- </div>
 
- <div class="bgCategories" id="bgCategories"></div>
+  <button class="tool" onclick="createNU()">
+    <span class="toolIcon">📖</span>
+    <span class="toolText">NU</span>
+  </button>
 
- <div class="bgGrid" id="bgGrid"></div>
+  <button class="tool" onclick="createDay()">
+    <span class="toolIcon">📅</span>
+    <span class="toolText">Dagen</span>
+  </button>
+
+  <button class="tool" onclick="createSchedule()">
+    <span class="toolIcon">🗓️</span>
+    <span class="toolText">Schema</span>
+  </button>
+
+  <button class="tool" onclick="createLinks()">
+    <span class="toolIcon">🔗</span>
+    <span class="toolText">Länkar</span>
+  </button>
+
+  <button class="tool" onclick="createClock()">
+    <span class="toolIcon">🕒</span>
+    <span class="toolText">Klocka</span>
+  </button>
+
+  <button class="tool" onclick="createTimer()">
+    <span class="toolIcon">⏱️</span>
+    <span class="toolText">Timer</span>
+  </button>
+
+  <button class="tool" onclick="openBackgrounds()">
+    <span class="toolIcon">🎨</span>
+    <span class="toolText">Bakgrund</span>
+  </button>
+
+  <button class="tool" onclick="toggleFullscreen()">
+    <span class="toolIcon">⛶</span>
+    <span class="toolText">Helskärm</span>
+  </button>
+
+</div>
+
+
+<!-- =====================================================
+     BAKGRUNDSPANEL
+===================================================== -->
+
+<div id="backgroundPanel">
+
+  <div class="bgHeader">
+    <h2>🎨 Bakgrunder</h2>
+
+    <button class="bgClose" onclick="closeBackgrounds()">×</button>
+  </div>
+
+  <div class="bgSection">
+
+    <div class="bgSectionTitle">
+      Mina bakgrunder
+    </div>
+
+    <div id="customBackgrounds" class="bgGrid">
+
+      <label class="bgCard bgAdd">
+        <span>＋</span>
+        <span>Lägg till egen</span>
+
+        <input
+          id="backgroundUpload"
+          class="hiddenFile"
+          type="file"
+          accept="image/*"
+        >
+      </label>
+
+    </div>
+
+  </div>
+
+
+  <div class="bgSection">
+
+    <div class="bgSectionTitle">
+      Lugna bakgrunder
+    </div>
+
+    <div class="bgGrid">
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#dfe8e8,#8ea7a7)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#dfe8e8,#8ea7a7)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#f3eadb,#c9b18d)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#f3eadb,#c9b18d)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#e5e9f2,#aebbd0)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#e5e9f2,#aebbd0)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#e7efe8,#a9c4ad)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#e7efe8,#a9c4ad)')">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="bgSection">
+
+    <div class="bgSectionTitle">
+      Natur
+    </div>
+
+    <div class="bgGrid">
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#426d59,#b5cba9)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#426d59,#b5cba9)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#8ab6c4,#dce7d8)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#8ab6c4,#dce7d8)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#526b82,#d3c9ae)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#526b82,#d3c9ae)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#263b31,#6f9273)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#263b31,#6f9273)')">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="bgSection">
+
+    <div class="bgSectionTitle">
+      Årstider
+    </div>
+
+    <div class="bgGrid">
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#d8e8ef,#ffffff)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#d8e8ef,#ffffff)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#d8c39c,#78935f)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#d8c39c,#78935f)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#d69c68,#b44f45)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#d69c68,#b44f45)')">
+      </div>
+
+      <div
+        class="bgCard"
+        style="background-image:linear-gradient(135deg,#e7edf4,#9aa7b6)"
+        onclick="setBackgroundGradient('linear-gradient(135deg,#e7edf4,#9aa7b6)')">
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
 
-<div class="toolbar">
 
- <button class="tool" onclick="add('note')">
-  <span class="ico">📝</span>
-  <span>Anteckning</span>
- </button>
-
- <button class="tool" onclick="add('now')">
-  <span class="ico">▶️</span>
-  <span>NU</span>
- </button>
-
- <button class="tool" onclick="add('day')">
-  <span class="ico">📅</span>
-  <span>Dagen</span>
- </button>
-
- <button class="tool" onclick="add('schedule')">
-  <span class="ico">📋</span>
-  <span>Schema</span>
- </button>
-
- <button class="tool" onclick="add('links')">
-  <span class="ico">🔗</span>
-  <span>Länkar</span>
- </button>
-
- <button class="tool" onclick="add('clock')">
-  <span class="ico">🕒</span>
-  <span>Klocka</span>
- </button>
-
- <button class="tool" onclick="add('timer')">
-  <span class="ico">⌛</span>
-  <span>Timer</span>
- </button>
-
- <button class="tool"
-         onclick="document.getElementById('backgroundPanel').classList.toggle('open')">
-  <span class="ico">🏞️</span>
-  <span>Bakgrund</span>
- </button>
-
- <label class="tool filetool">
-  <span class="ico">🖼️</span>
-  <span>Bild</span>
-  <input id="imageFile" type="file" accept="image/*">
- </label>
-
- <button class="tool" onclick="fullscreen()">
-  <span class="ico">⛶</span>
-  <span>Helskärm</span>
- </button>
-
-</div>
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
 
 <script>
 
-const board=document.getElementById('board');
-const bgVideo=document.getElementById('bgVideo');
+/* =====================================================
+   LAGRING
+===================================================== */
 
-const KEY='klassrumstavlan-v6';
+const STORAGE_KEY = "klassrumstavlan-v7";
 
-let state={
- widgets:[],
- background:null
+let state = {
+  windows: {},
+  backgrounds: {
+    type:"gradient",
+    value:"linear-gradient(135deg,#dfe8e8,#8ea7a7)"
+  }
 };
 
 try{
- state=JSON.parse(
-  localStorage.getItem(KEY) ||
-  '{"widgets":[],"background":null}'
- );
-}catch(e){}
 
-const esc=s=>String(s??'').replace(
- /[&<>"']/g,
- m=>({
-  '&':'&amp;',
-  '<':'&lt;',
-  '>':'&gt;',
-  '"':'&quot;',
-  "'":'&#39;'
- }[m])
-);
+  const saved = localStorage.getItem(STORAGE_KEY);
 
-const save=()=>{
- state.widgets=[
-  ...document.querySelectorAll('.widget')
- ].map(w=>({
-  id:w.id,
-  type:w.dataset.type,
-  x:w.offsetLeft,
-  y:w.offsetTop,
-  width:w.offsetWidth,
-  height:w.offsetHeight,
-  min:w.classList.contains('minimized'),
-  data:collect(w)
- }));
+  if(saved){
+    state = JSON.parse(saved);
+  }
 
- localStorage.setItem(KEY,JSON.stringify(state));
-};
+}catch(e){
 
-function collect(w){
-
- let d={};
-
- w.querySelectorAll('[data-k]').forEach(e=>{
-  d[e.dataset.k]=e.value;
- });
-
- return d;
-}
-
-
-/* ---------------- BACKGROUNDS ---------------- */
-
-const backgrounds={
-
- "Lugna":[
-
-  ["Strand",
-   "linear-gradient(135deg,#496f80,#d7c7a1)"],
-
-  ["Skog",
-   "linear-gradient(135deg,#193b2b,#789b78,#d8c99d)"],
-
-  ["Himmel",
-   "linear-gradient(135deg,#426b86,#a9c9d7,#e8d8bd)"],
-
-  ["Sjö",
-   "linear-gradient(135deg,#214d68,#78a9b9,#d7d4bd)"],
-
-  ["Solnedgång",
-   "linear-gradient(135deg,#513f52,#b77c63,#e0b67b)"]
-
- ],
-
- "Årstider":[
-
-  ["Vår",
-   "linear-gradient(135deg,#729b72,#b7d39a,#ead5a0)"],
-
-  ["Sommar",
-   "linear-gradient(135deg,#3c7284,#8fc2ba,#e7d19a)"],
-
-  ["Höst",
-   "linear-gradient(135deg,#634f3d,#a8794e,#d5bd8b)"],
-
-  ["Vinter",
-   "linear-gradient(135deg,#6d8492,#b9cad2,#e8edf0)"],
-
-  ["Jul",
-   "linear-gradient(135deg,#315247,#7f9b72,#c7b78a)"]
-
- ],
-
- "Enkla":[
-
-  ["Ljus",
-   "linear-gradient(135deg,#e7edf1,#ffffff)"],
-
-  ["Sand",
-   "linear-gradient(135deg,#d8c6a4,#f1e7d1)"],
-
-  ["Grå",
-   "linear-gradient(135deg,#65727c,#b7c0c5)"],
-
-  ["Grön",
-   "linear-gradient(135deg,#54735d,#a9c1a5)"],
-
-  ["Blå",
-   "linear-gradient(135deg,#52748c,#b4ccd7)"]
-
- ],
-
- "Fantasi":[
-
-  ["Rymd",
-   "linear-gradient(135deg,#20294e,#59688d,#b38c73)"],
-
-  ["Sagobok",
-   "linear-gradient(135deg,#64526d,#b49a76,#d9c8a5)"],
-
-  ["Äventyr",
-   "linear-gradient(135deg,#355f68,#8b9f78,#d4b47a)"],
-
-  ["Hav",
-   "linear-gradient(135deg,#17485d,#4c8da0,#c3d2c8)"],
-
-  ["Moln",
-   "linear-gradient(135deg,#6f8292,#cbd7dc,#f4f1e8)"]
-
- ]
-
-};
-
-
-function renderBgMenu(){
-
- const cats=document.getElementById('bgCategories');
- const grid=document.getElementById('bgGrid');
-
- cats.innerHTML='';
-
- Object.keys(backgrounds).forEach((cat,i)=>{
-
-  const b=document.createElement('button');
-
-  b.textContent=cat;
-
-  b.onclick=()=>showBgCategory(cat);
-
-  if(i===0)b.classList.add('active');
-
-  cats.appendChild(b);
-
- });
-
- showBgCategory(Object.keys(backgrounds)[0]);
+  console.log("Kunde inte läsa sparad information.");
 
 }
 
 
-function showBgCategory(cat){
+/* =====================================================
+   ID
+===================================================== */
 
- document.querySelectorAll(
-  '.bgCategories button'
- ).forEach(
-  b=>b.classList.toggle(
-   'active',
-   b.textContent===cat
-  )
- );
+function uid(prefix="id"){
 
- const grid=document.getElementById('bgGrid');
+  return prefix + "-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).substring(2,8);
 
- grid.innerHTML='';
+}
 
- backgrounds[cat].forEach(([name,bg])=>{
 
-  const b=document.createElement('button');
+/* =====================================================
+   SPARA
+===================================================== */
 
-  b.className='bgChoice';
+function saveState(){
 
-  b.style.background=bg;
+  try{
 
-  b.innerHTML=
-   '<span class="bgLabel">'+
-   name+
-   '</span>';
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(state)
+    );
 
-  b.onclick=()=>{
+  }catch(e){
 
-   document.body.style.backgroundImage='none';
+    console.log("Kunde inte spara.");
 
-   bgVideo.style.display='none';
+  }
 
-   bgVideo.pause();
+}
 
-   state.background={
-    kind:'css',
-    value:bg
-   };
 
-   localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
-   );
+/* =====================================================
+   INDEXERA FÖNSTER
+===================================================== */
 
-   document.body.style.background=bg;
+function registerWindow(win,type){
 
-   closePanel('backgroundPanel');
+  const id = win.dataset.id;
+
+  if(!state.windows[id]){
+
+    state.windows[id] = {
+
+      type:type,
+
+      x:win.offsetLeft,
+      y:win.offsetTop,
+
+      width:win.offsetWidth,
+      height:win.offsetHeight,
+
+      minimized:false
+
+    };
+
+  }
+
+}
+
+
+/* =====================================================
+   SKAPA FÖNSTER
+===================================================== */
+
+function createWindow(type,title,icon){
+
+  const win = document.createElement("div");
+
+  win.className = "window";
+
+  win.dataset.id = uid("window");
+  win.dataset.type = type;
+
+  const existing =
+    Object.keys(state.windows).length;
+
+  win.style.left =
+    (80 + existing * 25) + "px";
+
+  win.style.top =
+    (70 + existing * 25) + "px";
+
+  win.innerHTML = `
+
+    <div class="windowHeader">
+
+      <div class="windowTitle">
+
+        <span class="windowTitleIcon">
+          ${icon}
+        </span>
+
+        <span>
+          ${title}
+        </span>
+
+      </div>
+
+      <div class="windowButtons">
+
+        <button
+          class="windowButton minimizeButton"
+          title="Minimera">
+          −
+        </button>
+
+        <button
+          class="windowButton closeButton"
+          title="Stäng">
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="windowBody"></div>
+
+  `;
+
+  document.body.appendChild(win);
+
+  registerWindow(win,type);
+
+  setupWindow(win);
+
+  return win;
+
+}
+
+
+/* =====================================================
+   FLYTTA FÖNSTER
+===================================================== */
+
+function setupWindow(win){
+
+  const header =
+    win.querySelector(".windowHeader");
+
+  const minimize =
+    win.querySelector(".minimizeButton");
+
+  const close =
+    win.querySelector(".closeButton");
+
+
+  /* DRAG */
+
+  let dragging = false;
+
+  let startX = 0;
+  let startY = 0;
+
+  let startLeft = 0;
+  let startTop = 0;
+
+
+  header.addEventListener("mousedown",e=>{
+
+    if(
+      e.target.closest(".windowButton")
+    ){
+      return;
+    }
+
+    dragging = true;
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    startLeft = win.offsetLeft;
+    startTop = win.offsetTop;
+
+    document.body.style.userSelect =
+      "none";
+
+  });
+
+
+  document.addEventListener("mousemove",e=>{
+
+    if(!dragging) return;
+
+    const dx =
+      e.clientX - startX;
+
+    const dy =
+      e.clientY - startY;
+
+    win.style.left =
+      Math.max(0,startLeft + dx) + "px";
+
+    win.style.top =
+      Math.max(0,startTop + dy) + "px";
+
+  });
+
+
+  document.addEventListener("mouseup",()=>{
+
+    if(!dragging) return;
+
+    dragging = false;
+
+    document.body.style.userSelect =
+      "";
+
+    saveWindowState(win);
+
+  });
+
+
+  /* MINIMERA */
+
+  minimize.addEventListener("click",()=>{
+
+    win.classList.toggle("minimized");
+
+    saveWindowState(win);
+
+  });
+
+
+  /* STÄNG */
+
+  close.addEventListener("click",()=>{
+
+    delete state.windows[win.dataset.id];
+
+    win.remove();
+
+    saveState();
+
+  });
+
+
+  /* RESIZE */
+
+  if(window.ResizeObserver){
+
+    const observer =
+      new ResizeObserver(()=>{
+
+        if(!win.classList.contains("minimized")){
+
+          saveWindowState(win);
+
+        }
+
+      });
+
+    observer.observe(win);
+
+  }
+
+}
+
+
+/* =====================================================
+   SPARA FÖNSTERPOSITION
+===================================================== */
+
+function saveWindowState(win){
+
+  const id =
+    win.dataset.id;
+
+  if(!state.windows[id]) return;
+
+  state.windows[id] = {
+
+    ...state.windows[id],
+
+    x:win.offsetLeft,
+
+    y:win.offsetTop,
+
+    width:win.offsetWidth,
+
+    height:win.offsetHeight,
+
+    minimized:
+      win.classList.contains("minimized")
 
   };
 
-  grid.appendChild(b);
-
- });
+  saveState();
 
 }
 
 
-function closePanel(id){
+/* =====================================================
+   ANTECKNING
+===================================================== */
 
- document
-  .getElementById(id)
-  .classList
-  .remove('open');
+function createNote(data=null){
 
-}
+  const win =
+    createWindow(
+      "note",
+      "Anteckning",
+      "📝"
+    );
 
-renderBgMenu();
+  const body =
+    win.querySelector(".windowBody");
 
+  body.innerHTML = `
 
-/* ---------------- ADD WIDGET ---------------- */
+    <textarea
+      class="noteArea"
+      placeholder="Skriv din anteckning här..."
+    ></textarea>
 
-function add(type,s={}){
+  `;
 
- const w=document.createElement('section');
+  const area =
+    body.querySelector(".noteArea");
 
- w.className=
-  'widget '+
-  (type==='note'?'note ':'')+
-  (s.min?'minimized':'');
+  if(data?.text){
 
- w.dataset.type=type;
+    area.value =
+      data.text;
 
- w.id=
-  s.id ||
-  ('w'+Date.now()+Math.random());
+  }
 
- const size={
+  area.addEventListener("input",()=>{
 
-  note:[360,300],
+    state.windows[win.dataset.id].data = {
 
-  now:[420,360],
+      text:area.value
 
-  day:[350,190],
+    };
 
-  schedule:[420,520],
+    saveState();
 
-  links:[390,300],
-
-  clock:[300,180],
-
-  timer:[320,210],
-
-  image:[480,350]
-
- }[type]||[350,220];
-
-
- w.style.left=
-  (s.x??70+Math.random()*180)+'px';
-
- w.style.top=
-  (s.y??50+Math.random()*120)+'px';
-
- w.style.width=
-  (s.width||size[0])+'px';
-
- w.style.height=
-  (s.height||size[1])+'px';
-
-
- const d=s.data||{};
-
- const title={
-
-  note:'📝 Anteckning',
-
-  now:'▶️ NU',
-
-  day:'📅 Dagen',
-
-  schedule:'📋 Schema',
-
-  links:'🔗 Länkar',
-
-  clock:'🕒 Klocka',
-
-  timer:'⌛ Timer',
-
-  image:'🖼️ Bild'
-
- }[type];
-
-
- let c='';
-
-
- if(type==='note')
-
-  c=
-   '<textarea data-k="text" '+
-   'placeholder="Skriv här...">'+
-   esc(d.text)+
-   '</textarea>';
-
-
- if(type==='day')
-
-  c=
-   '<div class="today"></div>'+
-   '<div class="date"></div>'+
-   '<p class="muted">'+
-   'Datum och veckodag uppdateras automatiskt.'+
-   '</p>';
-
-
- if(type==='clock')
-
-  c=
-   '<div class="clockText">--:--</div>';
-
-
- if(type==='links')
-
-  c=
-   '<div class="linksGrid">'+
-
-   [
-    ['▶️','UR Play','https://urplay.se/'],
-    ['📺','SVT Play','https://www.svtplay.se/'],
-    ['🧩','Skolon','https://skolon.com/'],
-    ['🎬','SLI','https://sliplay.se/'],
-    ['🔴','YouTube','https://www.youtube.com/']
-
-   ].map(x=>
-
-    '<a class="serviceLink" '+
-    'href="'+x[2]+'" '+
-    'target="_blank" '+
-    'rel="noopener noreferrer">'+
-    x[0]+' '+x[1]+
-    '</a>'
-
-   ).join('')+
-
-   '</div>'+
-
-   '<p class="muted">'+
-   'Lägg egna länkar i NU-fönstret för en specifik lektion.'+
-   '</p>';
-
-
- if(type==='timer')
-
-  c=
-   '<div class="timerNum">05:00</div>'+
-   '<div class="row">'+
-   '<input data-k="minutes" type="number" min="1" value="'+
-   esc(d.minutes||5)+
-   '">' +
-   '<button class="action start">Start</button>'+
-   '<button class="action secondary stop">Stopp</button>'+
-   '</div>';
-
-
- if(type==='image')
-
-  c=
-   '<input type="file" accept="image/*" '+
-   'onchange="loadImage(this,'+
-   JSON.stringify(w.id)+')">'+
-   '<img alt="Bild" '+
-   'style="max-width:100%;margin-top:10px;border-radius:10px">';
-
-
- if(type==='now')
-
-  c=nowBody(d);
-
-
- if(type==='schedule')
-
-  c=scheduleBody();
-
-
- w.innerHTML=
-
-  '<div class="head">'+
-
-   '<span class="title">'+
-   title+
-   '</span>'+
-
-   '<button class="mini" title="Minimera">−</button>'+
-
-   '<button class="close" title="Stäng">×</button>'+
-
-  '</div>'+
-
-  '<div class="body">'+
-  c+
-  '</div>';
-
-
- board.appendChild(w);
-
- wire(w);
-
- drag(w);
-
- save();
-
- return w;
+  });
 
 }
 
 
-/* ---------------- NU-FÖNSTER ---------------- */
+/* =====================================================
+   REDIGERINGSVERKTYG
+===================================================== */
 
-function nowBody(d){
+function editorToolbar(editor){
 
- const links=d.links?
-  JSON.parse(d.links):
-  [];
+  const bar =
+    document.createElement("div");
 
- return (
+  bar.className =
+    "editToolbar";
 
-  '<div class="nowTitle">'+
-  esc(d.subject||'Dagens lektion')+
-  '</div>'+
+  bar.innerHTML = `
 
-  '<div class="nowActions">'+
+    <button class="editButton">
+      B
+    </button>
 
-   '<button onclick="nowAddLink(this)">'+
-   '🔗 Lägg till länk'+
-   '</button>'+
+    <button class="editButton">
+      I
+    </button>
 
-   '<button onclick="nowAddLink(this,\'UR Play\')">'+
-   '▶️ UR Play'+
-   '</button>'+
+    <button class="editButton">
+      🔗 Lägg till länk
+    </button>
 
-  '</div>'+
+    <button class="editButton">
+      🖼️ Lägg till bild
+    </button>
 
-  '<textarea class="nowNote" '+
-  'data-k="note" '+
-  'placeholder="Skriv instruktioner, uppgifter eller bildstödsord...">'+
-  esc(d.note||'')+
-  '</textarea>'+
+    <button class="editButton">
+      • Lista
+    </button>
 
-  '<div class="nowLinkList">'+
+  `;
 
-   links.map(x=>
+  const buttons =
+    bar.querySelectorAll("button");
 
-    '<a class="nowLink" '+
-    'href="'+esc(x.url)+'" '+
-    'target="_blank" '+
-    'rel="noopener noreferrer">'+
-    '▶️ '+esc(x.name)+
-    '</a>'
+  buttons[0].onclick=()=>{
+    document.execCommand("bold");
+    editor.focus();
+  };
 
-   ).join('')+
+  buttons[1].onclick=()=>{
+    document.execCommand("italic");
+    editor.focus();
+  };
 
-  '</div>'
+  buttons[2].onclick=()=>{
+    addLink(editor);
+  };
 
- );
+  buttons[3].onclick=()=>{
+    addImageToEditor(editor);
+  };
+
+  buttons[4].onclick=()=>{
+    document.execCommand("insertUnorderedList");
+    editor.focus();
+  };
+
+  return bar;
 
 }
 
 
-function nowAddLink(btn,preset){
+/* =====================================================
+   LÄNK
+===================================================== */
 
- const w=btn.closest('.widget');
+function addLink(editor){
 
- let name,url;
+  const url =
+    prompt(
+      "Klistra in länken:",
+      "https://"
+    );
 
- if(preset){
+  if(!url) return;
 
-  name=preset;
+  const text =
+    prompt(
+      "Vad ska länken heta?",
+      "Öppna länk"
+    );
 
-  url='https://urplay.se/';
+  if(!text) return;
 
- }else{
+  editor.focus();
 
-  name=prompt(
-   'Namn på länken, t.ex. "Film om vikingatiden":',
-   ''
+  const html = `
+
+    <a
+      href="${escapeAttribute(url)}"
+      target="_blank"
+      rel="noopener"
+    >
+      🔗 ${escapeHtml(text)}
+    </a>
+
+  `;
+
+  document.execCommand(
+    "insertHTML",
+    false,
+    html
   );
 
-  if(!name)return;
-
-  url=prompt(
-   'Klistra in webbadressen:',
-   'https://'
+  editor.dispatchEvent(
+    new Event("input")
   );
-
-  if(!url)return;
-
- }
-
- if(!/^https?:\/\//i.test(url))
-
-  url='https://'+url;
-
-
- let links=[];
-
- try{
-
-  links=JSON.parse(
-   w.querySelector(
-    '[data-k="links"]'
-   )?.value||'[]'
-  );
-
- }catch(e){}
-
-
- links.push({
-  name,
-  url
- });
-
-
- let hidden=w.querySelector(
-  '[data-k="links"]'
- );
-
-
- if(!hidden){
-
-  hidden=document.createElement('input');
-
-  hidden.type='hidden';
-
-  hidden.dataset.k='links';
-
-  w.querySelector('.body')
-   .appendChild(hidden);
-
- }
-
-
- hidden.value=
-  JSON.stringify(links);
-
-
- const a=document.createElement('a');
-
- a.className='nowLink';
-
- a.href=url;
-
- a.target='_blank';
-
- a.rel='noopener noreferrer';
-
- a.textContent=
-  '▶️ '+name;
-
-
- w.querySelector(
-  '.nowLinkList'
- ).appendChild(a);
-
-
- save();
 
 }
 
 
-/* ---------------- SCHEMA ---------------- */
+/* =====================================================
+   BILD I EDITOR
+===================================================== */
 
-function scheduleBody(){
+function addImageToEditor(editor){
 
- return (
+  const input =
+    document.createElement("input");
 
-  '<div class="row">'+
+  input.type="file";
+  input.accept="image/*";
 
-   '<button class="action addRow">'+
-   '＋ Rad'+
-   '</button>'+
+  input.onchange=async()=>{
 
-   '<button class="action secondary preview">'+
-   'Visa'+
-   '</button>'+
+    const file =
+      input.files[0];
 
-  '</div>'+
+    if(!file) return;
 
-  '<p class="muted">'+
-  'Bygg dagens schema en gång och använd det som stöd på tavlan.'+
-  '</p>'+
+    const data =
+      await resizeImage(file);
 
-  '<div class="scheduleRows"></div>'+
+    const id =
+      await saveImageToDB(
+        data,
+        "support"
+      );
 
-  '<div class="schedulePreview"></div>'
+    const img =
+      document.createElement("img");
 
- );
+    img.dataset.imageId =
+      id;
+
+    img.src =
+      data;
+
+    editor.appendChild(img);
+
+    editor.dispatchEvent(
+      new Event("input")
+    );
+
+  };
+
+  input.click();
 
 }
 
 
-/* ---------------- WIDGET EVENTS ---------------- */
+/* =====================================================
+   DAGENS
+===================================================== */
 
-function wire(w){
+function createDay(data=null){
 
- w.querySelector('.close').onclick=()=>{
+  const win =
+    createWindow(
+      "day",
+      "Dagen",
+      "📅"
+    );
 
-  w.remove();
-
-  save();
-
- };
-
-
- w.querySelector('.mini').onclick=()=>{
-
-  w.classList.toggle('minimized');
-
-  save();
-
- };
+  const body =
+    win.querySelector(".windowBody");
 
 
- w.querySelectorAll('[data-k]')
-  .forEach(e=>
-   e.addEventListener(
-    'input',
+  const heading =
+    data?.heading ||
+    "Dagens plan";
+
+
+  const html =
+    data?.html ||
+    `
+
+      <p><strong>Välkommen!</strong></p>
+
+      <p>
+        Här kan du skriva dagens planering,
+        instruktioner och information.
+      </p>
+
+    `;
+
+
+  body.innerHTML = `
+
+    <input
+      class="dayHeading"
+      value="${escapeAttribute(heading)}"
+    >
+
+    <div class="dayDate">
+      ${formatDate()}
+    </div>
+
+    <div class="editorToolbarContainer"></div>
+
+    <div
+      class="editor dayEditor"
+      contenteditable="true"
+    ></div>
+
+    <h3 style="margin-top:18px;">
+      🕒 Dagens tider
+    </h3>
+
+    <div class="daySchedule"></div>
+
+    <button
+      class="editButton addDayRow"
+      style="margin-top:10px;"
+    >
+      ＋ Lägg till tid
+    </button>
+
+  `;
+
+
+  const headingInput =
+    body.querySelector(".dayHeading");
+
+  const editor =
+    body.querySelector(".dayEditor");
+
+
+  editor.innerHTML =
+    html;
+
+
+  const toolbar =
+    editorToolbar(editor);
+
+  body
+    .querySelector(".editorToolbarContainer")
+    .appendChild(toolbar);
+
+
+  /* TIDER */
+
+  const schedule =
+    body.querySelector(".daySchedule");
+
+
+  const rows =
+    data?.rows ||
+    [
+
+      ["08.40","SO"],
+      ["09.25","Svenska"],
+      ["09.40","Matte"],
+      ["10.25","Musik"],
+      ["10.35","SO"],
+      ["11.20","Lunch"],
+      ["13.00","Bild"],
+      ["13.45","Musik"]
+
+    ];
+
+
+  rows.forEach(row=>{
+
+    addDayRow(
+      schedule,
+      row[0],
+      row[1]
+    );
+
+  });
+
+
+  body
+    .querySelector(".addDayRow")
+    .onclick=()=>{
+
+      addDayRow(
+        schedule,
+        "",
+        ""
+      );
+
+      saveDay(win);
+
+    };
+
+
+  headingInput.addEventListener(
+    "input",
+    ()=>saveDay(win)
+  );
+
+
+  editor.addEventListener(
+    "input",
+    ()=>saveDay(win)
+  );
+
+
+  saveDay(win);
+
+}
+
+
+/* =====================================================
+   DAGENS RAD
+===================================================== */
+
+function addDayRow(container,time="",subject=""){
+
+  const row =
+    document.createElement("div");
+
+  row.className =
+    "dayScheduleRow";
+
+
+  row.innerHTML = `
+
+    <input
+      placeholder="Tid"
+      value="${escapeAttribute(time)}"
+    >
+
+    <input
+      placeholder="Aktivitet"
+      value="${escapeAttribute(subject)}"
+    >
+
+    <button title="Ta bort">
+      ×
+    </button>
+
+  `;
+
+
+  row.querySelector("button")
+    .onclick=()=>{
+
+      row.remove();
+
+      const win =
+        row.closest(".window");
+
+      if(win){
+        saveDay(win);
+      }
+
+    };
+
+
+  row.querySelectorAll("input")
+    .forEach(input=>{
+
+      input.addEventListener(
+        "input",
+        ()=>{
+
+          const win =
+            row.closest(".window");
+
+          if(win){
+            saveDay(win);
+          }
+
+        }
+      );
+
+    });
+
+
+  container.appendChild(row);
+
+}
+
+
+/* =====================================================
+   SPARA DAG
+===================================================== */
+
+function saveDay(win){
+
+  const body =
+    win.querySelector(".windowBody");
+
+  const rows =
+    [...body.querySelectorAll(
+      ".dayScheduleRow"
+    )]
+    .map(row=>{
+
+      const inputs =
+        row.querySelectorAll("input");
+
+      return [
+        inputs[0].value,
+        inputs[1].value
+      ];
+
+    });
+
+
+  state.windows[win.dataset.id].data = {
+
+    heading:
+      body.querySelector(".dayHeading").value,
+
+    html:
+      prepareEditorHtml(
+        body.querySelector(".dayEditor")
+      ),
+
+    rows:rows
+
+  };
+
+
+  saveState();
+
+}
+
+
+/* =====================================================
+   NU
+===================================================== */
+
+function createNU(data=null){
+
+  const win =
+    createWindow(
+      "nu",
+      "NU",
+      "📖"
+    );
+
+
+  const body =
+    win.querySelector(".windowBody");
+
+
+  body.innerHTML = `
+
+    <input
+      class="nuSubject"
+      placeholder="Ämne / lektion"
+      value="${escapeAttribute(
+        data?.subject || "SVENSKA"
+      )}"
+    >
+
+    <div class="editorToolbarContainer"></div>
+
+    <div
+      class="editor nuEditor"
+      contenteditable="true"
+    ></div>
+
+  `;
+
+
+  const editor =
+    body.querySelector(".nuEditor");
+
+
+  editor.innerHTML =
+    data?.html ||
+
+    `
+
+      <p>
+        <strong>
+          Läs s. 34–38
+        </strong>
+      </p>
+
+      <p>
+        Arbeta två och två.
+      </p>
+
+    `;
+
+
+  body
+    .querySelector(".editorToolbarContainer")
+    .appendChild(
+      editorToolbar(editor)
+    );
+
+
+  const save=()=>{
+
+    state.windows[win.dataset.id].data={
+
+      subject:
+        body.querySelector(".nuSubject").value,
+
+      html:
+        prepareEditorHtml(editor)
+
+    };
+
+    saveState();
+
+  };
+
+
+  body
+    .querySelector(".nuSubject")
+    .addEventListener(
+      "input",
+      save
+    );
+
+
+  editor.addEventListener(
+    "input",
     save
-   )
   );
 
 
- if(w.dataset.type==='day'){
+  save();
 
-  const f=()=>{
+}
 
-   let n=new Date();
 
-   w.querySelector('.today')
-    .textContent=
-    n.toLocaleDateString(
-     'sv-SE',
-     {weekday:'long'}
+/* =====================================================
+   SCHEMA
+===================================================== */
+
+function createSchedule(data=null){
+
+  const win =
+    createWindow(
+      "schedule",
+      "Schema",
+      "🗓️"
     );
 
-   w.querySelector('.date')
-    .textContent=
-    n.toLocaleDateString(
-     'sv-SE',
-     {
-      day:'numeric',
-      month:'long',
-      year:'numeric'
-     }
+
+  const body =
+    win.querySelector(".windowBody");
+
+
+  body.innerHTML = `
+
+    <div class="schedule"></div>
+
+    <button
+      class="editButton"
+      style="margin-top:12px;"
+    >
+      ＋ Lägg till rad
+    </button>
+
+  `;
+
+
+  const schedule =
+    body.querySelector(".schedule");
+
+
+  const rows =
+    data?.rows ||
+
+    [
+
+      ["08.40","SO","📚"],
+      ["09.25","Svenska","📖"],
+      ["09.40","Matte","➗"],
+      ["10.25","Musik","🎵"],
+      ["10.35","SO","📚"],
+      ["11.20","Lunch","🍎"],
+      ["13.00","Bild","🎨"],
+      ["13.45","Musik","🎵"]
+
+    ];
+
+
+  rows.forEach(row=>{
+
+    addScheduleRow(
+      schedule,
+      row[0],
+      row[1],
+      row[2]
     );
+
+  });
+
+
+  body
+    .querySelector("button")
+    .onclick=()=>{
+
+      addScheduleRow(
+        schedule,
+        "",
+        "",
+        "📚"
+      );
+
+      saveSchedule(win);
+
+    };
+
+
+  saveSchedule(win);
+
+}
+
+
+/* =====================================================
+   SCHEMA RAD
+===================================================== */
+
+function addScheduleRow(
+  container,
+  time="",
+  subject="",
+  icon="📚"
+){
+
+  const row =
+    document.createElement("div");
+
+  row.className =
+    "scheduleRow";
+
+
+  row.innerHTML = `
+
+    <input
+      class="scheduleInput"
+      placeholder="Tid"
+      value="${escapeAttribute(time)}"
+    >
+
+    <input
+      class="scheduleInput"
+      placeholder="Ämne"
+      value="${escapeAttribute(subject)}"
+    >
+
+    <input
+      class="scheduleInput"
+      style="text-align:center;"
+      value="${escapeAttribute(icon)}"
+    >
+
+    <button
+      class="scheduleDelete"
+    >
+      ×
+    </button>
+
+  `;
+
+
+  row.querySelector(".scheduleDelete")
+    .onclick=()=>{
+
+      row.remove();
+
+      const win =
+        row.closest(".window");
+
+      if(win){
+        saveSchedule(win);
+      }
+
+    };
+
+
+  row.querySelectorAll("input")
+    .forEach(input=>{
+
+      input.addEventListener(
+        "input",
+        ()=>{
+
+          const win =
+            row.closest(".window");
+
+          if(win){
+            saveSchedule(win);
+          }
+
+        }
+      );
+
+    });
+
+
+  container.appendChild(row);
+
+}
+
+
+/* =====================================================
+   SPARA SCHEMA
+===================================================== */
+
+function saveSchedule(win){
+
+  const rows =
+    [...win.querySelectorAll(
+      ".scheduleRow"
+    )]
+    .map(row=>{
+
+      const inputs =
+        row.querySelectorAll("input");
+
+      return [
+
+        inputs[0].value,
+        inputs[1].value,
+        inputs[2].value
+
+      ];
+
+    });
+
+
+  state.windows[win.dataset.id].data = {
+
+    rows:rows
 
   };
 
-  f();
 
-  setInterval(f,60000);
+  saveState();
 
- }
+}
 
 
- if(w.dataset.type==='clock'){
+/* =====================================================
+   LÄNKAR
+===================================================== */
 
-  const f=()=>
+function createLinks(){
 
-   w.querySelector('.clockText')
-    .textContent=
-    new Date().toLocaleTimeString(
-     'sv-SE',
-     {
-      hour:'2-digit',
-      minute:'2-digit',
-      second:'2-digit'
-     }
+  const win =
+    createWindow(
+      "links",
+      "Länkar",
+      "🔗"
     );
 
-  f();
 
-  setInterval(f,1000);
-
- }
+  const body =
+    win.querySelector(".windowBody");
 
 
- if(w.dataset.type==='timer'){
+  body.innerHTML = `
 
-  let t=null;
+    <div class="linkList">
 
-  let left=300;
+      <a
+        class="linkItem"
+        href="https://urplay.se/"
+        target="_blank"
+        rel="noopener"
+      >
+        🎬 UR Play
+      </a>
 
-  const draw=()=>{
+      <a
+        class="linkItem"
+        href="https://www.svtplay.se/"
+        target="_blank"
+        rel="noopener"
+      >
+        📺 SVT Play
+      </a>
 
-   w.querySelector('.timerNum')
-    .textContent=
-    String(Math.floor(left/60))
-     .padStart(2,'0')+
-    ':'+
-    String(left%60)
-     .padStart(2,'0');
+      <a
+        class="linkItem"
+        href="https://www.youtube.com/"
+        target="_blank"
+        rel="noopener"
+      >
+        ▶️ YouTube
+      </a>
+
+      <a
+        class="linkItem"
+        href="https://www.skolon.com/"
+        target="_blank"
+        rel="noopener"
+      >
+        🏫 Skolon
+      </a>
+
+      <a
+        class="linkItem"
+        href="https://sli.se/"
+        target="_blank"
+        rel="noopener"
+      >
+        📚 SLI
+      </a>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =====================================================
+   KLOCKA
+===================================================== */
+
+function createClock(){
+
+  const win =
+    createWindow(
+      "clock",
+      "Klocka",
+      "🕒"
+    );
+
+
+  const body =
+    win.querySelector(".windowBody");
+
+
+  body.innerHTML = `
+
+    <div class="clock">
+
+      <div class="clockTime">
+        00:00
+      </div>
+
+      <div class="clockDate">
+        -
+      </div>
+
+    </div>
+
+  `;
+
+
+  function update(){
+
+    const now =
+      new Date();
+
+
+    body.querySelector(
+      ".clockTime"
+    ).textContent =
+      now.toLocaleTimeString(
+        "sv-SE",
+        {
+          hour:"2-digit",
+          minute:"2-digit"
+        }
+      );
+
+
+    body.querySelector(
+      ".clockDate"
+    ).textContent =
+      now.toLocaleDateString(
+        "sv-SE",
+        {
+          weekday:"long",
+          day:"numeric",
+          month:"long"
+        }
+      );
+
+  }
+
+
+  update();
+
+  setInterval(update,1000);
+
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+function createTimer(){
+
+  const win =
+    createWindow(
+      "timer",
+      "Timer",
+      "⏱️"
+    );
+
+
+  const body =
+    win.querySelector(".windowBody");
+
+
+  body.innerHTML = `
+
+    <div class="timer">
+
+      <div class="timerDisplay">
+        05:00
+      </div>
+
+      <div class="timerControls">
+
+        <button data-min="1">
+          1 min
+        </button>
+
+        <button data-min="5">
+          5 min
+        </button>
+
+        <button data-min="10">
+          10 min
+        </button>
+
+        <button data-action="start">
+          ▶ Start
+        </button>
+
+        <button data-action="reset">
+          ↺
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  let seconds=300;
+  let interval=null;
+
+
+  const display =
+    body.querySelector(
+      ".timerDisplay"
+    );
+
+
+  function render(){
+
+    const min =
+      Math.floor(seconds/60);
+
+    const sec =
+      seconds%60;
+
+    display.textContent =
+      String(min).padStart(2,"0")
+      + ":" +
+      String(sec).padStart(2,"0");
+
+  }
+
+
+  body
+    .querySelectorAll(
+      "[data-min]"
+    )
+    .forEach(button=>{
+
+      button.onclick=()=>{
+
+        seconds =
+          Number(button.dataset.min)*60;
+
+        render();
+
+      };
+
+    });
+
+
+  body
+    .querySelector(
+      "[data-action='start']"
+    )
+    .onclick=()=>{
+
+      if(interval) return;
+
+      interval =
+        setInterval(()=>{
+
+          if(seconds<=0){
+
+            clearInterval(interval);
+
+            interval=null;
+
+            return;
+
+          }
+
+          seconds--;
+
+          render();
+
+        },1000);
+
+    };
+
+
+  body
+    .querySelector(
+      "[data-action='reset']"
+    )
+    .onclick=()=>{
+
+      clearInterval(interval);
+
+      interval=null;
+
+      seconds=300;
+
+      render();
+
+    };
+
+
+  render();
+
+}
+
+
+/* =====================================================
+   BAKGRUNDER
+===================================================== */
+
+function openBackgrounds(){
+
+  document
+    .getElementById(
+      "backgroundPanel"
+    )
+    .classList.add("open");
+
+  loadCustomBackgrounds();
+
+}
+
+
+function closeBackgrounds(){
+
+  document
+    .getElementById(
+      "backgroundPanel"
+    )
+    .classList.remove("open");
+
+}
+
+
+/* =====================================================
+   VANLIG BAKGRUND
+===================================================== */
+
+function setBackgroundGradient(value){
+
+  document.body.style.backgroundImage =
+    value;
+
+
+  state.backgrounds = {
+
+    type:"gradient",
+
+    value:value
 
   };
 
 
-  w.querySelector('.start').onclick=()=>{
+  saveState();
 
-   clearInterval(t);
+  closeBackgrounds();
 
-   left=
-    Math.max(
-     1,
-     +w.querySelector(
-      '[data-k="minutes"]'
-     ).value||5
-    )*60;
+}
 
-   draw();
 
-   t=setInterval(()=>{
+/* =====================================================
+   UPLOAD BAKGRUND
+===================================================== */
 
-    left--;
+document
+  .getElementById(
+    "backgroundUpload"
+  )
+  .addEventListener(
+    "change",
+    async function(){
 
-    draw();
+      const file =
+        this.files[0];
 
-    if(left<=0){
+      if(!file) return;
 
-     clearInterval(t);
 
-     alert('Tiden är slut!');
+      const data =
+        await resizeImage(
+          file,
+          1600
+        );
+
+
+      const id =
+        await saveImageToDB(
+          data,
+          "background"
+        );
+
+
+      state.backgrounds={
+
+        type:"custom",
+
+        id:id
+
+      };
+
+
+      saveState();
+
+      applyCustomBackground(
+        data
+      );
+
+
+      await loadCustomBackgrounds();
+
+      this.value="";
+
+    }
+  );
+
+
+/* =====================================================
+   IDB
+===================================================== */
+
+let dbPromise = null;
+
+
+function getDB(){
+
+  if(dbPromise){
+    return dbPromise;
+  }
+
+
+  dbPromise =
+    new Promise((resolve,reject)=>{
+
+      const request =
+        indexedDB.open(
+          "KlassrumstavlanDB",
+          1
+        );
+
+
+      request.onupgradeneeded =
+        function(){
+
+          const db =
+            request.result;
+
+
+          if(
+            !db.objectStoreNames.contains(
+              "images"
+            )
+          ){
+
+            db.createObjectStore(
+              "images",
+              {
+                keyPath:"id"
+              }
+            );
+
+          }
+
+        };
+
+
+      request.onsuccess =
+        ()=>resolve(
+          request.result
+        );
+
+
+      request.onerror =
+        ()=>reject(
+          request.error
+        );
+
+    });
+
+
+  return dbPromise;
+
+}
+
+
+/* =====================================================
+   SPARA BILD
+===================================================== */
+
+async function saveImageToDB(
+  data,
+  type
+){
+
+  const db =
+    await getDB();
+
+
+  const id =
+    uid(type);
+
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const tx =
+        db.transaction(
+          "images",
+          "readwrite"
+        );
+
+
+      tx.objectStore(
+        "images"
+      ).put({
+
+        id:id,
+
+        type:type,
+
+        data:data,
+
+        created:Date.now()
+
+      });
+
+
+      tx.oncomplete =
+        ()=>resolve(id);
+
+
+      tx.onerror =
+        ()=>reject(
+          tx.error
+        );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   HÄMTA BILDER
+===================================================== */
+
+async function getImages(type){
+
+  const db =
+    await getDB();
+
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const tx =
+        db.transaction(
+          "images",
+          "readonly"
+        );
+
+
+      const request =
+        tx.objectStore(
+          "images"
+        ).getAll();
+
+
+      request.onsuccess=()=>{
+
+        resolve(
+          request.result
+            .filter(
+              image =>
+                image.type===type
+            )
+        );
+
+      };
+
+
+      request.onerror =
+        ()=>reject(
+          request.error
+        );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   TA BORT BILD
+===================================================== */
+
+async function deleteImage(id){
+
+  const db =
+    await getDB();
+
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const tx =
+        db.transaction(
+          "images",
+          "readwrite"
+        );
+
+
+      tx.objectStore(
+        "images"
+      ).delete(id);
+
+
+      tx.oncomplete =
+        ()=>resolve();
+
+
+      tx.onerror =
+        ()=>reject(
+          tx.error
+        );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   VISA EGNA BAKGRUNDER
+===================================================== */
+
+async function loadCustomBackgrounds(){
+
+  const container =
+    document.getElementById(
+      "customBackgrounds"
+    );
+
+
+  const addButton =
+    container.querySelector(
+      ".bgAdd"
+    );
+
+
+  container.innerHTML="";
+
+  container.appendChild(
+    addButton
+  );
+
+
+  const images =
+    await getImages(
+      "background"
+    );
+
+
+  images
+    .sort(
+      (a,b)=>
+        b.created-a.created
+    )
+    .forEach(image=>{
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "bgCard";
+
+
+      card.style.backgroundImage =
+        `url("${image.data}")`;
+
+
+      card.title =
+        "Välj bakgrund";
+
+
+      card.onclick=()=>{
+
+        state.backgrounds={
+
+          type:"custom",
+
+          id:image.id
+
+        };
+
+        saveState();
+
+        applyCustomBackground(
+          image.data
+        );
+
+        closeBackgrounds();
+
+      };
+
+
+      container.appendChild(
+        card
+      );
+
+    });
+
+}
+
+
+/* =====================================================
+   ANVÄND EGEN BAKGRUND
+===================================================== */
+
+function applyCustomBackground(data){
+
+  document.body.style.backgroundImage =
+    `url("${data}")`;
+
+}
+
+
+/* =====================================================
+   LADDAR SPARAD BAKGRUND
+===================================================== */
+
+async function loadSavedBackground(){
+
+  if(
+    !state.backgrounds
+  ){
+    return;
+  }
+
+
+  if(
+    state.backgrounds.type ===
+    "gradient"
+  ){
+
+    document.body.style.backgroundImage =
+      state.backgrounds.value;
+
+    return;
+
+  }
+
+
+  if(
+    state.backgrounds.type ===
+    "custom"
+  ){
+
+    const images =
+      await getImages(
+        "background"
+      );
+
+
+    const image =
+      images.find(
+        item =>
+          item.id ===
+          state.backgrounds.id
+      );
+
+
+    if(image){
+
+      applyCustomBackground(
+        image.data
+      );
 
     }
 
-   },1000);
+  }
 
-  };
-
-
-  w.querySelector('.stop').onclick=()=>
-
-   clearInterval(t);
-
- }
+}
 
 
- if(w.dataset.type==='schedule'){
+/* =====================================================
+   BILDRESIZE
+===================================================== */
 
-  const rows=
-   w.querySelector('.scheduleRows');
+function resizeImage(
+  file,
+  maxWidth=1400
+){
 
-  const preview=
-   w.querySelector('.schedulePreview');
+  return new Promise(
+    resolve=>{
 
-
-  const icons={
-
-   svenska:'🇸🇪',
-
-   sva:'🇸🇪',
-
-   matte:'➗',
-
-   matematik:'➗',
-
-   so:'🌍',
-
-   no:'🔬',
-
-   engelska:'🇬🇧',
-
-   musik:'🎵',
-
-   bild:'🎨',
-
-   idrott:'⚽',
-
-   rast:'🛝',
-
-   lunch:'🍽️',
-
-   slöjd:'🧵'
-
-  };
+      const reader =
+        new FileReader();
 
 
-  const iconFor=t=>{
+      reader.onload=e=>{
 
-   let q=t.toLowerCase();
-
-   for(const k in icons)
-
-    if(q.includes(k))
-
-     return icons[k];
-
-   return '📘';
-
-  };
+        const img =
+          new Image();
 
 
-  function row(subject='',time=''){
+        img.onload=()=>{
 
-   let r=
-    document.createElement('div');
+          let width =
+            img.width;
 
-   r.className='scheduleRow';
-
-
-   r.innerHTML=
-
-    '<div class="scheduleIcon">'+
-    iconFor(subject)+
-    '</div>'+
-
-    '<input class="schSubject" '+
-    'placeholder="Ämne/aktivitet" '+
-    'value="'+esc(subject)+'">'+
-
-    '<input class="schTime" '+
-    'placeholder="08:10–09:00" '+
-    'value="'+esc(time)+'">'+
-
-    '<button class="del">×</button>';
+          let height =
+            img.height;
 
 
-   r.querySelector('.del').onclick=()=>
+          if(width>maxWidth){
 
-    r.remove();
+            height =
+              Math.round(
+                height *
+                maxWidth /
+                width
+              );
 
+            width =
+              maxWidth;
 
-   r.querySelector('.schSubject').oninput=()=>{
-
-    r.querySelector(
-     '.scheduleIcon'
-    ).textContent=
-     iconFor(
-      r.querySelector(
-       '.schSubject'
-      ).value
-     );
-
-   };
+          }
 
 
-   rows.appendChild(r);
+          const canvas =
+            document.createElement(
+              "canvas"
+            );
+
+
+          canvas.width =
+            width;
+
+          canvas.height =
+            height;
+
+
+          const ctx =
+            canvas.getContext(
+              "2d"
+            );
+
+
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            width,
+            height
+          );
+
+
+          resolve(
+            canvas.toDataURL(
+              "image/jpeg",
+              .82
+            )
+          );
+
+        };
+
+
+        img.src =
+          e.target.result;
+
+      };
+
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   EDITOR BILDER – SPARA
+===================================================== */
+
+function prepareEditorHtml(editor){
+
+  const clone =
+    editor.cloneNode(true);
+
+
+  clone
+    .querySelectorAll(
+      "img[data-image-id]"
+    )
+    .forEach(img=>{
+
+      img.src =
+        "idb-image:" +
+        img.dataset.imageId;
+
+    });
+
+
+  return clone.innerHTML;
+
+}
+
+
+/* =====================================================
+   EDITOR BILDER – VISA
+===================================================== */
+
+async function restoreEditorImages(editor){
+
+  const images =
+    editor.querySelectorAll(
+      "img[data-image-id]"
+    );
+
+
+  if(!images.length){
+    return;
+  }
+
+
+  const all =
+    await getImages(
+      "support"
+    );
+
+
+  images.forEach(img=>{
+
+    const item =
+      all.find(
+        image =>
+          image.id ===
+          img.dataset.imageId
+      );
+
+
+    if(item){
+
+      img.src =
+        item.data;
+
+    }
+
+  });
+
+}
+
+
+/* =====================================================
+   DATUM
+===================================================== */
+
+function formatDate(){
+
+  return new Date()
+    .toLocaleDateString(
+      "sv-SE",
+      {
+        weekday:"long",
+        day:"numeric",
+        month:"long",
+        year:"numeric"
+      }
+    );
+
+}
+
+
+/* =====================================================
+   HTML SÄKERHET
+===================================================== */
+
+function escapeHtml(text){
+
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function escapeAttribute(text){
+
+  return escapeHtml(
+    text || ""
+  );
+
+}
+
+
+/* =====================================================
+   HELSKÄRM
+===================================================== */
+
+function toggleFullscreen(){
+
+  if(!document.fullscreenElement){
+
+    document.documentElement
+      .requestFullscreen()
+      .catch(()=>{});
+
+  }else{
+
+    document.exitFullscreen()
+      .catch(()=>{});
+
+  }
+
+}
+
+
+/* =====================================================
+   LÄS IN SPARADE FÖNSTER
+===================================================== */
+
+async function restoreWindows(){
+
+  const windows =
+    state.windows || {};
+
+
+  for(
+    const [id,data]
+    of Object.entries(windows)
+  ){
+
+    let win=null;
+
+
+    if(data.type==="note"){
+
+      createNote(data.data);
+
+    }
+
+    else if(data.type==="day"){
+
+      createDay(data.data);
+
+    }
+
+    else if(data.type==="nu"){
+
+      createNU(data.data);
+
+    }
+
+    else if(data.type==="schedule"){
+
+      createSchedule(data.data);
+
+    }
+
+    else if(data.type==="links"){
+
+      createLinks();
+
+    }
+
+    else if(data.type==="clock"){
+
+      createClock();
+
+    }
+
+    else if(data.type==="timer"){
+
+      createTimer();
+
+    }
+
+
+    /*
+
+      Äldre sparade fönster
+      behöver inte återanvända
+      samma ID.
+
+    */
 
   }
 
 
-  function makePreview(){
+  /* återställ bilder */
 
-   preview.innerHTML=
+  document
+    .querySelectorAll(
+      ".editor"
+    )
+    .forEach(editor=>{
 
-    [...rows.children]
-     .map(r=>
+      restoreEditorImages(
+        editor
+      );
 
-      '<div class="scheduleCard">'+
+    });
 
-       '<div class="pic">'+
-       r.querySelector(
-        '.scheduleIcon'
-       ).textContent+
-       '</div>'+
+}
 
-       '<div class="subject">'+
-       esc(
-        r.querySelector(
-         '.schSubject'
-        ).value||
-        'Aktivitet'
-       )+
-       '</div>'+
 
-       '<div class="time">'+
-       esc(
-        r.querySelector(
-         '.schTime'
-        ).value
-       )+
-       '</div>'+
+/* =====================================================
+   STANDARD FÖNSTER
+===================================================== */
 
-      '</div>'
+async function initialize(){
 
-     ).join('');
+  await loadSavedBackground();
+
+
+  const existing =
+    Object.keys(
+      state.windows || {}
+    ).length;
+
+
+  if(!existing){
+
+    createDay();
+
+    createSchedule();
+
+    createClock();
+
+  }else{
+
+    await restoreWindows();
 
   }
 
-
-  w.querySelector('.addRow').onclick=()=>row();
-
-  w.querySelector('.preview').onclick=
-   makePreview;
-
-
-  row(
-   'Svenska',
-   '08:10–09:00'
-  );
-
-  row(
-   'Rast',
-   '09:00–09:20'
-  );
-
-  row(
-   'Matematik',
-   '09:20–10:10'
-  );
-
-  row(
-   'Lunch',
-   '11:20–12:00'
-  );
-
- }
-
 }
 
 
-/* ---------------- DRAG ---------------- */
-
-function drag(w){
-
- const h=w.querySelector('.head');
-
- let on=false;
-
- let sx,sy,ox,oy;
-
-
- h.onpointerdown=e=>{
-
-  if(e.target.closest('button'))
-   return;
-
-  on=true;
-
-  sx=e.clientX;
-  sy=e.clientY;
-
-  ox=w.offsetLeft;
-  oy=w.offsetTop;
-
-  h.setPointerCapture(
-   e.pointerId
-  );
-
- };
-
-
- h.onpointermove=e=>{
-
-  if(on){
-
-   w.style.left=
-    Math.max(
-     0,
-     ox+e.clientX-sx
-    )+'px';
-
-   w.style.top=
-    Math.max(
-     0,
-     oy+e.clientY-sy
-    )+'px';
-
-  }
-
- };
-
-
- h.onpointerup=()=>{
-
-  on=false;
-
-  save();
-
- };
-
-
- new ResizeObserver(save)
-  .observe(w);
-
-}
-
-
-/* ---------------- BILD ---------------- */
-
-function loadImage(input,id){
-
- const f=input.files[0];
-
- if(!f)return;
-
- const w=
-  document.getElementById(id);
-
- const img=
-  w.querySelector('img');
-
- img.src=
-  URL.createObjectURL(f);
-
- input.value='';
-
- save();
-
-}
-
-
-document.getElementById(
- 'imageFile'
-).onchange=e=>{
-
- const f=e.target.files[0];
-
- if(!f)return;
-
- const w=add('image');
-
- w.querySelector('img').src=
-  URL.createObjectURL(f);
-
- e.target.value='';
-
-};
-
-
-/* ---------------- FULLSKÄRM ---------------- */
-
-function fullscreen(){
-
- document.documentElement
-  .requestFullscreen?.();
-
-}
-
-
-/* ---------------- SPARAD BAKGRUND ---------------- */
-
-function applySavedBg(){
-
- if(!state.background)
-  return;
-
- if(
-  state.background.kind==='css'
- ){
-
-  document.body.style.background=
-   state.background.value;
-
- }
-
-}
-
-applySavedBg();
-
-
-/* ---------------- ÅTERSTÄLL WIDGETS ---------------- */
-
-if(state.widgets?.length){
-
- state.widgets.forEach(
-  x=>add(x.type,x)
- );
-
-}else{
-
- add('day');
-
- add('schedule');
-
- add('clock');
-
-}
+initialize();
 
 </script>
 
