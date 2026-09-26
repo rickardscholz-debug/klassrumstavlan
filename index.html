@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
@@ -24,6 +24,7 @@ body{
   background-position:center;
   background-repeat:no-repeat;
   transition:background-image .3s ease;
+  background-image: url('https://unsplash.com');
 }
 
 /* =========================
@@ -91,8 +92,8 @@ body{
   min-width:280px;
   min-height:180px;
 
-  width:420px;
-  height:300px;
+  width:460px;
+  height:380px;
 
   background:rgba(255,255,255,.98);
 
@@ -191,31 +192,13 @@ body{
 }
 
 /* =========================
-   ANTECKNING
-========================= */
-
-.noteArea{
-  width:100%;
-  height:100%;
-
-  border:0;
-  outline:0;
-  resize:none;
-
-  font-size:18px;
-  line-height:1.55;
-
-  color:#172033;
-  background:white;
-}
-
-/* =========================
-   REDIGERBAR TEXT
+   REDIGERBAR TEXT / LEKTION
 ========================= */
 
 .editor{
   width:100%;
-  min-height:150px;
+  height:calc(100% - 110px);
+  min-height:120px;
 
   padding:14px;
 
@@ -228,6 +211,7 @@ body{
   line-height:1.5;
 
   background:#fff;
+  overflow-y:auto;
 }
 
 .editor:focus{
@@ -243,6 +227,12 @@ body{
   margin:8px 0;
 
   display:block;
+}
+
+.editor a {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* =========================
@@ -269,6 +259,9 @@ body{
   cursor:pointer;
 
   font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:4px;
 }
 
 .editButton:hover{
@@ -276,7 +269,7 @@ body{
 }
 
 /* =========================
-   DAGENS PLAN
+   LEKTIONSPLAN
 ========================= */
 
 .dayHeading{
@@ -297,114 +290,6 @@ body{
 
 .dayHeading:focus{
   border-color:#aeb8c9;
-}
-
-.dayDate{
-  color:#687386;
-  margin-bottom:12px;
-}
-
-/* =========================
-   NU
-========================= */
-
-.nuSubject{
-  width:100%;
-
-  padding:10px 12px;
-
-  border:1px solid #e1e5eb;
-  border-radius:10px;
-
-  font-size:20px;
-  font-weight:700;
-
-  outline:none;
-
-  margin-bottom:10px;
-}
-
-.nuSubject:focus{
-  border-color:#aeb8c9;
-}
-
-/* =========================
-   LÄNKAR
-========================= */
-
-.linkList{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-
-.linkItem{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  padding:11px 13px;
-
-  background:#f6f8fb;
-
-  border-radius:10px;
-
-  text-decoration:none;
-
-  color:#172033;
-
-  border:1px solid #e6e9ef;
-}
-
-.linkItem:hover{
-  background:#edf1f6;
-}
-
-/* =========================
-   SCHEMA
-========================= */
-
-.schedule{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-
-.scheduleRow{
-  display:grid;
-  grid-template-columns:80px 1fr 40px 35px;
-
-  align-items:center;
-
-  gap:7px;
-}
-
-.scheduleInput{
-  min-width:0;
-
-  padding:8px;
-
-  border:1px solid #dfe4eb;
-  border-radius:8px;
-
-  outline:none;
-}
-
-.scheduleInput:focus{
-  border-color:#aeb8c9;
-}
-
-.scheduleDelete{
-  border:0;
-
-  width:30px;
-  height:30px;
-
-  border-radius:8px;
-
-  background:#f2f4f7;
-
-  cursor:pointer;
 }
 
 /* =========================
@@ -445,21 +330,23 @@ body{
   align-items:center;
   justify-content:center;
 
-  gap:15px;
+  gap:12px;
 }
 
 .timerDisplay{
-  font-size:60px;
+  font-size:55px;
   font-weight:700;
 }
 
-.timerControls{
+.timerPresets, .timerAdjusters, .timerControls{
   display:flex;
-  gap:8px;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
 }
 
-.timerControls button{
-  padding:9px 14px;
+.timerPresets button, .timerAdjusters button, .timerControls button{
+  padding:6px 10px;
 
   border:1px solid #dce1e8;
   border-radius:9px;
@@ -467,6 +354,26 @@ body{
   background:#f6f8fa;
 
   cursor:pointer;
+  font-size:13px;
+}
+
+.timerPresets button:hover, .timerAdjusters button:hover, .timerControls button:hover{
+  background:#eceff4;
+}
+
+.timerInputContainer {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:4px;
+}
+
+.timerInputContainer input {
+  width:60px;
+  padding:5px;
+  border:1px solid #dfe4eb;
+  border-radius:6px;
+  text-align:center;
 }
 
 /* =========================
@@ -600,2577 +507,697 @@ body{
 .bgAdd span:first-child{
   font-size:28px;
 }
+</style>
+</head>
+<body>
 
-/* =========================
-   FILER
-========================= */
+<!-- =========================
+     WINDOWS CONTAINER
+========================= -->
+<div id="desktop">
 
-.hiddenFile{
-  display:none;
+  <!-- TEMPLATE FÖR LEKTIONSFÖNSTER -->
+  <div id="lesson-template" class="window hidden">
+    <div class="windowHeader">
+      <div class="windowTitle">
+        <span class="windowTitleIcon">📚</span>
+        <span class="windowTitleText">Lektion</span>
+      </div>
+      <div class="windowButtons">
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
+      </div>
+    </div>
+    <div class="windowBody">
+      <input type="text" class="dayHeading" placeholder="Titel (t.ex. Måndag, Matte...)">
+      
+      <div class="editToolbar">
+        <button class="editButton boldBtn"><b>B</b></button>
+        <button class="editButton italicBtn"><i>I</i></button>
+        <button class="editButton imgBtn">📷 Bild</button>
+        <button class="editButton linkBtn">🔗 Länk</button>
+      </div>
+
+      <div class="editor" contenteditable="true" placeholder="Skriv planering, klistra in text eller lägg till bilder..."></div>
+    </div>
+  </div>
+
+  <!-- KLOCKA -->
+  <div id="window-clock" class="window" style="left: 50px; top: 50px; width: 320px; height: 220px;">
+    <div class="windowHeader">
+      <div class="windowTitle">
+        <span class="windowTitleIcon">🕒</span>
+        <span>Klocka</span>
+      </div>
+      <div class="windowButtons">
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
+      </div>
+    </div>
+    <div class="windowBody">
+      <div class="clock">
+        <div class="clockTime" id="liveClock">00:00:00</div>
+        <div class="clockDate" id="liveDate">Måndag, 1 januari</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMER -->
+  <div id="window-timer" class="window" style="left: 420px; top: 50px; width: 360px; height: 320px;">
+    <div class="windowHeader">
+      <div class="windowTitle">
+        <span class="windowTitleIcon">⏳</span>
+        <span>Timer</span>
+      </div>
+      <div class="windowButtons">
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
+      </div>
+    </div>
+    <div class="windowBody">
+      <div class="timer">
+        <div class="timerDisplay" id="timerDisplay">10:00</div>
+        
+        <!-- Snabbval 20, 30, 40, 50 min -->
+        <div class="timerPresets">
+          <button onclick="setTimerPreset(20)">20 min</button>
+          <button onclick="setTimerPreset(30)">30 min</button>
+          <button onclick="setTimerPreset(40)">40 min</button>
+          <button onclick="setTimerPreset(50)">50 min</button>
+        </div>
+
+        <!-- Justering +/- 1 och 5 min -->
+        <div class="timerAdjusters">
+          <button onclick="adjustTimer(5)">+5 min</button>
+          <button onclick="adjustTimer(1)">+1 min</button>
+          <button onclick="adjustTimer(-1)">-1 min</button>
+          <button onclick="adjustTimer(-5)">-5 min</button>
+        </div>
+        
+        <div class="timerControls">
+          <button id="timerStartBtn" onclick="toggleTimer()">Starta</button>
+          <button onclick="resetTimer()">Nollställ</button>
+        </div>
+
+
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klassrumstavlan</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+  color:#172033;
+}
+
+body{
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transition:background-image .3s ease;
+  background-image: url('https://unsplash.com');
 }
 
 /* =========================
-   DAGENS SCHEMA
+   TOOLBAR
 ========================= */
 
-.daySchedule{
-  margin-top:14px;
+#toolbar{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:10000;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:10px 14px;
+
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:22px;
+
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
+}
+
+.tool{
+  width:62px;
+  height:62px;
+  border:0;
+  background:transparent;
+  border-radius:16px;
+  cursor:pointer;
 
   display:flex;
   flex-direction:column;
-  gap:8px;
-}
-
-.dayScheduleRow{
-  display:grid;
-
-  grid-template-columns:75px 1fr 38px;
-
-  gap:8px;
-
+  justify-content:center;
   align-items:center;
+  gap:3px;
+
+  color:#172033;
+  font-size:11px;
 }
 
-.dayScheduleRow input{
-  min-width:0;
+.tool:hover{
+  background:#f0f3f8;
+}
 
-  border:1px solid #dfe4eb;
+.toolIcon{
+  font-size:27px;
+  line-height:27px;
+}
+
+.toolText{
+  white-space:nowrap;
+}
+
+/* =========================
+   GEMENSAMT FÖNSTER
+========================= */
+
+.window{
+  position:absolute;
+
+  min-width:280px;
+  min-height:180px;
+
+  width:460px;
+  height:380px;
+
+  background:rgba(255,255,255,.98);
+
+  border:1px solid rgba(20,30,50,.12);
+  border-radius:18px;
+
+  box-shadow:0 12px 35px rgba(0,0,0,.20);
+
+  overflow:hidden;
+
+  resize:both;
+
+  z-index:100;
+}
+
+.window.hidden{
+  display:none;
+}
+
+.window.minimized{
+  width:230px !important;
+  height:58px !important;
+  min-width:230px;
+  min-height:58px;
+  resize:none;
+}
+
+.window.minimized .windowBody{
+  display:none;
+}
+
+.windowHeader{
+  height:58px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 12px 0 17px;
+
+  background:#ffffff;
+
+  border-bottom:1px solid #e7eaf0;
+
+  cursor:move;
+
+  user-select:none;
+}
+
+.windowTitle{
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  font-size:17px;
+  font-weight:700;
+}
+
+.windowTitleIcon{
+  font-size:23px;
+}
+
+.windowButtons{
+  display:flex;
+  gap:5px;
+}
+
+.windowButton{
+  width:34px;
+  height:34px;
+
+  border:0;
+  border-radius:10px;
+
+  background:#f3f5f8;
+
+  cursor:pointer;
+
+  font-size:17px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.windowButton:hover{
+  background:#e7ebf1;
+}
+
+.windowBody{
+  width:100%;
+  height:calc(100% - 58px);
+  padding:16px;
+
+  overflow:auto;
+}
+
+/* =========================
+   REDIGERBAR TEXT / LEKTION
+========================= */
+
+.editor{
+  width:100%;
+  height:calc(100% - 110px);
+  min-height:120px;
+
+  padding:14px;
+
+  border:1px solid #dfe4ec;
+  border-radius:12px;
+
+  outline:none;
+
+  font-size:17px;
+  line-height:1.5;
+
+  background:#fff;
+  overflow-y:auto;
+}
+
+.editor:focus{
+  border-color:#aeb8c9;
+  box-shadow:0 0 0 3px rgba(100,120,160,.08);
+}
+
+.editor img{
+  max-width:100%;
+  height:auto;
+
+  border-radius:10px;
+  margin:8px 0;
+
+  display:block;
+}
+
+.editor a {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* =========================
+   REDIGERINGSKNAPPAR
+========================= */
+
+.editToolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+
+  margin-bottom:10px;
+}
+
+.editButton{
+  border:1px solid #dce1e8;
+
+  background:#f7f8fa;
+
+  padding:8px 11px;
 
   border-radius:9px;
 
-  padding:9px;
+  cursor:pointer;
+
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.editButton:hover{
+  background:#eceff4;
+}
+
+/* =========================
+   LEKTIONSPLAN
+========================= */
+
+.dayHeading{
+  width:100%;
+
+  padding:10px 12px;
+
+  margin-bottom:10px;
+
+  border:1px solid #e1e5eb;
+  border-radius:10px;
+
+  font-size:22px;
+  font-weight:700;
 
   outline:none;
 }
 
-.dayScheduleRow input:focus{
+.dayHeading:focus{
   border-color:#aeb8c9;
 }
 
-.dayScheduleRow button{
-  width:32px;
-  height:32px;
+/* =========================
+   KLOCKA
+========================= */
 
-  border:0;
-  border-radius:8px;
+.clock{
+  height:100%;
 
-  background:#f1f3f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-  cursor:pointer;
+  flex-direction:column;
+
+  gap:8px;
+}
+
+.clockTime{
+  font-size:55px;
+  font-weight:700;
+}
+
+.clockDate{
+  font-size:17px;
+  color:#6c7585;
 }
 
 /* =========================
-   RESPONSIVE
+   TIMER
 ========================= */
 
-@media(max-width:700px){
+.timer{
+  height:100%;
 
-  #toolbar{
-    max-width:95vw;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 
-    overflow-x:auto;
+  gap:12px;
+}
 
-    justify-content:flex-start;
-  }
+.timerDisplay{
+  font-size:55px;
+  font-weight:700;
+}
 
-  .tool{
-    flex:0 0 58px;
-  }
+.timerPresets, .timerAdjusters, .timerControls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+}
 
-  .bgGrid{
-    grid-template-columns:repeat(2,1fr);
-  }
+.timerPresets button, .timerAdjusters button, .timerControls button{
+  padding:6px 10px;
 
-  .window{
-    width:90vw;
-    height:65vh;
-  }
+  border:1px solid #dce1e8;
+  border-radius:9px;
+
+  background:#f6f8fa;
+
+  cursor:pointer;
+  font-size:13px;
+}
+
+.timerPresets button:hover, .timerAdjusters button:hover, .timerControls button:hover{
+  background:#eceff4;
+}
+
+.timerInputContainer {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:4px;
+}
+
+.timerInputContainer input {
+  width:60px;
+  padding:5px;
+  border:1px solid #dfe4eb;
+  border-radius:6px;
+  text-align:center;
+}
+
+/* =========================
+   BAKGRUNDSMENY
+========================= */
+
+#backgroundPanel{
+  position:fixed;
+
+  top:0;
+  right:0;
+
+  width:min(780px,100vw);
+  height:100vh;
+
+  background:#fff;
+
+  z-index:20000;
+
+  box-shadow:-8px 0 35px rgba(0,0,0,.18);
+
+  display:none;
+
+  overflow:auto;
+}
+
+#backgroundPanel.open{
+  display:block;
+}
+
+.bgHeader{
+  position:sticky;
+  top:0;
+
+  z-index:5;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:22px 25px;
+
+  background:white;
+
+  border-bottom:1px solid #e8ebef;
+}
+
+.bgHeader h2{
+  margin:0;
+
+  font-size:25px;
+}
+
+.bgClose{
+  width:44px;
+  height:44px;
+
+  border:1px solid #e0e4ea;
+  border-radius:50%;
+
+  background:white;
+
+  cursor:pointer;
+
+  font-size:25px;
+}
+
+.bgSection{
+  padding:20px 25px 5px;
+}
+
+.bgSectionTitle{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.bgGrid{
+  display:grid;
+
+  grid-template-columns:repeat(4,1fr);
+
+  gap:12px;
+}
+
+.bgCard{
+  height:100px;
+
+  border-radius:9px;
+
+  overflow:hidden;
+
+  cursor:pointer;
+
+  position:relative;
+
+  border:2px solid transparent;
+
+  background-size:cover;
+  background-position:center;
+}
+
+.bgCard:hover{
+  border-color:#75839a;
+}
+
+.bgCard img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.bgAdd{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  flex-direction:column;
+
+  gap:7px;
+
+  background:#f4f6f9;
+
+  border:2px dashed #c8ced8;
+
+  color:#536074;
+
+  font-weight:600;
+}
+
+.bgAdd span:first-child{
+  font-size:28px;
 }
 </style>
 </head>
-
 <body>
 
-<!-- =====================================================
-     TOOLBAR
-===================================================== -->
-
-<div id="toolbar">
-
-  <button class="tool" onclick="createNote()">
-    <span class="toolIcon">📝</span>
-    <span class="toolText">Anteckning</span>
-  </button>
-
-  <button class="tool" onclick="createNU()">
-    <span class="toolIcon">📖</span>
-    <span class="toolText">NU</span>
-  </button>
-
-  <button class="tool" onclick="createDay()">
-    <span class="toolIcon">📅</span>
-    <span class="toolText">Dagen</span>
-  </button>
-
-  <button class="tool" onclick="createSchedule()">
-    <span class="toolIcon">🗓️</span>
-    <span class="toolText">Schema</span>
-  </button>
-
-  <button class="tool" onclick="createLinks()">
-    <span class="toolIcon">🔗</span>
-    <span class="toolText">Länkar</span>
-  </button>
-
-  <button class="tool" onclick="createClock()">
-    <span class="toolIcon">🕒</span>
-    <span class="toolText">Klocka</span>
-  </button>
-
-  <button class="tool" onclick="createTimer()">
-    <span class="toolIcon">⏱️</span>
-    <span class="toolText">Timer</span>
-  </button>
-
-  <button class="tool" onclick="openBackgrounds()">
-    <span class="toolIcon">🎨</span>
-    <span class="toolText">Bakgrund</span>
-  </button>
-
-  <button class="tool" onclick="toggleFullscreen()">
-    <span class="toolIcon">⛶</span>
-    <span class="toolText">Helskärm</span>
-  </button>
-
-</div>
-
-
-<!-- =====================================================
-     BAKGRUNDSPANEL
-===================================================== -->
-
-<div id="backgroundPanel">
-
-  <div class="bgHeader">
-    <h2>🎨 Bakgrunder</h2>
-
-    <button class="bgClose" onclick="closeBackgrounds()">×</button>
-  </div>
-
-  <div class="bgSection">
-
-    <div class="bgSectionTitle">
-      Mina bakgrunder
-    </div>
-
-    <div id="customBackgrounds" class="bgGrid">
-
-      <label class="bgCard bgAdd">
-        <span>＋</span>
-        <span>Lägg till egen</span>
-
-        <input
-          id="backgroundUpload"
-          class="hiddenFile"
-          type="file"
-          accept="image/*"
-        >
-      </label>
-
-    </div>
-
-  </div>
-
-
-  <div class="bgSection">
-
-    <div class="bgSectionTitle">
-      Lugna bakgrunder
-    </div>
-
-    <div class="bgGrid">
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#dfe8e8,#8ea7a7)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#dfe8e8,#8ea7a7)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#f3eadb,#c9b18d)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#f3eadb,#c9b18d)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#e5e9f2,#aebbd0)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#e5e9f2,#aebbd0)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#e7efe8,#a9c4ad)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#e7efe8,#a9c4ad)')">
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="bgSection">
-
-    <div class="bgSectionTitle">
-      Natur
-    </div>
-
-    <div class="bgGrid">
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#426d59,#b5cba9)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#426d59,#b5cba9)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#8ab6c4,#dce7d8)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#8ab6c4,#dce7d8)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#526b82,#d3c9ae)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#526b82,#d3c9ae)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#263b31,#6f9273)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#263b31,#6f9273)')">
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="bgSection">
-
-    <div class="bgSectionTitle">
-      Årstider
-    </div>
-
-    <div class="bgGrid">
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#d8e8ef,#ffffff)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#d8e8ef,#ffffff)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#d8c39c,#78935f)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#d8c39c,#78935f)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#d69c68,#b44f45)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#d69c68,#b44f45)')">
-      </div>
-
-      <div
-        class="bgCard"
-        style="background-image:linear-gradient(135deg,#e7edf4,#9aa7b6)"
-        onclick="setBackgroundGradient('linear-gradient(135deg,#e7edf4,#9aa7b6)')">
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
-
-<script>
-
-/* =====================================================
-   LAGRING
-===================================================== */
-
-const STORAGE_KEY = "klassrumstavlan-v7";
-
-let state = {
-  windows: {},
-  backgrounds: {
-    type:"gradient",
-    value:"linear-gradient(135deg,#dfe8e8,#8ea7a7)"
-  }
-};
-
-try{
-
-  const saved = localStorage.getItem(STORAGE_KEY);
-
-  if(saved){
-    state = JSON.parse(saved);
-  }
-
-}catch(e){
-
-  console.log("Kunde inte läsa sparad information.");
-
-}
-
-
-/* =====================================================
-   ID
-===================================================== */
-
-function uid(prefix="id"){
-
-  return prefix + "-" +
-    Date.now().toString(36) +
-    "-" +
-    Math.random().toString(36).substring(2,8);
-
-}
-
-
-/* =====================================================
-   SPARA
-===================================================== */
-
-function saveState(){
-
-  try{
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(state)
-    );
-
-  }catch(e){
-
-    console.log("Kunde inte spara.");
-
-  }
-
-}
-
-
-/* =====================================================
-   INDEXERA FÖNSTER
-===================================================== */
-
-function registerWindow(win,type){
-
-  const id = win.dataset.id;
-
-  if(!state.windows[id]){
-
-    state.windows[id] = {
-
-      type:type,
-
-      x:win.offsetLeft,
-      y:win.offsetTop,
-
-      width:win.offsetWidth,
-      height:win.offsetHeight,
-
-      minimized:false
-
-    };
-
-  }
-
-}
-
-
-/* =====================================================
-   SKAPA FÖNSTER
-===================================================== */
-
-function createWindow(type,title,icon){
-
-  const win = document.createElement("div");
-
-  win.className = "window";
-
-  win.dataset.id = uid("window");
-  win.dataset.type = type;
-
-  const existing =
-    Object.keys(state.windows).length;
-
-  win.style.left =
-    (80 + existing * 25) + "px";
-
-  win.style.top =
-    (70 + existing * 25) + "px";
-
-  win.innerHTML = `
-
+<!-- =========================
+     WINDOWS CONTAINER
+========================= -->
+<div id="desktop">
+
+  <!-- TEMPLATE FÖR LEKTIONSFÖNSTER -->
+  <div id="lesson-template" class="window hidden">
     <div class="windowHeader">
-
       <div class="windowTitle">
-
-        <span class="windowTitleIcon">
-          ${icon}
-        </span>
-
-        <span>
-          ${title}
-        </span>
-
+        <span class="windowTitleIcon">📚</span>
+        <span class="windowTitleText">Lektion</span>
       </div>
-
       <div class="windowButtons">
-
-        <button
-          class="windowButton minimizeButton"
-          title="Minimera">
-          −
-        </button>
-
-        <button
-          class="windowButton closeButton"
-          title="Stäng">
-          ×
-        </button>
-
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
+      </div>
+    </div>
+    <div class="windowBody">
+      <input type="text" class="dayHeading" placeholder="Titel (t.ex. Måndag, Matte...)">
+      
+      <div class="editToolbar">
+        <button class="editButton boldBtn"><b>B</b></button>
+        <button class="editButton italicBtn"><i>I</i></button>
+        <button class="editButton imgBtn">📷 Bild</button>
+        <button class="editButton linkBtn">🔗 Länk</button>
       </div>
 
+      <div class="editor" contenteditable="true" placeholder="Skriv planering, klistra in text eller lägg till bilder..."></div>
     </div>
-
-    <div class="windowBody"></div>
-
-  `;
-
-  document.body.appendChild(win);
-
-  registerWindow(win,type);
-
-  setupWindow(win);
-
-  return win;
-
-}
-
-
-/* =====================================================
-   FLYTTA FÖNSTER
-===================================================== */
-
-function setupWindow(win){
-
-  const header =
-    win.querySelector(".windowHeader");
-
-  const minimize =
-    win.querySelector(".minimizeButton");
-
-  const close =
-    win.querySelector(".closeButton");
-
-
-  /* DRAG */
-
-  let dragging = false;
-
-  let startX = 0;
-  let startY = 0;
-
-  let startLeft = 0;
-  let startTop = 0;
-
-
-  header.addEventListener("mousedown",e=>{
-
-    if(
-      e.target.closest(".windowButton")
-    ){
-      return;
-    }
-
-    dragging = true;
-
-    startX = e.clientX;
-    startY = e.clientY;
-
-    startLeft = win.offsetLeft;
-    startTop = win.offsetTop;
-
-    document.body.style.userSelect =
-      "none";
-
-  });
-
-
-  document.addEventListener("mousemove",e=>{
-
-    if(!dragging) return;
-
-    const dx =
-      e.clientX - startX;
-
-    const dy =
-      e.clientY - startY;
-
-    win.style.left =
-      Math.max(0,startLeft + dx) + "px";
-
-    win.style.top =
-      Math.max(0,startTop + dy) + "px";
-
-  });
-
-
-  document.addEventListener("mouseup",()=>{
-
-    if(!dragging) return;
-
-    dragging = false;
-
-    document.body.style.userSelect =
-      "";
-
-    saveWindowState(win);
-
-  });
-
-
-  /* MINIMERA */
-
-  minimize.addEventListener("click",()=>{
-
-    win.classList.toggle("minimized");
-
-    saveWindowState(win);
-
-  });
-
-
-  /* STÄNG */
-
-  close.addEventListener("click",()=>{
-
-    delete state.windows[win.dataset.id];
-
-    win.remove();
-
-    saveState();
-
-  });
-
-
-  /* RESIZE */
-
-  if(window.ResizeObserver){
-
-    const observer =
-      new ResizeObserver(()=>{
-
-        if(!win.classList.contains("minimized")){
-
-          saveWindowState(win);
-
-        }
-
-      });
-
-    observer.observe(win);
-
-  }
-
-}
-
-
-/* =====================================================
-   SPARA FÖNSTERPOSITION
-===================================================== */
-
-function saveWindowState(win){
-
-  const id =
-    win.dataset.id;
-
-  if(!state.windows[id]) return;
-
-  state.windows[id] = {
-
-    ...state.windows[id],
-
-    x:win.offsetLeft,
-
-    y:win.offsetTop,
-
-    width:win.offsetWidth,
-
-    height:win.offsetHeight,
-
-    minimized:
-      win.classList.contains("minimized")
-
-  };
-
-  saveState();
-
-}
-
-
-/* =====================================================
-   ANTECKNING
-===================================================== */
-
-function createNote(data=null){
-
-  const win =
-    createWindow(
-      "note",
-      "Anteckning",
-      "📝"
-    );
-
-  const body =
-    win.querySelector(".windowBody");
-
-  body.innerHTML = `
-
-    <textarea
-      class="noteArea"
-      placeholder="Skriv din anteckning här..."
-    ></textarea>
-
-  `;
-
-  const area =
-    body.querySelector(".noteArea");
-
-  if(data?.text){
-
-    area.value =
-      data.text;
-
-  }
-
-  area.addEventListener("input",()=>{
-
-    state.windows[win.dataset.id].data = {
-
-      text:area.value
-
-    };
-
-    saveState();
-
-  });
-
-}
-
-
-/* =====================================================
-   REDIGERINGSVERKTYG
-===================================================== */
-
-function editorToolbar(editor){
-
-  const bar =
-    document.createElement("div");
-
-  bar.className =
-    "editToolbar";
-
-  bar.innerHTML = `
-
-    <button class="editButton">
-      B
-    </button>
-
-    <button class="editButton">
-      I
-    </button>
-
-    <button class="editButton">
-      🔗 Lägg till länk
-    </button>
-
-    <button class="editButton">
-      🖼️ Lägg till bild
-    </button>
-
-    <button class="editButton">
-      • Lista
-    </button>
-
-  `;
-
-  const buttons =
-    bar.querySelectorAll("button");
-
-  buttons[0].onclick=()=>{
-    document.execCommand("bold");
-    editor.focus();
-  };
-
-  buttons[1].onclick=()=>{
-    document.execCommand("italic");
-    editor.focus();
-  };
-
-  buttons[2].onclick=()=>{
-    addLink(editor);
-  };
-
-  buttons[3].onclick=()=>{
-    addImageToEditor(editor);
-  };
-
-  buttons[4].onclick=()=>{
-    document.execCommand("insertUnorderedList");
-    editor.focus();
-  };
-
-  return bar;
-
-}
-
-
-/* =====================================================
-   LÄNK
-===================================================== */
-
-function addLink(editor){
-
-  const url =
-    prompt(
-      "Klistra in länken:",
-      "https://"
-    );
-
-  if(!url) return;
-
-  const text =
-    prompt(
-      "Vad ska länken heta?",
-      "Öppna länk"
-    );
-
-  if(!text) return;
-
-  editor.focus();
-
-  const html = `
-
-    <a
-      href="${escapeAttribute(url)}"
-      target="_blank"
-      rel="noopener"
-    >
-      🔗 ${escapeHtml(text)}
-    </a>
-
-  `;
-
-  document.execCommand(
-    "insertHTML",
-    false,
-    html
-  );
-
-  editor.dispatchEvent(
-    new Event("input")
-  );
-
-}
-
-
-/* =====================================================
-   BILD I EDITOR
-===================================================== */
-
-function addImageToEditor(editor){
-
-  const input =
-    document.createElement("input");
-
-  input.type="file";
-  input.accept="image/*";
-
-  input.onchange=async()=>{
-
-    const file =
-      input.files[0];
-
-    if(!file) return;
-
-    const data =
-      await resizeImage(file);
-
-    const id =
-      await saveImageToDB(
-        data,
-        "support"
-      );
-
-    const img =
-      document.createElement("img");
-
-    img.dataset.imageId =
-      id;
-
-    img.src =
-      data;
-
-    editor.appendChild(img);
-
-    editor.dispatchEvent(
-      new Event("input")
-    );
-
-  };
-
-  input.click();
-
-}
-
-
-/* =====================================================
-   DAGENS
-===================================================== */
-
-function createDay(data=null){
-
-  const win =
-    createWindow(
-      "day",
-      "Dagen",
-      "📅"
-    );
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  const heading =
-    data?.heading ||
-    "Dagens plan";
-
-
-  const html =
-    data?.html ||
-    `
-
-      <p><strong>Välkommen!</strong></p>
-
-      <p>
-        Här kan du skriva dagens planering,
-        instruktioner och information.
-      </p>
-
-    `;
-
-
-  body.innerHTML = `
-
-    <input
-      class="dayHeading"
-      value="${escapeAttribute(heading)}"
-    >
-
-    <div class="dayDate">
-      ${formatDate()}
-    </div>
-
-    <div class="editorToolbarContainer"></div>
-
-    <div
-      class="editor dayEditor"
-      contenteditable="true"
-    ></div>
-
-    <h3 style="margin-top:18px;">
-      🕒 Dagens tider
-    </h3>
-
-    <div class="daySchedule"></div>
-
-    <button
-      class="editButton addDayRow"
-      style="margin-top:10px;"
-    >
-      ＋ Lägg till tid
-    </button>
-
-  `;
-
-
-  const headingInput =
-    body.querySelector(".dayHeading");
-
-  const editor =
-    body.querySelector(".dayEditor");
-
-
-  editor.innerHTML =
-    html;
-
-
-  const toolbar =
-    editorToolbar(editor);
-
-  body
-    .querySelector(".editorToolbarContainer")
-    .appendChild(toolbar);
-
-
-  /* TIDER */
-
-  const schedule =
-    body.querySelector(".daySchedule");
-
-
-  const rows =
-    data?.rows ||
-    [
-
-      ["08.40","SO"],
-      ["09.25","Svenska"],
-      ["09.40","Matte"],
-      ["10.25","Musik"],
-      ["10.35","SO"],
-      ["11.20","Lunch"],
-      ["13.00","Bild"],
-      ["13.45","Musik"]
-
-    ];
-
-
-  rows.forEach(row=>{
-
-    addDayRow(
-      schedule,
-      row[0],
-      row[1]
-    );
-
-  });
-
-
-  body
-    .querySelector(".addDayRow")
-    .onclick=()=>{
-
-      addDayRow(
-        schedule,
-        "",
-        ""
-      );
-
-      saveDay(win);
-
-    };
-
-
-  headingInput.addEventListener(
-    "input",
-    ()=>saveDay(win)
-  );
-
-
-  editor.addEventListener(
-    "input",
-    ()=>saveDay(win)
-  );
-
-
-  saveDay(win);
-
-}
-
-
-/* =====================================================
-   DAGENS RAD
-===================================================== */
-
-function addDayRow(container,time="",subject=""){
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "dayScheduleRow";
-
-
-  row.innerHTML = `
-
-    <input
-      placeholder="Tid"
-      value="${escapeAttribute(time)}"
-    >
-
-    <input
-      placeholder="Aktivitet"
-      value="${escapeAttribute(subject)}"
-    >
-
-    <button title="Ta bort">
-      ×
-    </button>
-
-  `;
-
-
-  row.querySelector("button")
-    .onclick=()=>{
-
-      row.remove();
-
-      const win =
-        row.closest(".window");
-
-      if(win){
-        saveDay(win);
-      }
-
-    };
-
-
-  row.querySelectorAll("input")
-    .forEach(input=>{
-
-      input.addEventListener(
-        "input",
-        ()=>{
-
-          const win =
-            row.closest(".window");
-
-          if(win){
-            saveDay(win);
-          }
-
-        }
-      );
-
-    });
-
-
-  container.appendChild(row);
-
-}
-
-
-/* =====================================================
-   SPARA DAG
-===================================================== */
-
-function saveDay(win){
-
-  const body =
-    win.querySelector(".windowBody");
-
-  const rows =
-    [...body.querySelectorAll(
-      ".dayScheduleRow"
-    )]
-    .map(row=>{
-
-      const inputs =
-        row.querySelectorAll("input");
-
-      return [
-        inputs[0].value,
-        inputs[1].value
-      ];
-
-    });
-
-
-  state.windows[win.dataset.id].data = {
-
-    heading:
-      body.querySelector(".dayHeading").value,
-
-    html:
-      prepareEditorHtml(
-        body.querySelector(".dayEditor")
-      ),
-
-    rows:rows
-
-  };
-
-
-  saveState();
-
-}
-
-
-/* =====================================================
-   NU
-===================================================== */
-
-function createNU(data=null){
-
-  const win =
-    createWindow(
-      "nu",
-      "NU",
-      "📖"
-    );
-
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  body.innerHTML = `
-
-    <input
-      class="nuSubject"
-      placeholder="Ämne / lektion"
-      value="${escapeAttribute(
-        data?.subject || "SVENSKA"
-      )}"
-    >
-
-    <div class="editorToolbarContainer"></div>
-
-    <div
-      class="editor nuEditor"
-      contenteditable="true"
-    ></div>
-
-  `;
-
-
-  const editor =
-    body.querySelector(".nuEditor");
-
-
-  editor.innerHTML =
-    data?.html ||
-
-    `
-
-      <p>
-        <strong>
-          Läs s. 34–38
-        </strong>
-      </p>
-
-      <p>
-        Arbeta två och två.
-      </p>
-
-    `;
-
-
-  body
-    .querySelector(".editorToolbarContainer")
-    .appendChild(
-      editorToolbar(editor)
-    );
-
-
-  const save=()=>{
-
-    state.windows[win.dataset.id].data={
-
-      subject:
-        body.querySelector(".nuSubject").value,
-
-      html:
-        prepareEditorHtml(editor)
-
-    };
-
-    saveState();
-
-  };
-
-
-  body
-    .querySelector(".nuSubject")
-    .addEventListener(
-      "input",
-      save
-    );
-
-
-  editor.addEventListener(
-    "input",
-    save
-  );
-
-
-  save();
-
-}
-
-
-/* =====================================================
-   SCHEMA
-===================================================== */
-
-function createSchedule(data=null){
-
-  const win =
-    createWindow(
-      "schedule",
-      "Schema",
-      "🗓️"
-    );
-
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  body.innerHTML = `
-
-    <div class="schedule"></div>
-
-    <button
-      class="editButton"
-      style="margin-top:12px;"
-    >
-      ＋ Lägg till rad
-    </button>
-
-  `;
-
-
-  const schedule =
-    body.querySelector(".schedule");
-
-
-  const rows =
-    data?.rows ||
-
-    [
-
-      ["08.40","SO","📚"],
-      ["09.25","Svenska","📖"],
-      ["09.40","Matte","➗"],
-      ["10.25","Musik","🎵"],
-      ["10.35","SO","📚"],
-      ["11.20","Lunch","🍎"],
-      ["13.00","Bild","🎨"],
-      ["13.45","Musik","🎵"]
-
-    ];
-
-
-  rows.forEach(row=>{
-
-    addScheduleRow(
-      schedule,
-      row[0],
-      row[1],
-      row[2]
-    );
-
-  });
-
-
-  body
-    .querySelector("button")
-    .onclick=()=>{
-
-      addScheduleRow(
-        schedule,
-        "",
-        "",
-        "📚"
-      );
-
-      saveSchedule(win);
-
-    };
-
-
-  saveSchedule(win);
-
-}
-
-
-/* =====================================================
-   SCHEMA RAD
-===================================================== */
-
-function addScheduleRow(
-  container,
-  time="",
-  subject="",
-  icon="📚"
-){
-
-  const row =
-    document.createElement("div");
-
-  row.className =
-    "scheduleRow";
-
-
-  row.innerHTML = `
-
-    <input
-      class="scheduleInput"
-      placeholder="Tid"
-      value="${escapeAttribute(time)}"
-    >
-
-    <input
-      class="scheduleInput"
-      placeholder="Ämne"
-      value="${escapeAttribute(subject)}"
-    >
-
-    <input
-      class="scheduleInput"
-      style="text-align:center;"
-      value="${escapeAttribute(icon)}"
-    >
-
-    <button
-      class="scheduleDelete"
-    >
-      ×
-    </button>
-
-  `;
-
-
-  row.querySelector(".scheduleDelete")
-    .onclick=()=>{
-
-      row.remove();
-
-      const win =
-        row.closest(".window");
-
-      if(win){
-        saveSchedule(win);
-      }
-
-    };
-
-
-  row.querySelectorAll("input")
-    .forEach(input=>{
-
-      input.addEventListener(
-        "input",
-        ()=>{
-
-          const win =
-            row.closest(".window");
-
-          if(win){
-            saveSchedule(win);
-          }
-
-        }
-      );
-
-    });
-
-
-  container.appendChild(row);
-
-}
-
-
-/* =====================================================
-   SPARA SCHEMA
-===================================================== */
-
-function saveSchedule(win){
-
-  const rows =
-    [...win.querySelectorAll(
-      ".scheduleRow"
-    )]
-    .map(row=>{
-
-      const inputs =
-        row.querySelectorAll("input");
-
-      return [
-
-        inputs[0].value,
-        inputs[1].value,
-        inputs[2].value
-
-      ];
-
-    });
-
-
-  state.windows[win.dataset.id].data = {
-
-    rows:rows
-
-  };
-
-
-  saveState();
-
-}
-
-
-/* =====================================================
-   LÄNKAR
-===================================================== */
-
-function createLinks(){
-
-  const win =
-    createWindow(
-      "links",
-      "Länkar",
-      "🔗"
-    );
-
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  body.innerHTML = `
-
-    <div class="linkList">
-
-      <a
-        class="linkItem"
-        href="https://urplay.se/"
-        target="_blank"
-        rel="noopener"
-      >
-        🎬 UR Play
-      </a>
-
-      <a
-        class="linkItem"
-        href="https://www.svtplay.se/"
-        target="_blank"
-        rel="noopener"
-      >
-        📺 SVT Play
-      </a>
-
-      <a
-        class="linkItem"
-        href="https://www.youtube.com/"
-        target="_blank"
-        rel="noopener"
-      >
-        ▶️ YouTube
-      </a>
-
-      <a
-        class="linkItem"
-        href="https://www.skolon.com/"
-        target="_blank"
-        rel="noopener"
-      >
-        🏫 Skolon
-      </a>
-
-      <a
-        class="linkItem"
-        href="https://sli.se/"
-        target="_blank"
-        rel="noopener"
-      >
-        📚 SLI
-      </a>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   KLOCKA
-===================================================== */
-
-function createClock(){
-
-  const win =
-    createWindow(
-      "clock",
-      "Klocka",
-      "🕒"
-    );
-
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  body.innerHTML = `
-
-    <div class="clock">
-
-      <div class="clockTime">
-        00:00
+  </div>
+
+  <!-- KLOCKA -->
+  <div id="window-clock" class="window" style="left: 50px; top: 50px; width: 320px; height: 220px;">
+    <div class="windowHeader">
+      <div class="windowTitle">
+        <span class="windowTitleIcon">🕒</span>
+        <span>Klocka</span>
       </div>
-
-      <div class="clockDate">
-        -
+      <div class="windowButtons">
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
       </div>
-
     </div>
-
-  `;
-
-
-  function update(){
-
-    const now =
-      new Date();
-
-
-    body.querySelector(
-      ".clockTime"
-    ).textContent =
-      now.toLocaleTimeString(
-        "sv-SE",
-        {
-          hour:"2-digit",
-          minute:"2-digit"
-        }
-      );
-
-
-    body.querySelector(
-      ".clockDate"
-    ).textContent =
-      now.toLocaleDateString(
-        "sv-SE",
-        {
-          weekday:"long",
-          day:"numeric",
-          month:"long"
-        }
-      );
-
-  }
-
-
-  update();
-
-  setInterval(update,1000);
-
-}
-
-
-/* =====================================================
-   TIMER
-===================================================== */
-
-function createTimer(){
-
-  const win =
-    createWindow(
-      "timer",
-      "Timer",
-      "⏱️"
-    );
-
-
-  const body =
-    win.querySelector(".windowBody");
-
-
-  body.innerHTML = `
-
-    <div class="timer">
-
-      <div class="timerDisplay">
-        05:00
+    <div class="windowBody">
+      <div class="clock">
+        <div class="clockTime" id="liveClock">00:00:00</div>
+        <div class="clockDate" id="liveDate">Måndag, 1 januari</div>
       </div>
-
-      <div class="timerControls">
-
-        <button data-min="1">
-          1 min
-        </button>
-
-        <button data-min="5">
-          5 min
-        </button>
-
-        <button data-min="10">
-          10 min
-        </button>
-
-        <button data-action="start">
-          ▶ Start
-        </button>
-
-        <button data-action="reset">
-          ↺
-        </button>
-
-      </div>
-
     </div>
-
-  `;
-
-
-  let seconds=300;
-  let interval=null;
-
-
-  const display =
-    body.querySelector(
-      ".timerDisplay"
-    );
-
-
-  function render(){
-
-    const min =
-      Math.floor(seconds/60);
-
-    const sec =
-      seconds%60;
-
-    display.textContent =
-      String(min).padStart(2,"0")
-      + ":" +
-      String(sec).padStart(2,"0");
-
-  }
-
-
-  body
-    .querySelectorAll(
-      "[data-min]"
-    )
-    .forEach(button=>{
-
-      button.onclick=()=>{
-
-        seconds =
-          Number(button.dataset.min)*60;
-
-        render();
-
-      };
-
-    });
-
-
-  body
-    .querySelector(
-      "[data-action='start']"
-    )
-    .onclick=()=>{
-
-      if(interval) return;
-
-      interval =
-        setInterval(()=>{
-
-          if(seconds<=0){
-
-            clearInterval(interval);
-
-            interval=null;
-
-            return;
-
-          }
-
-          seconds--;
-
-          render();
-
-        },1000);
-
-    };
-
-
-  body
-    .querySelector(
-      "[data-action='reset']"
-    )
-    .onclick=()=>{
-
-      clearInterval(interval);
-
-      interval=null;
-
-      seconds=300;
-
-      render();
-
-    };
-
-
-  render();
-
-}
-
-
-/* =====================================================
-   BAKGRUNDER
-===================================================== */
-
-function openBackgrounds(){
-
-  document
-    .getElementById(
-      "backgroundPanel"
-    )
-    .classList.add("open");
-
-  loadCustomBackgrounds();
-
-}
-
-
-function closeBackgrounds(){
-
-  document
-    .getElementById(
-      "backgroundPanel"
-    )
-    .classList.remove("open");
-
-}
-
-
-/* =====================================================
-   VANLIG BAKGRUND
-===================================================== */
-
-function setBackgroundGradient(value){
-
-  document.body.style.backgroundImage =
-    value;
-
-
-  state.backgrounds = {
-
-    type:"gradient",
-
-    value:value
-
-  };
-
-
-  saveState();
-
-  closeBackgrounds();
-
-}
-
-
-/* =====================================================
-   UPLOAD BAKGRUND
-===================================================== */
-
-document
-  .getElementById(
-    "backgroundUpload"
-  )
-  .addEventListener(
-    "change",
-    async function(){
-
-      const file =
-        this.files[0];
-
-      if(!file) return;
-
-
-      const data =
-        await resizeImage(
-          file,
-          1600
-        );
-
-
-      const id =
-        await saveImageToDB(
-          data,
-          "background"
-        );
-
-
-      state.backgrounds={
-
-        type:"custom",
-
-        id:id
-
-      };
-
-
-      saveState();
-
-      applyCustomBackground(
-        data
-      );
-
-
-      await loadCustomBackgrounds();
-
-      this.value="";
-
-    }
-  );
-
-
-/* =====================================================
-   IDB
-===================================================== */
-
-let dbPromise = null;
-
-
-function getDB(){
-
-  if(dbPromise){
-    return dbPromise;
-  }
-
-
-  dbPromise =
-    new Promise((resolve,reject)=>{
-
-      const request =
-        indexedDB.open(
-          "KlassrumstavlanDB",
-          1
-        );
-
-
-      request.onupgradeneeded =
-        function(){
-
-          const db =
-            request.result;
-
-
-          if(
-            !db.objectStoreNames.contains(
-              "images"
-            )
-          ){
-
-            db.createObjectStore(
-              "images",
-              {
-                keyPath:"id"
-              }
-            );
-
-          }
-
-        };
-
-
-      request.onsuccess =
-        ()=>resolve(
-          request.result
-        );
-
-
-      request.onerror =
-        ()=>reject(
-          request.error
-        );
-
-    });
-
-
-  return dbPromise;
-
-}
-
-
-/* =====================================================
-   SPARA BILD
-===================================================== */
-
-async function saveImageToDB(
-  data,
-  type
-){
-
-  const db =
-    await getDB();
-
-
-  const id =
-    uid(type);
-
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const tx =
-        db.transaction(
-          "images",
-          "readwrite"
-        );
-
-
-      tx.objectStore(
-        "images"
-      ).put({
-
-        id:id,
-
-        type:type,
-
-        data:data,
-
-        created:Date.now()
-
-      });
-
-
-      tx.oncomplete =
-        ()=>resolve(id);
-
-
-      tx.onerror =
-        ()=>reject(
-          tx.error
-        );
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   HÄMTA BILDER
-===================================================== */
-
-async function getImages(type){
-
-  const db =
-    await getDB();
-
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const tx =
-        db.transaction(
-          "images",
-          "readonly"
-        );
-
-
-      const request =
-        tx.objectStore(
-          "images"
-        ).getAll();
-
-
-      request.onsuccess=()=>{
-
-        resolve(
-          request.result
-            .filter(
-              image =>
-                image.type===type
-            )
-        );
-
-      };
-
-
-      request.onerror =
-        ()=>reject(
-          request.error
-        );
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   TA BORT BILD
-===================================================== */
-
-async function deleteImage(id){
-
-  const db =
-    await getDB();
-
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const tx =
-        db.transaction(
-          "images",
-          "readwrite"
-        );
-
-
-      tx.objectStore(
-        "images"
-      ).delete(id);
-
-
-      tx.oncomplete =
-        ()=>resolve();
-
-
-      tx.onerror =
-        ()=>reject(
-          tx.error
-        );
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   VISA EGNA BAKGRUNDER
-===================================================== */
-
-async function loadCustomBackgrounds(){
-
-  const container =
-    document.getElementById(
-      "customBackgrounds"
-    );
-
-
-  const addButton =
-    container.querySelector(
-      ".bgAdd"
-    );
-
-
-  container.innerHTML="";
-
-  container.appendChild(
-    addButton
-  );
-
-
-  const images =
-    await getImages(
-      "background"
-    );
-
-
-  images
-    .sort(
-      (a,b)=>
-        b.created-a.created
-    )
-    .forEach(image=>{
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-      card.className =
-        "bgCard";
-
-
-      card.style.backgroundImage =
-        `url("${image.data}")`;
-
-
-      card.title =
-        "Välj bakgrund";
-
-
-      card.onclick=()=>{
-
-        state.backgrounds={
-
-          type:"custom",
-
-          id:image.id
-
-        };
-
-        saveState();
-
-        applyCustomBackground(
-          image.data
-        );
-
-        closeBackgrounds();
-
-      };
-
-
-      container.appendChild(
-        card
-      );
-
-    });
-
-}
-
-
-/* =====================================================
-   ANVÄND EGEN BAKGRUND
-===================================================== */
-
-function applyCustomBackground(data){
-
-  document.body.style.backgroundImage =
-    `url("${data}")`;
-
-}
-
-
-/* =====================================================
-   LADDAR SPARAD BAKGRUND
-===================================================== */
-
-async function loadSavedBackground(){
-
-  if(
-    !state.backgrounds
-  ){
-    return;
-  }
-
-
-  if(
-    state.backgrounds.type ===
-    "gradient"
-  ){
-
-    document.body.style.backgroundImage =
-      state.backgrounds.value;
-
-    return;
-
-  }
-
-
-  if(
-    state.backgrounds.type ===
-    "custom"
-  ){
-
-    const images =
-      await getImages(
-        "background"
-      );
-
-
-    const image =
-      images.find(
-        item =>
-          item.id ===
-          state.backgrounds.id
-      );
-
-
-    if(image){
-
-      applyCustomBackground(
-        image.data
-      );
-
-    }
-
-  }
-
-}
-
-
-/* =====================================================
-   BILDRESIZE
-===================================================== */
-
-function resizeImage(
-  file,
-  maxWidth=1400
-){
-
-  return new Promise(
-    resolve=>{
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload=e=>{
-
-        const img =
-          new Image();
-
-
-        img.onload=()=>{
-
-          let width =
-            img.width;
-
-          let height =
-            img.height;
-
-
-          if(width>maxWidth){
-
-            height =
-              Math.round(
-                height *
-                maxWidth /
-                width
-              );
-
-            width =
-              maxWidth;
-
-          }
-
-
-          const canvas =
-            document.createElement(
-              "canvas"
-            );
-
-
-          canvas.width =
-            width;
-
-          canvas.height =
-            height;
-
-
-          const ctx =
-            canvas.getContext(
-              "2d"
-            );
-
-
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            width,
-            height
-          );
-
-
-          resolve(
-            canvas.toDataURL(
-              "image/jpeg",
-              .82
-            )
-          );
-
-        };
-
-
-        img.src =
-          e.target.result;
-
-      };
-
-
-      reader.readAsDataURL(file);
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   EDITOR BILDER – SPARA
-===================================================== */
-
-function prepareEditorHtml(editor){
-
-  const clone =
-    editor.cloneNode(true);
-
-
-  clone
-    .querySelectorAll(
-      "img[data-image-id]"
-    )
-    .forEach(img=>{
-
-      img.src =
-        "idb-image:" +
-        img.dataset.imageId;
-
-    });
-
-
-  return clone.innerHTML;
-
-}
-
-
-/* =====================================================
-   EDITOR BILDER – VISA
-===================================================== */
-
-async function restoreEditorImages(editor){
-
-  const images =
-    editor.querySelectorAll(
-      "img[data-image-id]"
-    );
-
-
-  if(!images.length){
-    return;
-  }
-
-
-  const all =
-    await getImages(
-      "support"
-    );
-
-
-  images.forEach(img=>{
-
-    const item =
-      all.find(
-        image =>
-          image.id ===
-          img.dataset.imageId
-      );
-
-
-    if(item){
-
-      img.src =
-        item.data;
-
-    }
-
-  });
-
-}
-
-
-/* =====================================================
-   DATUM
-===================================================== */
-
-function formatDate(){
-
-  return new Date()
-    .toLocaleDateString(
-      "sv-SE",
-      {
-        weekday:"long",
-        day:"numeric",
-        month:"long",
-        year:"numeric"
-      }
-    );
-
-}
-
-
-/* =====================================================
-   HTML SÄKERHET
-===================================================== */
-
-function escapeHtml(text){
-
-  return String(text)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
-}
-
-
-function escapeAttribute(text){
-
-  return escapeHtml(
-    text || ""
-  );
-
-}
-
-
-/* =====================================================
-   HELSKÄRM
-===================================================== */
-
-function toggleFullscreen(){
-
-  if(!document.fullscreenElement){
-
-    document.documentElement
-      .requestFullscreen()
-      .catch(()=>{});
-
-  }else{
-
-    document.exitFullscreen()
-      .catch(()=>{});
-
-  }
-
-}
-
-
-/* =====================================================
-   LÄS IN SPARADE FÖNSTER
-===================================================== */
-
-async function restoreWindows(){
-
-  const windows =
-    state.windows || {};
-
-
-  for(
-    const [id,data]
-    of Object.entries(windows)
-  ){
-
-    let win=null;
-
-
-    if(data.type==="note"){
-
-      createNote(data.data);
-
-    }
-
-    else if(data.type==="day"){
-
-      createDay(data.data);
-
-    }
-
-    else if(data.type==="nu"){
-
-      createNU(data.data);
-
-    }
-
-    else if(data.type==="schedule"){
-
-      createSchedule(data.data);
-
-    }
-
-    else if(data.type==="links"){
-
-      createLinks();
-
-    }
-
-    else if(data.type==="clock"){
-
-      createClock();
-
-    }
-
-    else if(data.type==="timer"){
-
-      createTimer();
-
-    }
-
-
-    /*
-
-      Äldre sparade fönster
-      behöver inte återanvända
-      samma ID.
-
-    */
-
-  }
-
-
-  /* återställ bilder */
-
-  document
-    .querySelectorAll(
-      ".editor"
-    )
-    .forEach(editor=>{
-
-      restoreEditorImages(
-        editor
-      );
-
-    });
-
-}
-
-
-/* =====================================================
-   STANDARD FÖNSTER
-===================================================== */
-
-async function initialize(){
-
-  await loadSavedBackground();
-
-
-  const existing =
-    Object.keys(
-      state.windows || {}
-    ).length;
-
-
-  if(!existing){
-
-    createDay();
-
-    createSchedule();
-
-    createClock();
-
-  }else{
-
-    await restoreWindows();
-
-  }
-
-}
-
-
-initialize();
-
-</script>
-
-</body>
-</html>
+  </div>
+
+  <!-- TIMER -->
+  <div id="window-timer" class="window" style="left: 420px; top: 50px; width: 360px; height: 320px;">
+    <div class="windowHeader">
+      <div class="windowTitle">
+        <span class="windowTitleIcon">⏳</span>
+        <span>Timer</span>
+      </div>
+      <div class="windowButtons">
+        <button class="windowButton minBtn">➖</button>
+        <button class="windowButton closeBtn">❌</button>
+      </div>
+    </div>
+    <div class="windowBody">
+      <div class="timer">
+        <div class="timerDisplay" id="timerDisplay">10:00</div>
+        
+        <!-- Snabbval 20, 30, 40, 50 min -->
+        <div class="timerPresets">
+          <button onclick="setTimerPreset(20)">20 min</button>
+          <button onclick="setTimerPreset(30)">30 min</button>
+          <button onclick="setTimerPreset(40)">40 min</button>
+          <button onclick="setTimerPreset(50)">50 min</button>
+        </div>
+
+        <!-- Justering +/- 1 och 5 min -->
+        <div class="timerAdjusters">
+          <button onclick="adjustTimer(5)">+5 min</button>
+          <button onclick="adjustTimer(1)">+1 min</button>
+          <button onclick="adjustTimer(-1)">-1 min</button>
+          <button onclick="adjustTimer(-5)">-5 min</button>
+        </div>
+        
+        <div class="timerControls">
+          <button id="timerStartBtn" onclick="toggleTimer()">Starta</button>
+          <button onclick="resetTimer()">Nollställ</button>
+        </div>
+
+Use code with caution.Sätt tid📚Lektion🕒Klocka⏳Timer🖼️Bakgrund Välj bakgrund✕Högupplösta naturbilderEgen bakgrund (Bild eller animerad GIF)📤Ladda upp fillet activeWindow = null;let zIndexCounter = 100;let lessonCounter = 0;// Initiering av existerande fönster vid startdocument.querySelectorAll('.window:not(#lesson-template)').forEach(win => {makeDraggable(win);setupWindowButtons(win);win.addEventListener('mousedown', () => bringToFront(win));});// Skapa ett nytt unikt Lektionsfönster dynamisktdocument.getElementById('tool-lesson').addEventListener('click', () => {lessonCounter++;const template = document.getElementById('lesson-template');const clone = template.cloneNode(true);clone.id = window-lesson-${lessonCounter};clone.classList.remove('hidden');// Slumpmässig eller förskjuten placering så de inte hamnar exakt på varandraclone.style.left = ${100 + (lessonCounter * 25) % 300}px;clone.style.top = ${120 + (lessonCounter * 25) % 200}px;clone.style.zIndex = ++zIndexCounter;document.getElementById('desktop').appendChild(clone);// Aktivera fönsterfunktionermakeDraggable(clone);setupWindowButtons(clone);setupEditorFeatures(clone);clone.addEventListener('mousedown', () => bringToFront(clone));});function toggleWindow(id) {const win = document.getElementById(id);if (!win) return;if (win.classList.contains('hidden')) {win.classList.remove('hidden');bringToFront(win);} else {win.classList.add('hidden');}}function setupWindowButtons(win) {const minBtn = win.querySelector('.minBtn');const closeBtn = win.querySelector('.closeBtn');if (minBtn) {minBtn.addEventListener('click', (e) => {e.stopPropagation();win.classList.toggle('minimized');});}if (closeBtn) {closeBtn.addEventListener('click', (e) => {e.stopPropagation();if (win.id.startsWith('window-lesson-')) {win.remove(); // Ta bort dynamiska fönster helt} else {win.classList.add('hidden'); // Göm fasta fönster}});}}function bringToFront(win) {zIndexCounter++;win.style.zIndex = zIndexCounter;}// Hantering för textredigeraren i Lektionfunction setupEditorFeatures(win) {const editor = win.querySelector('.editor');const boldBtn = win.querySelector('.boldBtn');const italicBtn = win.querySelector('.italicBtn');const imgBtn = win.querySelector('.imgBtn');const linkBtn = win.querySelector('.linkBtn');boldBtn.addEventListener('click', () => {document.execCommand('bold', false, null);editor.focus();});italicBtn.addEventListener('click', () => {document.execCommand('italic', false, null);editor.focus();});imgBtn.addEventListener('click', () => {const url = prompt('Klistra in bildens webbadress (URL):');if (url) {document.execCommand('insertImage', false, url);}});linkBtn.addEventListener('click', () => {const text = prompt('Ange text som ska visas för länken:');if (!text) return;let url = prompt('Ange webbadress (URL):', 'https://');if (!url) return;// Säkerställ fungerande länkprotokollif (!/^https?:///i.test(url)) {url = 'https://' + url;}// Generera en länk som garanterat öppnas i ett nytt fönsterconst linkHTML = <a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>;document.execCommand('insertHTML', false, linkHTML);});}// Drag-and-drop / flytta fönster mekanikfunction makeDraggable(win) {const header = win.querySelector('.windowHeader');let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;header.onmousedown = dragMouseDown;function dragMouseDown(e) {if (e.target.classList.contains('windowButton')) return;e.preventDefault();pos3 = e.clientX;pos4 = e.clientY;document.onmouseup = closeDragElement;document.onmousemove = elementDrag;bringToFront(win);}function elementDrag(e) {e.preventDefault();pos1 = pos3 - e.clientX;pos2 = pos4 - e.clientY;pos3 = e.clientX;pos4 = e.clientY;win.style.top = (win.offsetTop - pos2) + "px";win.style.left = (win.offsetLeft - pos1) + "px";}function closeDragElement() {document.onmouseup = null;document.onmousemove = null;}}/* =========================KLOCKFUNKTIONER========================= */function updateClock() {const now = new Date();const options = { weekday: 'long', day: 'numeric', month: 'long' };document.getElementById('liveClock').textContent = now.toLocaleTimeString('sv-SE');document.getElementById('liveDate').textContent = now.toLocaleDateString('sv-SE', options);}setInterval(updateClock, 1000);updateClock();/* =========================TIMERFUNKTIONER========================= */let timerInterval = null;let timerSeconds = 600; // Standardinställning 10 minuterlet timerRunning = false;function updateTimerDisplay() {const mins = Math.floor(Math.abs(timerSeconds) / 60);const secs = Math.floor(Math.abs(timerSeconds) % 60);const sign = timerSeconds < 0 ? "-" : "";document.getElementById('timerDisplay').textContent = ${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')};}function toggleTimer() {const startBtn = document.getElementById('timerStartBtn');if (timerRunning) {clearInterval(timerInterval);startBtn.textContent = "Starta";timerRunning = false;} else {timerRunning = true;startBtn.textContent = "Pausa";timerInterval = setInterval(() => {timerSeconds--;updateTimerDisplay();if (timerSeconds === 0) {// Valfritt: Spela upp ett ljud här när tiden är slut}}, 1000);}}function resetTimer() {clearInterval(timerInterval);timerRunning = false;timerSeconds = 600;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();}function setTimerPreset(minutes) {clearInterval(timerInterval);timerRunning = false;timerSeconds = minutes * 60;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();}function setCustomTimer() {const input = document.getElementById('customMinutes');const mins = parseInt(input.value);if (!isNaN(mins) && mins >= 0) {clearInterval(timerInterval);timerRunning = false;timerSeconds = mins * 60;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();input.value = "";}}// Förändra tid dynamiskt (fungerar under körning)function adjustTimer(minutes) {timerSeconds += minutes * 60;updateTimerDisplay();}/* =========================BAKGRUNDSHANTERING========================= */function openBgPanel() {document.getElementById('backgroundPanel').classList.add('open');}function closeBgPanel() {document.getElementById('backgroundPanel').classList.remove('open');}function changeBackground(url) {document.body.style.backgroundImage = url('${url}');}function triggerBgUpload() {document.getElementById('bgUploadInput').click();}function handleBgUpload(e) {const file = e.target.files[0];if (file) {const reader = new FileReader();reader.onload = function(event) {// FileReader som DataURL behåller animeringen intakt för .gif-filer!changeBackground(event.target.result);};reader.readAsDataURL(file);}}
