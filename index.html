@@ -1,1203 +1,148 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Klassrumstavlan</title>
-
 <style>
-*{
-  box-sizing:border-box;
-}
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  color:#172033;
-}
-
-body{
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  transition:background-image .3s ease;
-  background-image: url('https://unsplash.com');
-}
-
-/* =========================
-   TOOLBAR
-========================= */
-
-#toolbar{
-  position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  z-index:10000;
-
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  padding:10px 14px;
-
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:22px;
-
-  box-shadow:0 8px 30px rgba(0,0,0,.18);
-}
-
-.tool{
-  width:62px;
-  height:62px;
-  border:0;
-  background:transparent;
-  border-radius:16px;
-  cursor:pointer;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:3px;
-
-  color:#172033;
-  font-size:11px;
-}
-
-.tool:hover{
-  background:#f0f3f8;
-}
-
-.toolIcon{
-  font-size:27px;
-  line-height:27px;
-}
-
-.toolText{
-  white-space:nowrap;
-}
-
-/* =========================
-   GEMENSAMT FÖNSTER
-========================= */
-
-.window{
-  position:absolute;
-
-  min-width:280px;
-  min-height:180px;
-
-  width:460px;
-  height:380px;
-
-  background:rgba(255,255,255,.98);
-
-  border:1px solid rgba(20,30,50,.12);
-  border-radius:18px;
-
-  box-shadow:0 12px 35px rgba(0,0,0,.20);
-
-  overflow:hidden;
-
-  resize:both;
-
-  z-index:100;
-}
-
-.window.hidden{
-  display:none;
-}
-
-.window.minimized{
-  width:230px !important;
-  height:58px !important;
-  min-width:230px;
-  min-height:58px;
-  resize:none;
-}
-
-.window.minimized .windowBody{
-  display:none;
-}
-
-.windowHeader{
-  height:58px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:0 12px 0 17px;
-
-  background:#ffffff;
-
-  border-bottom:1px solid #e7eaf0;
-
-  cursor:move;
-
-  user-select:none;
-}
-
-.windowTitle{
-  display:flex;
-  align-items:center;
-  gap:9px;
-
-  font-size:17px;
-  font-weight:700;
-}
-
-.windowTitleIcon{
-  font-size:23px;
-}
-
-.windowButtons{
-  display:flex;
-  gap:5px;
-}
-
-.windowButton{
-  width:34px;
-  height:34px;
-
-  border:0;
-  border-radius:10px;
-
-  background:#f3f5f8;
-
-  cursor:pointer;
-
-  font-size:17px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.windowButton:hover{
-  background:#e7ebf1;
-}
-
-.windowBody{
-  width:100%;
-  height:calc(100% - 58px);
-  padding:16px;
-
-  overflow:auto;
-}
-
-/* =========================
-   REDIGERBAR TEXT / LEKTION
-========================= */
-
-.editor{
-  width:100%;
-  height:calc(100% - 110px);
-  min-height:120px;
-
-  padding:14px;
-
-  border:1px solid #dfe4ec;
-  border-radius:12px;
-
-  outline:none;
-
-  font-size:17px;
-  line-height:1.5;
-
-  background:#fff;
-  overflow-y:auto;
-}
-
-.editor:focus{
-  border-color:#aeb8c9;
-  box-shadow:0 0 0 3px rgba(100,120,160,.08);
-}
-
-.editor img{
-  max-width:100%;
-  height:auto;
-
-  border-radius:10px;
-  margin:8px 0;
-
-  display:block;
-}
-
-.editor a {
-  color: #0066cc;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-/* =========================
-   REDIGERINGSKNAPPAR
-========================= */
-
-.editToolbar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-
-  margin-bottom:10px;
-}
-
-.editButton{
-  border:1px solid #dce1e8;
-
-  background:#f7f8fa;
-
-  padding:8px 11px;
-
-  border-radius:9px;
-
-  cursor:pointer;
-
-  font-size:13px;
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-
-.editButton:hover{
-  background:#eceff4;
-}
-
-/* =========================
-   LEKTIONSPLAN
-========================= */
-
-.dayHeading{
-  width:100%;
-
-  padding:10px 12px;
-
-  margin-bottom:10px;
-
-  border:1px solid #e1e5eb;
-  border-radius:10px;
-
-  font-size:22px;
-  font-weight:700;
-
-  outline:none;
-}
-
-.dayHeading:focus{
-  border-color:#aeb8c9;
-}
-
-/* =========================
-   KLOCKA
-========================= */
-
-.clock{
-  height:100%;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  flex-direction:column;
-
-  gap:8px;
-}
-
-.clockTime{
-  font-size:55px;
-  font-weight:700;
-}
-
-.clockDate{
-  font-size:17px;
-  color:#6c7585;
-}
-
-/* =========================
-   TIMER
-========================= */
-
-.timer{
-  height:100%;
-
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-
-  gap:12px;
-}
-
-.timerDisplay{
-  font-size:55px;
-  font-weight:700;
-}
-
-.timerPresets, .timerAdjusters, .timerControls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  justify-content:center;
-}
-
-.timerPresets button, .timerAdjusters button, .timerControls button{
-  padding:6px 10px;
-
-  border:1px solid #dce1e8;
-  border-radius:9px;
-
-  background:#f6f8fa;
-
-  cursor:pointer;
-  font-size:13px;
-}
-
-.timerPresets button:hover, .timerAdjusters button:hover, .timerControls button:hover{
-  background:#eceff4;
-}
-
-.timerInputContainer {
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-top:4px;
-}
-
-.timerInputContainer input {
-  width:60px;
-  padding:5px;
-  border:1px solid #dfe4eb;
-  border-radius:6px;
-  text-align:center;
-}
-
-/* =========================
-   BAKGRUNDSMENY
-========================= */
-
-#backgroundPanel{
-  position:fixed;
-
-  top:0;
-  right:0;
-
-  width:min(780px,100vw);
-  height:100vh;
-
-  background:#fff;
-
-  z-index:20000;
-
-  box-shadow:-8px 0 35px rgba(0,0,0,.18);
-
-  display:none;
-
-  overflow:auto;
-}
-
-#backgroundPanel.open{
-  display:block;
-}
-
-.bgHeader{
-  position:sticky;
-  top:0;
-
-  z-index:5;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:22px 25px;
-
-  background:white;
-
-  border-bottom:1px solid #e8ebef;
-}
-
-.bgHeader h2{
-  margin:0;
-
-  font-size:25px;
-}
-
-.bgClose{
-  width:44px;
-  height:44px;
-
-  border:1px solid #e0e4ea;
-  border-radius:50%;
-
-  background:white;
-
-  cursor:pointer;
-
-  font-size:25px;
-}
-
-.bgSection{
-  padding:20px 25px 5px;
-}
-
-.bgSectionTitle{
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:12px;
-}
-
-.bgGrid{
-  display:grid;
-
-  grid-template-columns:repeat(4,1fr);
-
-  gap:12px;
-}
-
-.bgCard{
-  height:100px;
-
-  border-radius:9px;
-
-  overflow:hidden;
-
-  cursor:pointer;
-
-  position:relative;
-
-  border:2px solid transparent;
-
-  background-size:cover;
-  background-position:center;
-}
-
-.bgCard:hover{
-  border-color:#75839a;
-}
-
-.bgCard img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.bgAdd{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  flex-direction:column;
-
-  gap:7px;
-
-  background:#f4f6f9;
-
-  border:2px dashed #c8ced8;
-
-  color:#536074;
-
-  font-weight:600;
-}
-
-.bgAdd span:first-child{
-  font-size:28px;
-}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#172033}body{background:#dfe7ef;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image .25s ease}
+#desktop{position:fixed;inset:0;overflow:hidden}
+#toolbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;display:flex;align-items:center;gap:7px;padding:9px 12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.tool{width:62px;height:62px;border:0;background:transparent;border-radius:16px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;color:#172033;font-size:11px}.tool:hover{background:#f0f3f8}.toolIcon{font-size:27px;line-height:27px}.toolText{white-space:nowrap}
+.window{position:absolute;min-width:280px;min-height:180px;width:460px;height:380px;background:rgba(255,255,255,.98);border:1px solid rgba(20,30,50,.12);border-radius:18px;box-shadow:0 12px 35px rgba(0,0,0,.20);overflow:hidden;resize:both;z-index:100}.window.hidden{display:none}.window.minimized{width:230px!important;height:58px!important;min-width:230px;min-height:58px;resize:none}.window.minimized .windowBody{display:none}
+.windowHeader{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 17px;background:#fff;border-bottom:1px solid #e7eaf0;cursor:move;user-select:none}.windowTitle{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700}.windowTitleIcon{font-size:23px}.windowButtons{display:flex;gap:5px}.windowButton{width:34px;height:34px;border:0;border-radius:10px;background:#f3f5f8;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center}.windowButton:hover{background:#e7ebf1}.windowBody{width:100%;height:calc(100% - 58px);padding:16px;overflow:auto}
+.editor{width:100%;height:calc(100% - 90px);min-height:150px;padding:14px;border:1px solid #dfe4ec;border-radius:12px;outline:none;font-size:17px;line-height:1.5;background:#fff;overflow-y:auto}.editor:focus{border-color:#aeb8c9;box-shadow:0 0 0 3px rgba(100,120,160,.08)}.editor img{max-width:100%;height:auto;border-radius:10px;margin:8px 0;display:block}.editor a{color:#06c;text-decoration:underline;cursor:pointer}
+.editToolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}.editButton,.smallButton{border:1px solid #dce1e8;background:#f7f8fa;padding:8px 11px;border-radius:9px;cursor:pointer;font-size:13px}.editButton:hover,.smallButton:hover{background:#eceff4}
+.lessonHeading,.lessonDate,.noteTitle{width:100%;padding:10px 12px;margin-bottom:9px;border:1px solid #e1e5eb;border-radius:10px;font-size:20px;outline:none}.lessonDate{font-size:14px;font-weight:400}.lessonHeading:focus,.lessonDate:focus,.noteTitle:focus{border-color:#aeb8c9}
+.clock{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}.clockTime{font-size:55px;font-weight:700}.clockDate{font-size:17px;color:#6c7585}
+.timer{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}.timerDisplay{font-size:55px;font-weight:700}.timerPresets,.timerAdjusters,.timerControls,.timerCustom{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.timerPresets button,.timerAdjusters button,.timerControls button,.timerCustom button{padding:7px 10px;border:1px solid #dce1e8;border-radius:9px;background:#f6f8fa;cursor:pointer;font-size:13px}.timerPresets button:hover,.timerAdjusters button:hover,.timerControls button:hover,.timerCustom button:hover{background:#eceff4}.timerCustom input{width:85px;padding:7px;border:1px solid #dfe4eb;border-radius:7px;text-align:center}
+.linkForm{display:grid;grid-template-columns:1fr 1.5fr auto;gap:7px;margin-bottom:12px}.linkForm input{min-width:0;padding:9px 10px;border:1px solid #dfe4eb;border-radius:8px}.linkList{display:flex;flex-direction:column;gap:7px}.linkItem{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e4e8ee;border-radius:9px;background:#fafbfc}.linkText{flex:1;color:#06c;font-weight:600}.linkDelete{border:0;background:#f0f2f5;border-radius:7px;cursor:pointer;font-size:18px;width:30px;height:30px}
+.scheduleTable{width:100%;border-collapse:collapse;font-size:16px}.scheduleTable th,.scheduleTable td{padding:9px;border-bottom:1px solid #e5e8ed;text-align:left}.scheduleTable th{background:#f7f8fa}.scheduleTable input{width:100%;border:1px solid #dfe4eb;border-radius:6px;padding:6px}.scheduleAdd{margin-top:10px}
+#backgroundPanel{position:fixed;top:0;right:0;width:min(780px,100vw);height:100vh;background:#fff;z-index:20000;box-shadow:-8px 0 35px rgba(0,0,0,.18);display:none;overflow:auto}#backgroundPanel.open{display:block}.bgHeader{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:22px 25px;background:#fff;border-bottom:1px solid #e8ebef}.bgHeader h2{margin:0;font-size:25px}.bgClose{width:44px;height:44px;border:1px solid #e0e4ea;border-radius:50%;background:#fff;cursor:pointer;font-size:25px}.bgSection{padding:20px 25px 5px}.bgSectionTitle{font-size:18px;font-weight:700;margin-bottom:12px}.bgGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.bgCard{height:105px;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;border:2px solid transparent;background-size:cover;background-position:center}.bgCard:hover{border-color:#75839a}.bgCard img{width:100%;height:100%;object-fit:cover}.bgLabel{position:absolute;left:7px;bottom:6px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;padding:3px 6px;font-size:11px}.bgAdd{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;background:#f4f6f9;border:2px dashed #c8ced8;color:#536074;font-weight:600}.bgAdd span:first-child{font-size:28px}.bgHint{color:#6c7585;font-size:13px;margin-top:8px}
+@media(max-width:900px){#toolbar{max-width:96vw;overflow-x:auto}.tool{width:56px}.bgGrid{grid-template-columns:repeat(2,1fr)}.linkForm{grid-template-columns:1fr}.window{width:min(92vw,460px)!important}}
 </style>
 </head>
 <body>
+<div id="desktop"></div>
 
-<!-- =========================
-     WINDOWS CONTAINER
-========================= -->
-<div id="desktop">
+<div id="toolbar">
+  <button class="tool" onclick="createNote()"><span class="toolIcon">📝</span><span class="toolText">Anteckning</span></button>
+  <button class="tool" onclick="createLesson()"><span class="toolIcon">📚</span><span class="toolText">Lektion</span></button>
+  <button class="tool" onclick="createSchedule()"><span class="toolIcon">📋</span><span class="toolText">Schema</span></button>
+  <button class="tool" onclick="createLinks()"><span class="toolIcon">🔗</span><span class="toolText">Länkar</span></button>
+  <button class="tool" onclick="createClock()"><span class="toolIcon">🕒</span><span class="toolText">Klocka</span></button>
+  <button class="tool" onclick="createTimer()"><span class="toolIcon">⏳</span><span class="toolText">Timer</span></button>
+  <button class="tool" onclick="openBackgrounds()"><span class="toolIcon">🖼️</span><span class="toolText">Bakgrund</span></button>
+  <button class="tool" onclick="toggleFullscreen()"><span class="toolIcon">⛶</span><span class="toolText">Helskärm</span></button>
+</div>
 
-  <!-- TEMPLATE FÖR LEKTIONSFÖNSTER -->
-  <div id="lesson-template" class="window hidden">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">📚</span>
-        <span class="windowTitleText">Lektion</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <input type="text" class="dayHeading" placeholder="Titel (t.ex. Måndag, Matte...)">
-      
-      <div class="editToolbar">
-        <button class="editButton boldBtn"><b>B</b></button>
-        <button class="editButton italicBtn"><i>I</i></button>
-        <button class="editButton imgBtn">📷 Bild</button>
-        <button class="editButton linkBtn">🔗 Länk</button>
-      </div>
+<div id="backgroundPanel">
+  <div class="bgHeader"><h2>Välj bakgrund</h2><button class="bgClose" onclick="closeBackgrounds()">✕</button></div>
+  <section class="bgSection"><div class="bgSectionTitle">Högupplösta naturbilder</div><div class="bgGrid" id="natureGrid"></div></section>
+  <section class="bgSection"><div class="bgSectionTitle">Lugna bakgrunder</div><div class="bgGrid" id="calmGrid"></div></section>
+  <section class="bgSection"><div class="bgSectionTitle">Årstider</div><div class="bgGrid" id="seasonGrid"></div></section>
+  <section class="bgSection"><div class="bgSectionTitle">Egen bakgrund – bild eller animerad GIF</div><div class="bgGrid" id="customGrid"><label class="bgCard bgAdd"><span>＋</span><span>Ladda upp fil</span><input id="backgroundUpload" type="file" accept="image/*,.gif" hidden></label></div><div class="bgHint">GIF-filer sparas som GIF och behåller sin animation.</div></section>
+</div>
 
-      <div class="editor" contenteditable="true" placeholder="Skriv planering, klistra in text eller lägg till bilder..."></div>
-    </div>
-  </div>
+<script>
+const STORAGE_KEY='klassrumstavlan-v7';
+let state=loadState();
+let zCounter=100;
+let lessonCounter=0;
+const natureBackgrounds=[
+  ['Skog','https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2200&q=90'],
+  ['Berg','https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2200&q=90'],
+  ['Grönska','https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=2200&q=90'],
+  ['Landskap','https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2200&q=90'],
+  ['Blad','https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2200&q=90'],
+  ['Vatten','https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2200&q=90'],
+  ['Blad – uppladdad bild','gildardo-rh-q1-dAZuhs7I-unsplash.jpg']
+];
+const calmBackgrounds=['linear-gradient(135deg,#eef3f7,#d9e3ec)','linear-gradient(135deg,#f4f0e8,#e7e0d2)','linear-gradient(135deg,#edf4ef,#dce9df)','linear-gradient(135deg,#f2f3f5,#dfe2e7)'];
+const seasonBackgrounds=[
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90',
+  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=2200&q=90',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90',
+  'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=2200&q=90'
+];
 
-  <!-- KLOCKA -->
-  <div id="window-clock" class="window" style="left: 50px; top: 50px; width: 320px; height: 220px;">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">🕒</span>
-        <span>Klocka</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <div class="clock">
-        <div class="clockTime" id="liveClock">00:00:00</div>
-        <div class="clockDate" id="liveDate">Måndag, 1 januari</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TIMER -->
-  <div id="window-timer" class="window" style="left: 420px; top: 50px; width: 360px; height: 320px;">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">⏳</span>
-        <span>Timer</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <div class="timer">
-        <div class="timerDisplay" id="timerDisplay">10:00</div>
-        
-        <!-- Snabbval 20, 30, 40, 50 min -->
-        <div class="timerPresets">
-          <button onclick="setTimerPreset(20)">20 min</button>
-          <button onclick="setTimerPreset(30)">30 min</button>
-          <button onclick="setTimerPreset(40)">40 min</button>
-          <button onclick="setTimerPreset(50)">50 min</button>
-        </div>
-
-        <!-- Justering +/- 1 och 5 min -->
-        <div class="timerAdjusters">
-          <button onclick="adjustTimer(5)">+5 min</button>
-          <button onclick="adjustTimer(1)">+1 min</button>
-          <button onclick="adjustTimer(-1)">-1 min</button>
-          <button onclick="adjustTimer(-5)">-5 min</button>
-        </div>
-        
-        <div class="timerControls">
-          <button id="timerStartBtn" onclick="toggleTimer()">Starta</button>
-          <button onclick="resetTimer()">Nollställ</button>
-        </div>
-
-
-<html lang="sv">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Klassrumstavlan</title>
-
-<style>
-*{
-  box-sizing:border-box;
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));return s&&s.windows?s:{windows:{},backgrounds:{type:'gradient',value:calmBackgrounds[0]}}}catch(e){return{windows:{},backgrounds:{type:'gradient',value:calmBackgrounds[0]}}}}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function uid(type){return type+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
+function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function normalizeUrl(url){url=String(url||'').trim();if(!url)return '';if(!/^https?:\/\//i.test(url))url='https://'+url;try{return new URL(url).href}catch(e){return ''}}
+function createWindow(type,title,icon,opts={}){
+  const id=opts.id||uid(type);const w=document.createElement('section');w.className='window';w.dataset.id=id;w.dataset.type=type;w.style.left=(opts.left??(80+(Object.keys(state.windows).length*28)%360))+'px';w.style.top=(opts.top??(70+(Object.keys(state.windows).length*24)%260))+'px';w.style.width=(opts.width??460)+'px';w.style.height=(opts.height??380)+'px';w.style.zIndex=++zCounter;
+  w.innerHTML=`<div class="windowHeader"><div class="windowTitle"><span class="windowTitleIcon">${icon}</span><span>${title}</span></div><div class="windowButtons"><button class="windowButton minBtn" title="Minimera">−</button><button class="windowButton closeBtn" title="Stäng">×</button></div></div><div class="windowBody"></div>`;
+  document.getElementById('desktop').appendChild(w);setupWindow(w);state.windows[id]={type,data:{}};saveState();return w;
 }
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  color:#172033;
+function setupWindow(w){
+  const header=w.querySelector('.windowHeader');w.addEventListener('mousedown',()=>bringToFront(w));
+  w.querySelector('.minBtn').onclick=e=>{e.stopPropagation();w.classList.toggle('minimized');saveWindowState(w)};
+  w.querySelector('.closeBtn').onclick=e=>{e.stopPropagation();delete state.windows[w.dataset.id];w.remove();saveState()};
+  let sx=0,sy=0,ox=0,oy=0,drag=false;
+  header.addEventListener('mousedown',e=>{if(e.target.closest('.windowButton'))return;drag=true;sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;bringToFront(w);document.body.style.userSelect='none';});
+  document.addEventListener('mousemove',e=>{if(!drag)return;w.style.left=Math.max(0,ox+e.clientX-sx)+'px';w.style.top=Math.max(0,oy+e.clientY-sy)+'px';});
+  document.addEventListener('mouseup',()=>{if(drag){drag=false;document.body.style.userSelect='';saveWindowState(w)}});
+  new ResizeObserver(()=>saveWindowState(w)).observe(w);
 }
+function bringToFront(w){w.style.zIndex=++zCounter}
+function saveWindowState(w){const s=state.windows[w.dataset.id];if(!s)return;s.minimized=w.classList.contains('minimized');s.left=w.offsetLeft;s.top=w.offsetTop;s.width=w.offsetWidth;s.height=w.offsetHeight;saveState()}
+function setWindowData(w,data){state.windows[w.dataset.id].data=data;saveWindowState(w)}
 
-body{
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  transition:background-image .3s ease;
-  background-image: url('https://unsplash.com');
+function editorToolbar(editor,onSave){
+  const bar=document.createElement('div');bar.className='editToolbar';
+  const b=document.createElement('button');b.className='editButton';b.innerHTML='<b>B</b>';b.onclick=()=>{editor.focus();document.execCommand('bold');onSave?.()};
+  const i=document.createElement('button');i.className='editButton';i.innerHTML='<i>I</i>';i.onclick=()=>{editor.focus();document.execCommand('italic');onSave?.()};
+  const img=document.createElement('button');img.className='editButton';img.textContent='📷 Bild';img.onclick=()=>{const u=prompt('Klistra in bildens webbadress (URL):');if(u){editor.focus();document.execCommand('insertImage',false,normalizeUrl(u));onSave?.()}};
+  const link=document.createElement('button');link.className='editButton';link.textContent='🔗 Länk';link.onclick=()=>addLink(editor,onSave);
+  bar.append(b,i,img,link);return bar;
 }
-
-/* =========================
-   TOOLBAR
-========================= */
-
-#toolbar{
-  position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  z-index:10000;
-
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  padding:10px 14px;
-
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:22px;
-
-  box-shadow:0 8px 30px rgba(0,0,0,.18);
+function addLink(editor,onSave){const text=prompt('Text som ska visas för länken:','Öppna länk');if(!text)return;const url=normalizeUrl(prompt('Webbadress (URL):','https://'));if(!url){alert('Fyll i en giltig webbadress.');return}editor.focus();document.execCommand('insertHTML',false,`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>`);saveEditor()}
+function createLesson(data=null,restore=false,opts={}){
+  const w=createWindow('lesson','Lektion','📚',{...opts});const body=w.querySelector('.windowBody');
+  body.innerHTML=`<input class="lessonHeading" placeholder="Lektionens rubrik" value="${esc(data?.heading||'Ny lektion')}"><input class="lessonDate" placeholder="Datum eller planering (valfritt)" value="${esc(data?.date||'')}"><div class="toolbarHost"></div><div class="editor" contenteditable="true"></div>`;
+  const editor=body.querySelector('.editor');editor.innerHTML=data?.html||'<p><strong>Planering</strong></p><p>Skriv instruktioner, text och länkar som eleverna behöver.</p>';
+  const heading=body.querySelector('.lessonHeading'),date=body.querySelector('.lessonDate');const save=()=>setWindowData(w,{heading:heading.value,date:date.value,html:editor.innerHTML});body.querySelector('.toolbarHost').appendChild(editorToolbar(editor,save));heading.oninput=save;date.oninput=save;editor.oninput=save;save();
+  if(!restore){w.style.left=(100+(lessonCounter++%5)*35)+'px';w.style.top=(90+(lessonCounter%5)*30)+'px';saveWindowState(w)}
+  return w;
 }
-
-.tool{
-  width:62px;
-  height:62px;
-  border:0;
-  background:transparent;
-  border-radius:16px;
-  cursor:pointer;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:3px;
-
-  color:#172033;
-  font-size:11px;
+function createNote(data=null,opts={}){const w=createWindow('note','Anteckning','📝',{...opts});const b=w.querySelector('.windowBody');b.innerHTML=`<input class="noteTitle" placeholder="Rubrik" value="${esc(data?.title||'Anteckning')}"><div class="editor" contenteditable="true"></div>`;const e=b.querySelector('.editor');e.innerHTML=data?.html||'';const t=b.querySelector('.noteTitle');const save=()=>setWindowData(w,{title:t.value,html:e.innerHTML});t.oninput=save;e.oninput=save;save();return w}
+function createSchedule(data=null,opts={}){const w=createWindow('schedule','Schema','📋',{width:430,height:430,...opts});const b=w.querySelector('.windowBody');const rows=data?.rows||[['08.40','SO','📚'],['09.25','Svenska','📖'],['09.40','Matte','➗'],['10.25','Musik','🎵'],['10.35','SO','📚'],['11.20','Lunch','🍎'],['13.00','Bild','🎨'],['13.45','Musik','🎵']];b.innerHTML='<table class="scheduleTable"><thead><tr><th>Tid</th><th>Ämne</th><th>Bildstöd</th></tr></thead><tbody></tbody></table><button class="smallButton scheduleAdd">＋ Lägg till rad</button>';const tb=b.querySelector('tbody');function render(){tb.innerHTML='';rows.forEach((r,idx)=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input value="${esc(r[0])}"></td><td><input value="${esc(r[1])}"></td><td><input value="${esc(r[2])}"></td>`;tr.querySelectorAll('input').forEach((inp,i)=>inp.oninput=()=>{r[i]=inp.value;setWindowData(w,{rows})});tb.appendChild(tr)})}b.querySelector('.scheduleAdd').onclick=()=>{rows.push(['','Ny lektion','📚']);render();setWindowData(w,{rows})};render();setWindowData(w,{rows});return w}
+function getDefaultLinks(){return[{name:'UR Play',url:'https://urplay.se/',icon:'🎬'},{name:'SVT Play',url:'https://www.svtplay.se/',icon:'📺'},{name:'YouTube',url:'https://www.youtube.com/',icon:'▶️'},{name:'Skolon',url:'https://www.skolon.com/',icon:'🏫'},{name:'SLI',url:'https://sli.se/',icon:'📚'}]}
+function createLinks(data=null,opts={}){const w=createWindow('links','Länkar','🔗',{width:520,height:420,...opts});const b=w.querySelector('.windowBody');b.innerHTML='<div class="linkForm"><input class="linkName" placeholder="Namn på länken"><input class="linkUrl" placeholder="https://..."><button class="smallButton">＋ Lägg till</button></div><div class="linkList"></div>';let links=(data?.links||getDefaultLinks()).map(x=>({...x}));const list=b.querySelector('.linkList');const save=()=>setWindowData(w,{links});function render(){list.innerHTML='';links.forEach((l,idx)=>{const item=document.createElement('div');item.className='linkItem';const a=document.createElement('a');a.className='linkText';a.href=normalizeUrl(l.url);a.target='_blank';a.rel='noopener noreferrer';a.textContent=(l.icon||'🔗')+' '+l.name;const del=document.createElement('button');del.className='linkDelete';del.textContent='×';del.onclick=()=>{links.splice(idx,1);render();save()};item.append(a,del);list.appendChild(item)})}const add=b.querySelector('.linkForm button');add.onclick=()=>{const n=b.querySelector('.linkName').value.trim(),u=normalizeUrl(b.querySelector('.linkUrl').value);if(!n||!u){alert('Fyll i namn och en giltig webbadress.');return}links.push({name:n,url:u,icon:'🔗'});b.querySelector('.linkName').value='';b.querySelector('.linkUrl').value='';render();save()};render();save();return w}
+function createClock(opts={}){const w=createWindow('clock','Klocka','🕒',{width:340,height:230,...opts});w.querySelector('.windowBody').innerHTML='<div class="clock"><div class="clockTime"></div><div class="clockDate"></div></div>';const time=w.querySelector('.clockTime'),date=w.querySelector('.clockDate');const tick=()=>{const n=new Date();time.textContent=n.toLocaleTimeString('sv-SE');date.textContent=n.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'})};tick();const timer=setInterval(()=>{if(!document.body.contains(w)){clearInterval(timer);return}tick()},1000);return w}
+function createTimer(data=null,opts={}){const w=createWindow('timer','Timer','⏳',{width:390,height:390,...opts});w.querySelector('.windowBody').innerHTML='<div class="timer"><div class="timerDisplay">20:00</div><div class="timerAdjusters"><button data-a="-300">−5 min</button><button data-a="-60">−1 min</button><button data-a="60">+1 min</button><button data-a="300">+5 min</button></div><div class="timerPresets"><button data-p="20">20 min</button><button data-p="30">30 min</button><button data-p="40">40 min</button><button data-p="50">50 min</button></div><div class="timerCustom"><input type="number" min="1" max="180" placeholder="Minuter"><button data-set>Ställ in</button></div><div class="timerControls"><button data-start>▶ Start</button><button data-reset>↺ Återställ</button></div></div>';let seconds=Number(data?.seconds??1200),running=false,interval=null;const display=w.querySelector('.timerDisplay'),start=w.querySelector('[data-start]');const render=()=>{const s=Math.max(0,seconds),m=Math.floor(s/60),sec=s%60;display.textContent=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`};const persist=()=>setWindowData(w,{seconds});const stop=()=>{clearInterval(interval);interval=null;running=false;start.textContent='▶ Start'};w.querySelectorAll('[data-a]').forEach(btn=>btn.onclick=()=>{seconds=Math.max(0,seconds+Number(btn.dataset.a));render();persist()});w.querySelectorAll('[data-p]').forEach(btn=>btn.onclick=()=>{seconds=Number(btn.dataset.p)*60;stop();render();persist()});w.querySelector('[data-set]').onclick=()=>{const v=Number(w.querySelector('input').value);if(v>0){seconds=Math.round(v*60);stop();render();persist();w.querySelector('input').value=''}};start.onclick=()=>{if(running){stop();return}if(seconds<=0)return;running=true;start.textContent='Ⅱ Paus';interval=setInterval(()=>{seconds--;render();persist();if(seconds<=0)stop()},1000)};w.querySelector('[data-reset]').onclick=()=>{stop();seconds=1200;render();persist()};render();persist();return w}
+function renderBgCards(){const make=(container,items,type)=>{const c=document.getElementById(container);c.innerHTML='';items.forEach((item,i)=>{const card=document.createElement('button');card.className='bgCard';card.type='button';const url=Array.isArray(item)?item[1]:item;card.style.backgroundImage=type==='gradient'?url:`url("${url}")`;const label=document.createElement('span');label.className='bgLabel';label.textContent=Array.isArray(item)?item[0]:['Vår','Sommar','Höst','Vinter'][i]||'';card.appendChild(label);card.onclick=()=>setBackground(type==='gradient'?url:url);c.appendChild(card)})};make('natureGrid',natureBackgrounds,'image');make('calmGrid',calmBackgrounds,'gradient');make('seasonGrid',seasonBackgrounds,'image');loadCustomBackgrounds()}
+function setBackground(value){if(value.startsWith('linear-gradient')){document.body.style.backgroundImage=value;state.backgrounds={type:'gradient',value}}else{document.body.style.backgroundImage=`url("${value}")`;state.backgrounds={type:'image',value}}saveState();closeBackgrounds()}
+function openBackgrounds(){renderBgCards();document.getElementById('backgroundPanel').classList.add('open')}
+function closeBackgrounds(){document.getElementById('backgroundPanel').classList.remove('open')}
+function loadCustomBackgrounds(){const c=document.getElementById('customGrid');const add=c.querySelector('.bgAdd');c.innerHTML='';c.appendChild(add);(state.customBackgrounds||[]).forEach((item,idx)=>{const card=document.createElement('button');card.type='button';card.className='bgCard';card.style.backgroundImage=`url("${item.data}")`;const label=document.createElement('span');label.className='bgLabel';label.textContent=item.name||'Egen';card.appendChild(label);card.onclick=()=>setBackground(item.data);c.appendChild(card)})}
+function readFileAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
+async function handleBackgroundUpload(file){if(!file)return;const data=await readFileAsDataURL(file);state.customBackgrounds=state.customBackgrounds||[];state.customBackgrounds.unshift({name:file.name,data});state.customBackgrounds=state.customBackgrounds.slice(0,6);saveState();setBackground(data);renderBgCards()}
+document.getElementById('backgroundUpload').addEventListener('change',e=>{handleBackgroundUpload(e.target.files[0]);e.target.value=''})
+function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
+function applySavedBackground(){const b=state.backgrounds;if(!b)return;if(b.type==='gradient')document.body.style.backgroundImage=b.value;else if(b.type==='image')document.body.style.backgroundImage=`url("${b.value}")`}
+function restoreWindows(){
+  const old=state.windows||{};
+  state.windows={};
+  Object.entries(old).forEach(([id,s])=>{
+    if(!s||s.type==='nu')return;
+    let w=null;
+    const opts={id,left:s.left,width:s.width,height:s.height};
+    if(s.type==='lesson'||s.type==='day')w=createLesson(s.data,true,opts);
+    else if(s.type==='note')w=createNote(s.data,opts);
+    else if(s.type==='schedule')w=createSchedule(s.data,opts);
+    else if(s.type==='links')w=createLinks(s.data,opts);
+    else if(s.type==='clock')w=createClock(opts);
+    else if(s.type==='timer')w=createTimer(s.data,opts);
+    if(w&&s.minimized)w.classList.add('minimized');
+  });
+  saveState();
 }
-
-.tool:hover{
-  background:#f0f3f8;
-}
-
-.toolIcon{
-  font-size:27px;
-  line-height:27px;
-}
-
-.toolText{
-  white-space:nowrap;
-}
-
-/* =========================
-   GEMENSAMT FÖNSTER
-========================= */
-
-.window{
-  position:absolute;
-
-  min-width:280px;
-  min-height:180px;
-
-  width:460px;
-  height:380px;
-
-  background:rgba(255,255,255,.98);
-
-  border:1px solid rgba(20,30,50,.12);
-  border-radius:18px;
-
-  box-shadow:0 12px 35px rgba(0,0,0,.20);
-
-  overflow:hidden;
-
-  resize:both;
-
-  z-index:100;
-}
-
-.window.hidden{
-  display:none;
-}
-
-.window.minimized{
-  width:230px !important;
-  height:58px !important;
-  min-width:230px;
-  min-height:58px;
-  resize:none;
-}
-
-.window.minimized .windowBody{
-  display:none;
-}
-
-.windowHeader{
-  height:58px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:0 12px 0 17px;
-
-  background:#ffffff;
-
-  border-bottom:1px solid #e7eaf0;
-
-  cursor:move;
-
-  user-select:none;
-}
-
-.windowTitle{
-  display:flex;
-  align-items:center;
-  gap:9px;
-
-  font-size:17px;
-  font-weight:700;
-}
-
-.windowTitleIcon{
-  font-size:23px;
-}
-
-.windowButtons{
-  display:flex;
-  gap:5px;
-}
-
-.windowButton{
-  width:34px;
-  height:34px;
-
-  border:0;
-  border-radius:10px;
-
-  background:#f3f5f8;
-
-  cursor:pointer;
-
-  font-size:17px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.windowButton:hover{
-  background:#e7ebf1;
-}
-
-.windowBody{
-  width:100%;
-  height:calc(100% - 58px);
-  padding:16px;
-
-  overflow:auto;
-}
-
-/* =========================
-   REDIGERBAR TEXT / LEKTION
-========================= */
-
-.editor{
-  width:100%;
-  height:calc(100% - 110px);
-  min-height:120px;
-
-  padding:14px;
-
-  border:1px solid #dfe4ec;
-  border-radius:12px;
-
-  outline:none;
-
-  font-size:17px;
-  line-height:1.5;
-
-  background:#fff;
-  overflow-y:auto;
-}
-
-.editor:focus{
-  border-color:#aeb8c9;
-  box-shadow:0 0 0 3px rgba(100,120,160,.08);
-}
-
-.editor img{
-  max-width:100%;
-  height:auto;
-
-  border-radius:10px;
-  margin:8px 0;
-
-  display:block;
-}
-
-.editor a {
-  color: #0066cc;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-/* =========================
-   REDIGERINGSKNAPPAR
-========================= */
-
-.editToolbar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-
-  margin-bottom:10px;
-}
-
-.editButton{
-  border:1px solid #dce1e8;
-
-  background:#f7f8fa;
-
-  padding:8px 11px;
-
-  border-radius:9px;
-
-  cursor:pointer;
-
-  font-size:13px;
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-
-.editButton:hover{
-  background:#eceff4;
-}
-
-/* =========================
-   LEKTIONSPLAN
-========================= */
-
-.dayHeading{
-  width:100%;
-
-  padding:10px 12px;
-
-  margin-bottom:10px;
-
-  border:1px solid #e1e5eb;
-  border-radius:10px;
-
-  font-size:22px;
-  font-weight:700;
-
-  outline:none;
-}
-
-.dayHeading:focus{
-  border-color:#aeb8c9;
-}
-
-/* =========================
-   KLOCKA
-========================= */
-
-.clock{
-  height:100%;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  flex-direction:column;
-
-  gap:8px;
-}
-
-.clockTime{
-  font-size:55px;
-  font-weight:700;
-}
-
-.clockDate{
-  font-size:17px;
-  color:#6c7585;
-}
-
-/* =========================
-   TIMER
-========================= */
-
-.timer{
-  height:100%;
-
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-
-  gap:12px;
-}
-
-.timerDisplay{
-  font-size:55px;
-  font-weight:700;
-}
-
-.timerPresets, .timerAdjusters, .timerControls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  justify-content:center;
-}
-
-.timerPresets button, .timerAdjusters button, .timerControls button{
-  padding:6px 10px;
-
-  border:1px solid #dce1e8;
-  border-radius:9px;
-
-  background:#f6f8fa;
-
-  cursor:pointer;
-  font-size:13px;
-}
-
-.timerPresets button:hover, .timerAdjusters button:hover, .timerControls button:hover{
-  background:#eceff4;
-}
-
-.timerInputContainer {
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-top:4px;
-}
-
-.timerInputContainer input {
-  width:60px;
-  padding:5px;
-  border:1px solid #dfe4eb;
-  border-radius:6px;
-  text-align:center;
-}
-
-/* =========================
-   BAKGRUNDSMENY
-========================= */
-
-#backgroundPanel{
-  position:fixed;
-
-  top:0;
-  right:0;
-
-  width:min(780px,100vw);
-  height:100vh;
-
-  background:#fff;
-
-  z-index:20000;
-
-  box-shadow:-8px 0 35px rgba(0,0,0,.18);
-
-  display:none;
-
-  overflow:auto;
-}
-
-#backgroundPanel.open{
-  display:block;
-}
-
-.bgHeader{
-  position:sticky;
-  top:0;
-
-  z-index:5;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:22px 25px;
-
-  background:white;
-
-  border-bottom:1px solid #e8ebef;
-}
-
-.bgHeader h2{
-  margin:0;
-
-  font-size:25px;
-}
-
-.bgClose{
-  width:44px;
-  height:44px;
-
-  border:1px solid #e0e4ea;
-  border-radius:50%;
-
-  background:white;
-
-  cursor:pointer;
-
-  font-size:25px;
-}
-
-.bgSection{
-  padding:20px 25px 5px;
-}
-
-.bgSectionTitle{
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:12px;
-}
-
-.bgGrid{
-  display:grid;
-
-  grid-template-columns:repeat(4,1fr);
-
-  gap:12px;
-}
-
-.bgCard{
-  height:100px;
-
-  border-radius:9px;
-
-  overflow:hidden;
-
-  cursor:pointer;
-
-  position:relative;
-
-  border:2px solid transparent;
-
-  background-size:cover;
-  background-position:center;
-}
-
-.bgCard:hover{
-  border-color:#75839a;
-}
-
-.bgCard img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.bgAdd{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  flex-direction:column;
-
-  gap:7px;
-
-  background:#f4f6f9;
-
-  border:2px dashed #c8ced8;
-
-  color:#536074;
-
-  font-weight:600;
-}
-
-.bgAdd span:first-child{
-  font-size:28px;
-}
-</style>
-</head>
-<body>
-
-<!-- =========================
-     WINDOWS CONTAINER
-========================= -->
-<div id="desktop">
-
-  <!-- TEMPLATE FÖR LEKTIONSFÖNSTER -->
-  <div id="lesson-template" class="window hidden">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">📚</span>
-        <span class="windowTitleText">Lektion</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <input type="text" class="dayHeading" placeholder="Titel (t.ex. Måndag, Matte...)">
-      
-      <div class="editToolbar">
-        <button class="editButton boldBtn"><b>B</b></button>
-        <button class="editButton italicBtn"><i>I</i></button>
-        <button class="editButton imgBtn">📷 Bild</button>
-        <button class="editButton linkBtn">🔗 Länk</button>
-      </div>
-
-      <div class="editor" contenteditable="true" placeholder="Skriv planering, klistra in text eller lägg till bilder..."></div>
-    </div>
-  </div>
-
-  <!-- KLOCKA -->
-  <div id="window-clock" class="window" style="left: 50px; top: 50px; width: 320px; height: 220px;">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">🕒</span>
-        <span>Klocka</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <div class="clock">
-        <div class="clockTime" id="liveClock">00:00:00</div>
-        <div class="clockDate" id="liveDate">Måndag, 1 januari</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TIMER -->
-  <div id="window-timer" class="window" style="left: 420px; top: 50px; width: 360px; height: 320px;">
-    <div class="windowHeader">
-      <div class="windowTitle">
-        <span class="windowTitleIcon">⏳</span>
-        <span>Timer</span>
-      </div>
-      <div class="windowButtons">
-        <button class="windowButton minBtn">➖</button>
-        <button class="windowButton closeBtn">❌</button>
-      </div>
-    </div>
-    <div class="windowBody">
-      <div class="timer">
-        <div class="timerDisplay" id="timerDisplay">10:00</div>
-        
-        <!-- Snabbval 20, 30, 40, 50 min -->
-        <div class="timerPresets">
-          <button onclick="setTimerPreset(20)">20 min</button>
-          <button onclick="setTimerPreset(30)">30 min</button>
-          <button onclick="setTimerPreset(40)">40 min</button>
-          <button onclick="setTimerPreset(50)">50 min</button>
-        </div>
-
-        <!-- Justering +/- 1 och 5 min -->
-        <div class="timerAdjusters">
-          <button onclick="adjustTimer(5)">+5 min</button>
-          <button onclick="adjustTimer(1)">+1 min</button>
-          <button onclick="adjustTimer(-1)">-1 min</button>
-          <button onclick="adjustTimer(-5)">-5 min</button>
-        </div>
-        
-        <div class="timerControls">
-          <button id="timerStartBtn" onclick="toggleTimer()">Starta</button>
-          <button onclick="resetTimer()">Nollställ</button>
-        </div>
-
-Use code with caution.Sätt tid📚Lektion🕒Klocka⏳Timer🖼️Bakgrund Välj bakgrund✕Högupplösta naturbilderEgen bakgrund (Bild eller animerad GIF)📤Ladda upp fillet activeWindow = null;let zIndexCounter = 100;let lessonCounter = 0;// Initiering av existerande fönster vid startdocument.querySelectorAll('.window:not(#lesson-template)').forEach(win => {makeDraggable(win);setupWindowButtons(win);win.addEventListener('mousedown', () => bringToFront(win));});// Skapa ett nytt unikt Lektionsfönster dynamisktdocument.getElementById('tool-lesson').addEventListener('click', () => {lessonCounter++;const template = document.getElementById('lesson-template');const clone = template.cloneNode(true);clone.id = window-lesson-${lessonCounter};clone.classList.remove('hidden');// Slumpmässig eller förskjuten placering så de inte hamnar exakt på varandraclone.style.left = ${100 + (lessonCounter * 25) % 300}px;clone.style.top = ${120 + (lessonCounter * 25) % 200}px;clone.style.zIndex = ++zIndexCounter;document.getElementById('desktop').appendChild(clone);// Aktivera fönsterfunktionermakeDraggable(clone);setupWindowButtons(clone);setupEditorFeatures(clone);clone.addEventListener('mousedown', () => bringToFront(clone));});function toggleWindow(id) {const win = document.getElementById(id);if (!win) return;if (win.classList.contains('hidden')) {win.classList.remove('hidden');bringToFront(win);} else {win.classList.add('hidden');}}function setupWindowButtons(win) {const minBtn = win.querySelector('.minBtn');const closeBtn = win.querySelector('.closeBtn');if (minBtn) {minBtn.addEventListener('click', (e) => {e.stopPropagation();win.classList.toggle('minimized');});}if (closeBtn) {closeBtn.addEventListener('click', (e) => {e.stopPropagation();if (win.id.startsWith('window-lesson-')) {win.remove(); // Ta bort dynamiska fönster helt} else {win.classList.add('hidden'); // Göm fasta fönster}});}}function bringToFront(win) {zIndexCounter++;win.style.zIndex = zIndexCounter;}// Hantering för textredigeraren i Lektionfunction setupEditorFeatures(win) {const editor = win.querySelector('.editor');const boldBtn = win.querySelector('.boldBtn');const italicBtn = win.querySelector('.italicBtn');const imgBtn = win.querySelector('.imgBtn');const linkBtn = win.querySelector('.linkBtn');boldBtn.addEventListener('click', () => {document.execCommand('bold', false, null);editor.focus();});italicBtn.addEventListener('click', () => {document.execCommand('italic', false, null);editor.focus();});imgBtn.addEventListener('click', () => {const url = prompt('Klistra in bildens webbadress (URL):');if (url) {document.execCommand('insertImage', false, url);}});linkBtn.addEventListener('click', () => {const text = prompt('Ange text som ska visas för länken:');if (!text) return;let url = prompt('Ange webbadress (URL):', 'https://');if (!url) return;// Säkerställ fungerande länkprotokollif (!/^https?:///i.test(url)) {url = 'https://' + url;}// Generera en länk som garanterat öppnas i ett nytt fönsterconst linkHTML = <a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>;document.execCommand('insertHTML', false, linkHTML);});}// Drag-and-drop / flytta fönster mekanikfunction makeDraggable(win) {const header = win.querySelector('.windowHeader');let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;header.onmousedown = dragMouseDown;function dragMouseDown(e) {if (e.target.classList.contains('windowButton')) return;e.preventDefault();pos3 = e.clientX;pos4 = e.clientY;document.onmouseup = closeDragElement;document.onmousemove = elementDrag;bringToFront(win);}function elementDrag(e) {e.preventDefault();pos1 = pos3 - e.clientX;pos2 = pos4 - e.clientY;pos3 = e.clientX;pos4 = e.clientY;win.style.top = (win.offsetTop - pos2) + "px";win.style.left = (win.offsetLeft - pos1) + "px";}function closeDragElement() {document.onmouseup = null;document.onmousemove = null;}}/* =========================KLOCKFUNKTIONER========================= */function updateClock() {const now = new Date();const options = { weekday: 'long', day: 'numeric', month: 'long' };document.getElementById('liveClock').textContent = now.toLocaleTimeString('sv-SE');document.getElementById('liveDate').textContent = now.toLocaleDateString('sv-SE', options);}setInterval(updateClock, 1000);updateClock();/* =========================TIMERFUNKTIONER========================= */let timerInterval = null;let timerSeconds = 600; // Standardinställning 10 minuterlet timerRunning = false;function updateTimerDisplay() {const mins = Math.floor(Math.abs(timerSeconds) / 60);const secs = Math.floor(Math.abs(timerSeconds) % 60);const sign = timerSeconds < 0 ? "-" : "";document.getElementById('timerDisplay').textContent = ${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')};}function toggleTimer() {const startBtn = document.getElementById('timerStartBtn');if (timerRunning) {clearInterval(timerInterval);startBtn.textContent = "Starta";timerRunning = false;} else {timerRunning = true;startBtn.textContent = "Pausa";timerInterval = setInterval(() => {timerSeconds--;updateTimerDisplay();if (timerSeconds === 0) {// Valfritt: Spela upp ett ljud här när tiden är slut}}, 1000);}}function resetTimer() {clearInterval(timerInterval);timerRunning = false;timerSeconds = 600;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();}function setTimerPreset(minutes) {clearInterval(timerInterval);timerRunning = false;timerSeconds = minutes * 60;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();}function setCustomTimer() {const input = document.getElementById('customMinutes');const mins = parseInt(input.value);if (!isNaN(mins) && mins >= 0) {clearInterval(timerInterval);timerRunning = false;timerSeconds = mins * 60;document.getElementById('timerStartBtn').textContent = "Starta";updateTimerDisplay();input.value = "";}}// Förändra tid dynamiskt (fungerar under körning)function adjustTimer(minutes) {timerSeconds += minutes * 60;updateTimerDisplay();}/* =========================BAKGRUNDSHANTERING========================= */function openBgPanel() {document.getElementById('backgroundPanel').classList.add('open');}function closeBgPanel() {document.getElementById('backgroundPanel').classList.remove('open');}function changeBackground(url) {document.body.style.backgroundImage = url('${url}');}function triggerBgUpload() {document.getElementById('bgUploadInput').click();}function handleBgUpload(e) {const file = e.target.files[0];if (file) {const reader = new FileReader();reader.onload = function(event) {// FileReader som DataURL behåller animeringen intakt för .gif-filer!changeBackground(event.target.result);};reader.readAsDataURL(file);}}
+function cleanupOldState(){let changed=false;Object.entries(state.windows||{}).forEach(([id,s])=>{if(s.type==='nu'){delete state.windows[id];changed=true}});if(changed)saveState()}
+function initialize(){cleanupOldState();applySavedBackground();const existing=Object.values(state.windows||{}).filter(s=>s&&s.type!=='nu');if(existing.length)restoreWindows();else{createLesson();createSchedule();createClock()}renderBgCards()}
+initialize();
+</script>
+</body>
+</html>
