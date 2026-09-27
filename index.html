@@ -98,12 +98,66 @@ function editorToolbar(editor,onSave){
   const link=document.createElement('button');link.className='editButton';link.textContent='🔗 Länk';link.onclick=()=>addLink(editor,onSave);
   bar.append(b,i,img,link);return bar;
 }
-function addLink(editor,onSave){const text=prompt('Text som ska visas för länken:','Öppna länk');if(!text)return;const url=normalizeUrl(prompt('Webbadress (URL):','https://'));if(!url){alert('Fyll i en giltig webbadress.');return}editor.focus();document.execCommand('insertHTML',false,`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>`);saveEditor()}
+function addLink(editor,onSave){
+  // Spara markeringen innan prompt-fönstren tar fokus.
+  const selection=window.getSelection();
+  let range=null;
+  let selectedText='';
+  if(selection && selection.rangeCount){
+    const r=selection.getRangeAt(0);
+    if(editor.contains(r.commonAncestorContainer)){
+      range=r.cloneRange();
+      selectedText=selection.toString().trim();
+    }
+  }
+
+  const text=prompt('Text som ska visas för länken:',selectedText||'Öppna länk');
+  if(!text)return;
+  const rawUrl=prompt('Webbadress (URL):','https://');
+  const url=normalizeUrl(rawUrl);
+  if(!url){alert('Fyll i en giltig webbadress, till exempel https://www.svtplay.se/');return}
+
+  editor.focus();
+  const sel=window.getSelection();
+  if(range){sel.removeAllRanges();sel.addRange(range)}
+
+  const a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  a.textContent=text;
+  a.title=url;
+
+  if(sel && sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer)){
+    const r=sel.getRangeAt(0);
+    r.deleteContents();
+    r.insertNode(a);
+    r.setStartAfter(a);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }else{
+    editor.appendChild(a);
+  }
+  onSave?.();
+}
+
+function setupLessonLinks(editor){
+  // I redigeringsläge: Ctrl/Cmd + klick öppnar länken. Vanligt klick lämnar redigeraren aktiv.
+  editor.addEventListener('click',e=>{
+    const a=e.target.closest('a');
+    if(!a || !editor.contains(a))return;
+    if(e.ctrlKey || e.metaKey){
+      e.preventDefault();
+      window.open(a.href,'_blank','noopener,noreferrer');
+    }
+  });
+}
 function createLesson(data=null,restore=false,opts={}){
   const w=createWindow('lesson','Lektion','📚',{...opts});const body=w.querySelector('.windowBody');
   body.innerHTML=`<input class="lessonHeading" placeholder="Lektionens rubrik" value="${esc(data?.heading||'Ny lektion')}"><input class="lessonDate" placeholder="Datum eller planering (valfritt)" value="${esc(data?.date||'')}"><div class="toolbarHost"></div><div class="editor" contenteditable="true"></div>`;
   const editor=body.querySelector('.editor');editor.innerHTML=data?.html||'<p><strong>Planering</strong></p><p>Skriv instruktioner, text och länkar som eleverna behöver.</p>';
-  const heading=body.querySelector('.lessonHeading'),date=body.querySelector('.lessonDate');const save=()=>setWindowData(w,{heading:heading.value,date:date.value,html:editor.innerHTML});body.querySelector('.toolbarHost').appendChild(editorToolbar(editor,save));heading.oninput=save;date.oninput=save;editor.oninput=save;save();
+  const heading=body.querySelector('.lessonHeading'),date=body.querySelector('.lessonDate');const save=()=>setWindowData(w,{heading:heading.value,date:date.value,html:editor.innerHTML});body.querySelector('.toolbarHost').appendChild(editorToolbar(editor,save));setupLessonLinks(editor);heading.oninput=save;date.oninput=save;editor.oninput=save;save();
   if(!restore){w.style.left=(100+(lessonCounter++%5)*35)+'px';w.style.top=(90+(lessonCounter%5)*30)+'px';saveWindowState(w)}
   return w;
 }
