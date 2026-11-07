@@ -143,14 +143,14 @@ function addLink(editor,onSave){
 }
 
 function setupLessonLinks(editor){
-  // I redigeringsläge: Ctrl/Cmd + klick öppnar länken. Vanligt klick lämnar redigeraren aktiv.
+  // Vanligt klick öppnar länken. Alt+klick tillåter redigering.
   editor.addEventListener('click',e=>{
     const a=e.target.closest('a');
     if(!a || !editor.contains(a))return;
-    if(e.ctrlKey || e.metaKey){
-      e.preventDefault();
-      window.open(a.href,'_blank','noopener,noreferrer');
-    }
+    if(e.altKey)return;
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(a.href,'_blank','noopener,noreferrer');
   });
 }
 function createLesson(data=null,restore=false,opts={}){
