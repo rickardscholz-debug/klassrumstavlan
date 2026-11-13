@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const CSS=`
-#natureMotion{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;display:none}
+
 #natureSounds{display:none;position:fixed;top:0;right:0;height:100vh;width:min(440px,100vw);overflow:auto;background:#fff;box-shadow:-6px 0 35px #0003;z-index:21000;color:#172033}
 #natureSounds.open{display:block}
 .nsHead{position:sticky;top:0;background:white;padding:20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb;z-index:2}
@@ -82,8 +82,11 @@ volInput.oninput=()=>{volume=Number(volInput.value)/100;localStorage.setItem('kl
 window.addEventListener('pagehide',stop);
 
 const bgPanel=document.querySelector('#backgroundPanel');
-const motions=[['Vågor uppifrån','#146178','#64bdc3'],['Lugnt hav','#286492','#91d1dd'],['Regn','#435e79','#a0b7cd'],['Moln','#7fa9ce','#ecf0f5'],['Löv som faller','#31624f','#a8bf75'],['Snöfall','#6683af','#e7efff'],['Porlande bäck','#3a8091','#9ed4d6'],['Solglitter','#337e96','#e2ca85'],['Dimma över sjö','#7c9ca5','#dbe6e5'],['Stjärnhimmel','#091731','#425b80']];
-const sec=document.createElement('section');sec.className='bgSection';sec.innerHTML='<div class="bgSectionTitle">Rörliga bakgrunder – natur och vatten</div><div class="bgGrid" id="motionGrid"></div><p class="bgHint">Animationerna rör sig automatiskt, även i helskärmsläge.</p>';
+
+const sec=document.createElement('section');
+sec.className='bgSection';
+sec.id='realVideoBackgroundSection';
+sec.innerHTML='<div class="bgSectionTitle">Riktiga rörliga naturfilmer</div><p class="bgHint">Film från verkliga miljöer · ljudlös video · upprepas automatiskt. Internet krävs.</p><div class="bgGrid" id="realVideoGrid"></div>';
 bgPanel.insertBefore(sec,bgPanel.querySelector('.bgSection'));
 const imageSection=document.createElement('section');imageSection.className='bgSection';
 imageSection.innerHTML='<div class="bgSectionTitle">Fler naturfotografier</div><div class="bgGrid" id="photoPlusGrid"></div>';
@@ -91,44 +94,55 @@ bgPanel.insertBefore(imageSection,sec.nextSibling);
 const photoIds=['1507525428034-b723cf961d3e','1518837695005-2083093ee35b','1470770841072-f978cf4d019e','1500534623283-312aade485b7','1464822759023-fed622ff2c3b','1475924156734-496f6cac6ec1','1448375240586-882707db888b','1473448912268-2022ce9509d8','1497436072909-60f362e1d4b1','1483664852095-d6cc6870702d','1500375592092-40eb2168fd21','1470071459604-3b5ec3a7fe05','1441974231531-c6227db76b6e','1534088568595-a066f410bcda','1433086966358-54859d0ed716','1454496522488-7a8e488e860e','1514282401047-d79a71a590e8','1426604966848-d7adac402bff','1501854140801-50d01698950b','1439853949212-09789ba454d5'];
 const names=['Tropiskt hav','Ocean','Sjö','Solnedgång','Berg','Kust','Skog','Grönska','Skymning','Vinter','Havsvågor','Dalgång','Skogsljus','Moln','Vattenfall','Fjäll','Turkost hav','Lövverk','Landskap','Havsutsikt'];
 photoIds.forEach((id,i)=>{const img='https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=2200&q=85';
-const b=document.createElement('button');b.className='bgCard';b.type='button';b.style.backgroundImage='url("https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=400&q=65")';b.innerHTML='<span class="bgLabel">'+names[i]+'</span>';b.onclick=()=>{stopMotion();setBackground(img)};document.querySelector('#photoPlusGrid').appendChild(b)});
-const canvas=document.createElement('canvas');canvas.id='natureMotion';document.body.insertBefore(canvas,document.body.firstChild);
-const g=canvas.getContext('2d');
-let scene=-1,raf=0,phase=0;
-const dots=Array.from({length:130},(_,i)=>({x:(i*.6180339)%1,y:(i*.75487766)%1,s:.3+(i%9)/10}));
-function stopMotion(){scene=-1;cancelAnimationFrame(raf);canvas.style.display='none'}
-function resize(){const pixel=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(innerWidth*pixel);canvas.height=Math.round(innerHeight*pixel);g.setTransform(pixel,0,0,pixel,0,0)}
-window.addEventListener('resize',resize);
-function draw(){
-if(scene<0)return;const w=innerWidth,h=innerHeight;phase+=.016;
-const item=motions[scene],gradient=g.createLinearGradient(0,0,w,h);
-gradient.addColorStop(0,item[1]);gradient.addColorStop(1,item[2]);g.fillStyle=gradient;g.fillRect(0,0,w,h);
-if([0,1,2,6,7,8].includes(scene)){
-for(let j=0;j<35;j++){
-g.beginPath();const y=j*h/34;g.moveTo(0,y);
-for(let x=0;x<=w+18;x+=18)g.lineTo(x,y+Math.sin(x*.012+j*.7+phase*(scene===1?.25:1.2))*6+Math.sin(x*.026+phase*.6+j)*3);
-g.strokeStyle=scene===7?'rgba(255,246,197,.26)':'rgba(235,255,255,.2)';g.lineWidth=scene===0?2.7:1.4;g.stroke();
-}}
-if([3,8].includes(scene))for(let j=0;j<18;j++){const p=dots[j],x=((p.x*w+phase*(6+j%4)*15)%(w+400))-200,y=p.y*h;
-const cloud=g.createRadialGradient(x,y,0,x,y,100+p.s*130);cloud.addColorStop(0,'rgba(255,255,255,.23)');cloud.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=cloud;g.fillRect(x-250,y-250,500,500)}
-if([2,4,5,6,7,9].includes(scene))dots.forEach((p,j)=>{
-let x=(p.x*w+phase*(scene===4?130:25)*p.s)%w,y=(p.y*h+phase*(scene===5?60:35)*p.s)%h;
-if(scene===9){x=p.x*w;y=p.y*h}
-g.globalAlpha=scene===9?.35+.6*Math.abs(Math.sin(phase*p.s+j)):.65;
-g.fillStyle=scene===4?'#d9e5a2':scene===7?'#fff1aa':'#fff';
-if(scene===4){g.beginPath();g.ellipse(x,y,5*p.s,2*p.s,Math.sin(phase+j),0,7);g.fill()}
-else{g.beginPath();g.arc(x,y,scene===5?2*p.s:1.4*p.s,0,7);g.fill()}
-});g.globalAlpha=1;
-raf=requestAnimationFrame(draw);
+const b=document.createElement('button');b.className='bgCard';b.type='button';b.style.backgroundImage='url("https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=400&q=65")';b.innerHTML='<span class="bgLabel">'+names[i]+'</span>';b.onclick=()=>{stopVideo();setBackground(img)};document.querySelector('#photoPlusGrid').appendChild(b)});
+
+const videoStyle=document.createElement('style');
+videoStyle.textContent='#realNatureVideo{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;object-position:center;z-index:0;pointer-events:none;display:none;background:#14242b}#realVideoGrid .bgCard{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border:1px solid #d8e2e9;background-size:cover}.realVideoThumb{font-size:28px;filter:drop-shadow(0 2px 3px #0005)}#realVideoGrid .bgCard .bgLabel{position:static;font-size:12px;background:#0008}.realVideoNote{padding:0 25px 10px;color:#657184;font-size:12px;line-height:1.5}.realVideoNote a{color:#235d8b}';
+document.head.appendChild(videoStyle);
+const realVideos=[
+ {id:'snow-lamp',name:'Snöfall vid gatlykta',symbol:'❄️',gradient:'linear-gradient(150deg,#12263c,#4d6574)',file:'Snow under LED street light in Tuntorp, Brastad.webm',author:'W.carter',license:'CC BY 4.0'},
+ {id:'campfire',name:'Levande lägereld',symbol:'🔥',gradient:'linear-gradient(150deg,#2b1a17,#bb5b21)',file:'Fire burning.webm',author:'Gpkp',license:'CC BY-SA 4.0'},
+ {id:'ocean-overhead',name:'Havsvågor uppifrån',symbol:'🌊',gradient:'linear-gradient(150deg,#145069,#76c2c5)',file:'Aerial view of sand beach. Top view sea waves. Drone footage.webm',author:'Nature video, HD - 4K',license:'CC BY 3.0'}
+];
+const fileUrl=file=>'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+encodeURIComponent(file);
+const sourceUrl=file=>'https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(file.replaceAll(' ','_'));
+const bgVideo=document.createElement('video');
+bgVideo.id='realNatureVideo';bgVideo.autoplay=true;bgVideo.loop=true;bgVideo.muted=true;bgVideo.defaultMuted=true;bgVideo.playsInline=true;bgVideo.preload='auto';bgVideo.setAttribute('aria-hidden','true');
+document.body.insertBefore(bgVideo,document.body.firstChild);
+const videoSection=document.querySelector('#realVideoBackgroundSection');
+const credit=document.createElement('div');credit.className='realVideoNote';credit.id='realVideoCredit';videoSection.appendChild(credit);
+function stopVideo(){bgVideo.pause();bgVideo.removeAttribute('src');bgVideo.load();bgVideo.style.display='none';credit.textContent=''}
+function selectVideo(id){
+const scene=realVideos.find(v=>v.id===id);if(!scene)return;
+bgVideo.pause();bgVideo.style.display='block';bgVideo.src=fileUrl(scene.file);
+bgVideo.muted=true;bgVideo.play().catch(()=>{credit.textContent='Videon kunde inte starta automatiskt. Kontrollera internetuppkopplingen.'});
+document.body.style.backgroundImage='none';
+state.backgrounds={type:'natureVideo',value:id};saveState();
+credit.innerHTML='Film: '+scene.author+' · '+scene.license+' · <a target="_blank" rel="noopener noreferrer" href="'+sourceUrl(scene.file)+'">Källa och licens</a>';
+closeBackgrounds();
 }
-function startMotion(i){stopMotion();scene=i;resize();canvas.style.display='block';document.body.style.backgroundImage='none';
-state.backgrounds={type:'animatedNature',value:i};saveState();closeBackgrounds();raf=requestAnimationFrame(draw)}
-motions.forEach((m,i)=>{const b=document.createElement('button');b.className='bgCard';b.type='button';b.style.backgroundImage='linear-gradient(130deg,'+m[1]+','+m[2]+')';
-b.innerHTML='<span class="bgLabel">◉ '+m[0]+'</span>';b.onclick=()=>startMotion(i);document.querySelector('#motionGrid').appendChild(b)});
-const saved=state.backgrounds;
-if(saved?.type==='animatedNature'&&Number.isInteger(saved.value)&&saved.value>=0&&saved.value<motions.length)startMotion(saved.value);
-document.querySelectorAll('#backgroundPanel .bgCard').forEach(b=>{
-if(b.closest('#motionGrid'))return;
-b.addEventListener('click',()=>{if(scene>=0){stopMotion();setTimeout(()=>{if(state.backgrounds?.type!=='animatedNature')canvas.style.display='none'},0)}});
+bgVideo.addEventListener('error',()=>{
+if(state.backgrounds?.type==='natureVideo') {
+credit.textContent='Kunde inte ladda videon. Kontrollera anslutningen eller välj en annan bakgrund.';
+bgVideo.style.display='none';
+}
 });
+realVideos.forEach((scene)=>{
+const button=document.createElement('button');
+button.type='button';button.className='bgCard';button.style.backgroundImage=scene.gradient;
+button.innerHTML='<span class="realVideoThumb">'+scene.symbol+'</span><span class="bgLabel">'+scene.name+'</span>';
+button.onclick=()=>selectVideo(scene.id);
+document.getElementById('realVideoGrid').appendChild(button);
+});
+document.getElementById('backgroundPanel').addEventListener('click',e=>{
+if(!e.target.closest('.bgCard'))return;
+if(e.target.closest('#realVideoGrid'))return;
+stopVideo();
+},true);
+const prior=state.backgrounds;
+if(prior?.type==='natureVideo')selectVideo(prior.value);
+else if(prior?.type==='animatedNature'){
+state.backgrounds={type:'gradient',value:calmBackgrounds[0]};
+document.body.style.backgroundImage=calmBackgrounds[0];saveState();
+}
 })();
