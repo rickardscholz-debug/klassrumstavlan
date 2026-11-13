@@ -12,7 +12,7 @@ const tracks=[
 {key:'birds',emoji:'🐦',name:'Fågelkvitter',file:'Birds shouting in the Spandauer Forst (Berlin-Spandau).ogg',artist:'Leonhard Lenz',license:'CC BY-SA 4.0',dur:'2:48',desc:'Fåglar i skogen'},
 {key:'thunder',emoji:'⛈️',name:'Regn och åska',file:'Rhumphries - rbh-thunder-storm.ogg',artist:'RHumphries',license:'CC BY 3.0',dur:'3:30',desc:'Äkta åskväder'},
 {key:'fire',emoji:'🔥',name:'Brasa',file:'Fire burning.ogv',artist:'Zouavman Le Zouave',license:'CC BY-SA',dur:'0:11',desc:'Inspelad eld, kort klipp'},
-{key:'night',emoji:'🌙',name:'Skogsatmosfär',file:'Short nature soundscape, Lamington National Park, Australia.ogg',artist:'Wikimedia Commons',license:'Se källa',dur:'3:29',desc:'Naturlig skogsatmosfär'},
+{key:'night',emoji:'🌙',name:'Skogsatmosfär',file:'20090610 0 ambience.ogg',artist:'nille',license:'Public domain',dur:'2:03',desc:'Skogsljud med fåglar'},
 {key:'breeze',emoji:'🌬️',name:'Vind',file:'Howling wind.ogg',artist:'Tvabutzku1234',license:'CC0',dur:'2:08',desc:'Vind som viner'}
 ];
 const old=document.getElementById('natureSounds');if(old)old.remove();
