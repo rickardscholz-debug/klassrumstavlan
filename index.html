@@ -203,5 +203,6 @@ function cleanupOldState(){let changed=false;Object.entries(state.windows||{}).f
 function initialize(){cleanupOldState();applySavedBackground();const existing=Object.values(state.windows||{}).filter(s=>s&&s.type!=='nu');if(existing.length)restoreWindows();else{createLesson();createSchedule();createClock()}renderBgCards()}
 initialize();
 </script>
+<script src="nature-extras.js?v=20261113"></script>
 </body>
 </html>
